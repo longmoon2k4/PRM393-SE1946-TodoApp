@@ -253,8 +253,8 @@ class TaskItem {
 ## 🤝 7. Quy trình Phối hợp Git & Phòng tránh Conflict
 
 1. **Nguyên tắc Phân nhánh (Branching Strategy):**
-   * `main`: Nhánh chứa bản build hoàn chỉnh, ổn định để demo và nộp bài.
-   * `dev`: Nhánh tích hợp chung của cả nhóm.
+   * `main`: Nhánh chứa bản build hoàn chỉnh, ổn định để demo và nộp bài. **(⚠️ ĐÃ KHÓA BẢO VỆ - Cấm push code trực tiếp. Mọi thay đổi phải được gộp từ `dev` sang thông qua Pull Request).**
+   * `dev`: Nhánh tích hợp chung của cả nhóm. Mọi nhánh tính năng đều phải merge vào đây trước.
    * Nhánh tính năng (`feat/<tên>-<tính-năng>`): Mỗi thành viên tạo nhánh riêng từ `dev` khi bắt đầu làm một tính năng mới.
 2. **Nguyên tắc Cô lập Thư mục:**
    * Mỗi thành viên chỉ tạo và chỉnh sửa file bên trong thư mục `lib/features/<phân_hệ_của_mình>/`.
