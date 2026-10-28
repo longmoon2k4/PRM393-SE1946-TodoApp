@@ -10,10 +10,12 @@ class TaskItem {
   final String description;
   final TaskStatus status;
   final TaskPriority priority;
+  final double orderIndex; // Phục vụ tính năng kéo thả sắp xếp
   final DateTime createdAt;
   final DateTime? startDate;
   final DateTime? deadline;
   final DateTime? reminderAt;
+  final DateTime? deletedAt; // Phục vụ tính năng Xóa mềm (Soft Delete) / Thùng rác
   final String? categoryId;
   final String? projectId;
   final List<String> tags;
@@ -27,10 +29,12 @@ class TaskItem {
     this.description = '',
     this.status = TaskStatus.todo,
     this.priority = TaskPriority.medium,
+    this.orderIndex = 0.0,
     required this.createdAt,
     this.startDate,
     this.deadline,
     this.reminderAt,
+    this.deletedAt,
     this.categoryId,
     this.projectId,
     this.tags = const [],
