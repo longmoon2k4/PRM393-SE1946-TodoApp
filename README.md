@@ -171,11 +171,13 @@ class SubTask {
   final String id;
   final String title;
   final bool isCompleted;
+  final double orderIndex; // Phục vụ tính năng kéo thả sắp xếp
 
   const SubTask({
     required this.id,
     required this.title,
     this.isCompleted = false,
+    this.orderIndex = 0.0,
   });
 }
 
@@ -201,10 +203,12 @@ class TaskItem {
   final String description;
   final TaskStatus status;
   final TaskPriority priority;
+  final double orderIndex; // Phục vụ tính năng kéo thả sắp xếp
   final DateTime createdAt;
   final DateTime? startDate;
   final DateTime? deadline;
   final DateTime? reminderAt;
+  final DateTime? deletedAt; // Phục vụ tính năng Xóa mềm (Soft Delete)
   final String? categoryId;
   final String? projectId;
   final List<String> tags;
@@ -218,10 +222,12 @@ class TaskItem {
     this.description = '',
     this.status = TaskStatus.todo,
     this.priority = TaskPriority.medium,
+    this.orderIndex = 0.0,
     required this.createdAt,
     this.startDate,
     this.deadline,
     this.reminderAt,
+    this.deletedAt,
     this.categoryId,
     this.projectId,
     this.tags = const [],
@@ -247,6 +253,17 @@ class TaskItem {
       : subtasks.where((s) => s.isCompleted).length / subtasks.length;
 }
 ```
+
+---
+
+## 🏗️ 6.5. Các Data Model Nâng cao Mới bổ sung
+
+Để hỗ trợ các tính năng làm việc nhóm chuyên nghiệp, hệ thống đã được thiết kế thêm các mô hình sau trong `lib/core/models/`:
+
+* **`ActivityLog` (`activity_log_model.dart`)**: Theo dõi và lưu vết mọi hành động của thành viên (ai vừa đổi trạng thái công việc nào vào lúc nào).
+* **`ProjectModel` & `ProjectMember` (`project_model.dart`)**: Cung cấp khả năng phân quyền (Role-based access) trong dự án (Owner, Admin, Member, Viewer).
+* **`orderIndex` (Kéo thả)**: Được áp dụng trên cả Task và Subtask, cho phép người dùng tùy ý di chuyển vị trí ưu tiên bằng Drag & Drop mà không ảnh hưởng tới Index của các task khác.
+* **`deletedAt` (Xóa mềm)**: Tính năng Thùng rác an toàn, tránh việc lỡ tay xóa mất vĩnh viễn dữ liệu quan trọng.
 
 ---
 
