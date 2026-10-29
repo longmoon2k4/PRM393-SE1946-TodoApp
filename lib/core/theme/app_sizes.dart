@@ -24,11 +24,11 @@ class AppSizes {
   static const Radius radius24 = Radius.circular(24.0);
   static const Radius radiusMax = Radius.circular(999.0); // Hình tròn (Pill shape)
 
-  static final BorderRadius br4 = BorderRadius.all(radius4);
-  static final BorderRadius br8 = BorderRadius.all(radius8);
-  static final BorderRadius br12 = BorderRadius.all(radius12);
-  static final BorderRadius br16 = BorderRadius.all(radius16);
-  static final BorderRadius brMax = BorderRadius.all(radiusMax);
+  static const BorderRadius br4 = BorderRadius.all(radius4);
+  static const BorderRadius br8 = BorderRadius.all(radius8);
+  static const BorderRadius br12 = BorderRadius.all(radius12);
+  static const BorderRadius br16 = BorderRadius.all(radius16);
+  static const BorderRadius brMax = BorderRadius.all(radiusMax);
 
   // --- 3. Icon Sizes ---
   static const double iconSmall = 16.0;

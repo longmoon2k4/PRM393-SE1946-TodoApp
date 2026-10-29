@@ -12,8 +12,8 @@ class MockRepository {
       priority: TaskPriority.high,
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
       deadline: DateTime.now().subtract(const Duration(days: 1)),
-      tags: ['Backend', 'Database'],
-      subtasks: [
+      tags: const ['Backend', 'Database'],
+      subtasks: const [
         SubTask(id: 'st-1', title: 'Vẽ ERD', isCompleted: true),
         SubTask(id: 'st-2', title: 'Viết mã SQL DDL', isCompleted: true),
       ],
@@ -35,8 +35,8 @@ class MockRepository {
       priority: TaskPriority.urgent,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
       deadline: DateTime.now().add(const Duration(hours: 5)), // Sắp tới hạn
-      tags: ['Frontend', 'Flutter'],
-      subtasks: [
+      tags: const ['Frontend', 'Flutter'],
+      subtasks: const [
         SubTask(id: 'st-3', title: 'Thêm dependencies', isCompleted: true),
         SubTask(id: 'st-4', title: 'Cấu hình Firebase', isCompleted: true),
         SubTask(id: 'st-5', title: 'Chia thư mục Feature-First', isCompleted: false),
@@ -50,7 +50,7 @@ class MockRepository {
       priority: TaskPriority.medium,
       createdAt: DateTime.now(),
       deadline: DateTime.now().add(const Duration(days: 5)),
-      tags: ['UI/UX'],
+      tags: const ['UI/UX'],
     ),
     TaskItem(
       id: 'task-4',
@@ -60,7 +60,7 @@ class MockRepository {
       priority: TaskPriority.high,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
       deadline: DateTime.now().subtract(const Duration(days: 2)), // Đã quá hạn
-      tags: ['Document'],
+      tags: const ['Document'],
     ),
     TaskItem(
       id: 'task-5',
@@ -69,7 +69,7 @@ class MockRepository {
       status: TaskStatus.cancelled,
       priority: TaskPriority.low,
       createdAt: DateTime.now().subtract(const Duration(days: 10)),
-      tags: ['Bug', 'UI/UX'],
+      tags: const ['Bug', 'UI/UX'],
     ),
   ];
 }
