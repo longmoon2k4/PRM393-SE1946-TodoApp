@@ -29,7 +29,13 @@ Phân hệ này đóng vai trò là "cửa ngõ" và "bộ não" điều khiển
 * **Luồng Auth:** Đảm bảo khi người dùng mở app, nếu đã đăng nhập rồi thì `GoRouter` phải đá thẳng vào trang chủ, không được hiện màn hình Login nhấp nháy.
 * **Adaptive Theme:** Chuyển đổi giữa các Theme nên sử dụng `AnimatedTheme` để có hiệu ứng chuyển màu mượt mà (fade), tránh đổi màu đột ngột gây chói mắt.
 
-## 🏆 3. Kết quả Mong đợi (Expected Outcomes)
+## 💡 3. Hướng dẫn Code Độc lập (Không bị block)
+Nếu bạn muốn thiết kế và kiểm thử trang **Dashboard Thống kê** nhưng chưa kịp code xong phần Đăng nhập:
+1. Mở `lib/core/router/app_router.dart` và sửa tạm `initialLocation: '/dashboard'` (hoặc đường dẫn tương ứng). Khi chạy app sẽ không bị kẹt ở màn hình Login nữa.
+2. Trong màn hình Dashboard, hãy gọi `MockRepository.mockTasks` để lấy danh sách Task giả, truyền vào `fl_chart` để vẽ biểu đồ.
+3. Bạn có thể tự do code và chạy app mà không cần bận tâm các tính năng của người khác!
+
+## 🏆 4. Kết quả Mong đợi (Expected Outcomes)
 1. Đăng nhập/Đăng xuất mượt mà bằng Google mà không gặp lỗi crash.
 2. Giao diện đổi màu sắc ngay lập tức (realtime) khi số lượng công việc thêm vào/hoàn thành vượt qua các ngưỡng quy định.
 3. Biểu đồ thống kê hiển thị chính xác số liệu, hiệu ứng đẹp và tương tác tốt.

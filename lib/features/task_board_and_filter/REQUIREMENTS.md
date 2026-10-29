@@ -28,7 +28,13 @@ Phân hệ này là "trái tim" tương tác của ứng dụng, nơi người d
 * **State Management:** Kết hợp nhiều bộ lọc (vừa search text, vừa filter status) là một bài toán khó. Hãy dùng tính năng kết hợp các Provider (`ref.watch`) trong Riverpod một cách khéo léo để code không bị rối.
 * **Tối ưu Danh sách:** Sử dụng `ListView.builder` hoặc `SliverList` để đảm bảo khi có 1000 tasks, app vẫn scroll mượt ở 60-120fps.
 
-## 🏆 3. Kết quả Mong đợi (Expected Outcomes)
+## 💡 3. Hướng dẫn Code Độc lập (Không bị block)
+Nếu Long chưa code xong Đăng nhập (App không có User), bạn vẫn có thể tự làm màn hình danh sách của mình bình thường:
+1. Mở `lib/core/router/app_router.dart` và sửa tạm `initialLocation: '/board'`. Khi chạy app, nó sẽ vào thẳng màn hình của bạn, bỏ qua lớp bảo mật Auth.
+2. Dùng dữ liệu giả bằng cách gọi biến `MockRepository.mockTasks` (trong thư mục `core/data/`). Dữ liệu này đã có sẵn đủ loại trạng thái Task để bạn test các thao tác đổ vào `ListView`, vuốt, và lọc.
+3. Cứ code và Push lên nhánh của mình thoải mái. Việc ráp nối các màn hình lại với nhau sẽ do nhóm làm sau cùng.
+
+## 🏆 4. Kết quả Mong đợi (Expected Outcomes)
 1. Danh sách công việc có thể vuốt thẻ hai chiều mượt mà, đổi trạng thái task trong nháy mắt.
 2. Tìm kiếm và Lọc ra kết quả ngay lập tức khi gõ phím mà không bị giật lag (sử dụng Debounce).
 3. Cho phép người dùng chọn cùng lúc 5 tasks và đánh dấu hoàn thành toàn bộ chỉ bằng 1 thao tác.
