@@ -1,7 +1,10 @@
 import 'package:go_router/go_router.dart';
 
-// TODO: Implement Khai báo đường dẫn điều hướng chung
+// TODO: Khai báo các đường dẫn điều hướng (Routes) cho toàn bộ ứng dụng.
+// Ví dụ: '/', '/board', '/task-detail'
 final appRouter = GoRouter(
   initialLocation: '/',
-  routes: [],
+  routes: [
+    // TODO: Thêm GoRoute ở đây
+  ],
 );
