@@ -21,31 +21,38 @@ Nền tảng quản lý công việc và cộng tác nhóm thông minh. Dự án
 * **Database:** MySQL 8.0 (Chi tiết: [DATABASE_DESIGN.md](./docs/DATABASE_DESIGN.md)).
 * **API Docs:** Swagger UI (Chi tiết: [API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)).
 
-## 📂 3. Cấu trúc Monorepo
+## 📂 3. Kiến trúc Monorepo & Vùng làm việc (Codebase)
 
-Dự án được phân chia rõ ràng để làm việc nhóm song song, chống xung đột (Conflict):
+Dự án áp dụng kiến trúc **Feature-First** nghiêm ngặt. Mỗi thành viên được giao quyền sở hữu một thư mục riêng biệt trong `lib/features/` để đảm bảo có thể code song song mà không gây ra xung đột mã nguồn (Merge Conflict).
 
 ```text
 PRM393-SE1946-TodoApp/
 ├── backend/                               # Code API Backend (Java/Spring Boot)
 ├── docs/                                  # Tài liệu thiết kế Database & API
 └── lib/                                   # Code Frontend (Flutter/Dart)
-    ├── core/                              # Dùng chung (Models, Theme, Router)
-    └── features/                          # Các phân hệ độc lập (Feature-First)
-        ├── auth_and_dashboard/            # Phân hệ: Auth & Thống kê
-        ├── task_board_and_filter/         # Phân hệ: Quản lý Board & Lọc
-        └── task_detail_and_collab/        # Phân hệ: Chi tiết Task & Cộng tác
+    ├── core/                              # Code dùng chung (Models, Theme, Router)
+    └── features/                          # KHÔNG GIAN LÀM VIỆC ĐỘC LẬP:
+        ├── auth_and_dashboard/            # 👉 Vùng code của: Hà Vũ Long
+        ├── task_board_and_filter/         # 👉 Vùng code của: Vũ Hoàng Phúc
+        └── task_detail_and_collab/        # 👉 Vùng code của: Nguyễn Hải Đăng
 ```
+*(Quy tắc cốt lõi: Tuyệt đối không chỉnh sửa code bên trong thư mục `features/` của thành viên khác).*
 
-## 👥 4. Đội ngũ & Phân công
+## 👥 4. Đội ngũ, Trách nhiệm & Phân nhánh Git
 
-| Thành viên | Vai trò & Phân hệ | Nhánh làm việc (Branch) |
-| :--- | :--- | :--- |
-| **Hà Vũ Long** | Auth (OAuth), Adaptive UI, Analytics | `feat/long-auth-adaptive-ui`, `feat/long-dashboard` |
-| **Vũ Hoàng Phúc** | Task Board, Search/Filter, Gestures | `feat/phuc-task-list-gesture`, `feat/phuc-search-filter` |
-| **Nguyễn Hải Đăng**| Task CRUD, Subtasks, Collaboration | `feat/dang-task-detail-subtask`, `feat/dang-comment-reminder` |
+Bảng dưới đây quy định rõ ràng trách nhiệm của từng người ứng với Tính năng, Thư mục Code và Nhánh Git tương ứng:
 
-> **⚠️ Quy trình Git:** Nhánh `main` đã bị khóa bảo vệ. Tuyệt đối không push trực tiếp. Mọi code mới phải thực hiện trên nhánh `feat/...`, sau đó kéo gộp vào `dev`, và tạo Pull Request (PR) để lên `main`.
+| Thành viên | Trách nhiệm (Tính năng) | Thư mục Code (`features/`) | Nhánh Git làm việc (Branch) |
+| :--- | :--- | :--- | :--- |
+| **Hà Vũ Long** | Xác thực (OAuth), Adaptive UI Engine, Bảng thống kê (Analytics) | `auth_and_dashboard/` | `feat/long-auth-adaptive-ui`<br>`feat/long-dashboard` |
+| **Vũ Hoàng Phúc** | Bảng công việc (Task Board), Bộ lọc (Search/Filter), Cử chỉ (Gestures) | `task_board_and_filter/` | `feat/phuc-task-list-gesture`<br>`feat/phuc-search-filter` |
+| **Nguyễn Hải Đăng**| Tạo/Sửa Task, Subtasks (Checklist), Cộng tác (Comment), Nhắc việc | `task_detail_and_collab/` | `feat/dang-task-detail-subtask`<br>`feat/dang-comment-reminder` |
+
+> **⚠️ Quy trình Git:** 
+> 1. Nhánh `main` đã bị khóa bảo vệ. Tuyệt đối không push trực tiếp.
+> 2. Mọi code mới phải được thực hiện trên nhánh `feat/...` của cá nhân.
+> 3. Sau khi xong, hợp nhất (merge) nhánh cá nhân vào nhánh `dev`.
+> 4. Tạo Pull Request (PR) từ `dev` sang `main` để kiểm duyệt trước khi release.
 
 ## 🚀 5. Hướng dẫn Khởi chạy
 
