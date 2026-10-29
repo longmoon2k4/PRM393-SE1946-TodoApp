@@ -30,7 +30,13 @@ Phân hệ này đảm nhận chiều sâu của ứng dụng. Bạn có nhiệm
 * **Quyền truy cập (Permissions):** Notification trên Android 13+ và iOS yêu cầu phải xin quyền người dùng trước khi đặt lịch nhắc nhở. Hãy code luồng xin quyền chuẩn chỉ.
 * **Thời gian (DateTime):** Luôn xử lý ngày giờ kết hợp với múi giờ (Timezone) chuẩn bằng package `intl` để tránh sai lệch khi hẹn giờ.
 
-## 🏆 3. Kết quả Mong đợi (Expected Outcomes)
+## 💡 3. Hướng dẫn Code Độc lập (Không bị block)
+Nếu Long chưa làm xong Đăng nhập và Phúc chưa làm xong List, bạn KHÔNG CẦN phải ngồi chờ:
+1. Mở `lib/core/router/app_router.dart` và thiết lập `initialLocation: '/task-detail'`. App sẽ vào thẳng màn hình chi tiết của bạn mà không cần bấm vào danh sách.
+2. Để có dữ liệu giả vẽ giao diện, hãy lấy task đầu tiên bằng cách gọi `final fakeTask = MockRepository.mockTasks.first;` và truyền nó vào màn hình. (Task này đã chứa sẵn các Subtask và Comment mẫu).
+3. Bạn có thể tự do code UI, bắt sự kiện click dựa trên `fakeTask` này. Code xong cứ Push lên nhánh cá nhân thoải mái!
+
+## 🏆 4. Kết quả Mong đợi (Expected Outcomes)
 1. Tạo một Task mới và thêm Checklist chỉ trong vòng chưa tới 10 giây nhờ Bottom Sheet trực quan.
 2. Thông báo nhắc nhở đẩy xuống điện thoại chính xác tới từng phút.
 3. Chức năng bình luận hoạt động mượt mà, phân biệt rõ ràng comment của "Mình" (bên phải) và "Người khác" (bên trái).

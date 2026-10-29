@@ -54,9 +54,17 @@ Bảng dưới đây quy định rõ ràng trách nhiệm của từng người 
 > 3. Sau khi xong, hợp nhất (merge) nhánh cá nhân vào nhánh `dev`.
 > 4. Tạo Pull Request (PR) từ `dev` sang `main` để kiểm duyệt trước khi release.
 
-## 🚀 5. Hướng dẫn Khởi chạy
+## 💡 5. Cẩm nang Làm việc Độc lập (Chống "Block" nhau)
 
-### 5.1. Chạy Backend (Spring Boot)
+Trong quá trình làm việc nhóm, nếu tính năng của bạn cần dữ liệu từ tính năng của người khác (nhưng họ chưa làm xong), **bạn hoàn toàn không cần phải chờ đợi!** Áp dụng 3 quy tắc sau:
+
+1. **Vượt rào bằng Router:** Mặc định app mở lên sẽ vào màn hình Login. Nếu bạn cần code màn hình khác, hãy vào `lib/core/router/app_router.dart`, đổi tạm `initialLocation` trỏ thẳng tới màn hình bạn đang làm (VD: `initialLocation: '/task-detail'`).
+2. **Dùng Dữ liệu giả (Mock Data):** Hãy sử dụng kho dữ liệu `MockRepository.mockTasks` trong `lib/core/data/mock_repository.dart` để lấy danh sách/chi tiết công việc (đã có sẵn đủ trạng thái) và đắp vào UI của bạn thay vì chờ Backend/API.
+3. **Ráp nối cuối cùng:** Mỗi người cứ thoải mái code và push lên nhánh `feat/` của mình. Đến sát hạn nộp, nhóm chỉ cần ngồi lại, ghép API và sửa đúng 1 file `app_router.dart` để nối các màn hình lại với nhau là xong!
+
+## 🚀 6. Hướng dẫn Khởi chạy
+
+### 6.1. Chạy Backend (Spring Boot)
 *Yêu cầu: Đã cài đặt Docker (chạy MySQL) và JDK 17.*
 ```bash
 # 1. Khởi động cơ sở dữ liệu MySQL qua Docker Compose
@@ -68,7 +76,7 @@ cd backend
 ```
 👉 **Kiểm thử API (Swagger):** `http://localhost:8080/swagger-ui.html`
 
-### 5.2. Chạy Frontend (Flutter)
+### 6.2. Chạy Frontend (Flutter)
 *Yêu cầu: Đã cài đặt Flutter SDK.*
 ```bash
 # 1. Tải các thư viện phụ thuộc
