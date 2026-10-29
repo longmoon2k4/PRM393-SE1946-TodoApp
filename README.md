@@ -1,85 +1,170 @@
 # 🚀 Smart Workflow & Adaptive Todo App
 
-Ứng dụng quản lý công việc và cộng tác nhóm linh hoạt được phát triển bằng **Flutter**. Dự án tập trung vào trải nghiệm người dùng (UX) hiện đại với giao diện tự động thích ứng (Adaptive UI), cử chỉ thông minh (Smart Gestures) và luồng làm việc nhóm theo thời gian thực.
+Ứng dụng quản lý công việc và cộng tác nhóm linh hoạt, phát triển bằng **Flutter** (frontend) và **Spring Boot** (backend), cơ sở dữ liệu **MySQL** chạy qua **Docker**.
 
 ---
 
-## 👥 1. Đội ngũ Phát triển & Phân công
+## 📌 1. Tổng quan
 
-Dự án được chia thành 3 phân hệ độc lập, ứng với 3 thành viên:
+- **Frontend**: Flutter (Dart), Riverpod, GoRouter, Firebase Auth
+- **Backend**: Spring Boot 3.2, Spring Data JPA, Spring Security, Springdoc OpenAPI
+- **Database**: MySQL 8 (Docker)
+- **Kiến trúc**: Feature-First (Flutter) + Layered (Spring Boot)
 
-| Thành viên | Vai trò & Phân hệ | Nhánh (Branch) |
+### Tính năng chính
+- Adaptive UI theo “độ tải” công việc (Calm / Focus / Overload)
+- Smart gestures: vuốt đổi trạng thái, kéo thả sắp xếp
+- Quản lý task, subtask, comment, tag, activity log
+- Làm việc nhóm: project, phân quyền thành viên
+- Đồng bộ user từ Firebase (OAuth)
+
+---
+
+## 👥 2. Phân công nhóm
+
+| Thành viên | Vai trò & Phân hệ | Nhánh |
 | :--- | :--- | :--- |
-| **Hà Vũ Long** | Authentication (OAuth), Adaptive UI Engine, Analytics Dashboard | `feat/long-auth-adaptive-ui`<br>`feat/long-dashboard` |
-| **Vũ Hoàng Phúc** | Task Board, Search/Filter Engine, Smart Gestures | `feat/phuc-task-list-gesture`<br>`feat/phuc-search-filter` |
-| **Nguyễn Hải Đăng** | Task CRUD, Subtasks, Collaboration, Notifications | `feat/dang-task-detail-subtask`<br>`feat/dang-comment-reminder` |
+| **Hà Vũ Long** | Authentication (OAuth), Adaptive UI Engine, Analytics Dashboard | `feat/long-auth-adaptive-ui`, `feat/long-dashboard` |
+| **Vũ Hoàng Phúc** | Task Board, Search/Filter Engine, Smart Gestures | `feat/phuc-task-list-gesture`, `feat/phuc-search-filter` |
+| **Nguyễn Hải Đăng** | Task CRUD, Subtasks, Collaboration, Notifications | `feat/dang-task-detail-subtask`, `feat/dang-comment-reminder` |
 
 ---
 
-## ✨ 2. Tính năng Nổi bật
-
-* **Giao diện Thích ứng (Adaptive UI):** Giao diện tự động thay đổi màu sắc và bố cục dựa trên "độ tải" công việc (Số lượng task đang đọng). Tự động chuyển đổi giữa các chế độ: *Calm (Thư giãn)*, *Focus (Tập trung)*, và *Overload (Quá tải)*.
-* **Cử chỉ Thông minh (Smart Gestures):** Vuốt để đổi trạng thái, vuốt để mở menu thao tác nhanh, nhấn giữ để kéo thả thay đổi vị trí công việc.
-* **Làm việc Nhóm (Collaboration):** Phân quyền dự án, giao việc cho thành viên, bình luận (comments) theo thời gian thực và nhật ký hoạt động (activity logs).
-* **Xác thực Nhanh (OAuth):** Hỗ trợ đăng nhập không mật khẩu bằng Google/GitHub qua Firebase Auth.
-
----
-
-## 🛠️ 3. Công nghệ Sử dụng
-
-* **Nền tảng:** Flutter (Dart)
-* **State Management:** `flutter_riverpod`
-* **Routing:** `go_router`
-* **UI/UX:** `google_fonts`, `icons_plus`, `flutter_slidable`, `fl_chart`, `lottie`
-* **Kiến trúc:** Feature-First (tách biệt module theo tính năng để chống xung đột code)
-* **Cơ sở dữ liệu:** [Xem Thiết kế Database (MySQL)](./docs/DATABASE_DESIGN.md)
-
----
-
-## 📁 4. Cấu trúc Dự án (Feature-First)
-
-Kiến trúc đảm bảo 3 thành viên có thể làm việc song song mà không sợ `merge conflict`:
+## 📁 3. Cấu trúc dự án
 
 ```text
-lib/
-├── core/                                  # Dùng chung (Model, Theme, Router, Component)
-└── features/                              # Phân hệ độc lập
-    ├── auth_and_dashboard/                # Code của Hà Vũ Long
-    ├── task_board_and_filter/             # Code của Vũ Hoàng Phúc
-    └── task_detail_and_collab/            # Code của Nguyễn Hải Đăng
+PRM393-SE1946-TodoApp/
+├── lib/                      # Flutter app (Feature-First)
+├── backend/                  # Spring Boot backend
+│   ├── src/main/java/...     # Controllers, models, repositories
+│   ├── src/main/resources/   # application.yml
+│   ├── sql/init.sql          # MySQL init script (auto-run by Docker)
+│   ├── docker-compose.yml    # MySQL container
+│   └── README.md
+├── docs/                     # DATABASE_DESIGN.md, API_DOCUMENTATION.md
+└── README.md
 ```
-*(Lưu ý: Mọi giao tiếp giữa các feature phải thông qua `core/models` và `GoRouter`)*
 
 ---
 
-## 🤝 5. Quy trình Làm việc (Git Workflow)
+## 🛠️ 4. Yêu cầu môi trường
 
-Dự án áp dụng quy trình Git nghiêm ngặt để đảm bảo chất lượng mã nguồn:
-
-1. **Nhánh `main`:** Chứa bản Release ổn định. **(⚠️ Bị khóa bảo vệ. Không được push trực tiếp).**
-2. **Nhánh `dev`:** Nhánh hội tụ code của cả nhóm.
-3. **Luồng làm việc hàng ngày:**
-   * Từng người code trên nhánh `feat/...` của riêng mình.
-   * Kéo code mới nhất từ nhánh hội tụ: `git merge dev`.
-   * Đẩy code của mình lên: `git push origin <tên-nhánh>`.
-   * Giao tiếp trên nhóm, sau đó báo cáo để merge nhánh cá nhân vào `dev`.
-   * Nhánh `dev` sẽ được Review và tạo Pull Request (PR) để merge vào `main`.
+- **Flutter SDK** (>= 3.6)
+- **JDK 17+** (khuyến nghị JDK 21 Temurin)
+- **Maven 3.9+**
+- **Docker** (cho MySQL)
 
 ---
 
-## 🚀 6. Hướng dẫn Khởi chạy
+## 🚀 5. Khởi chạy nhanh
 
+### 5.1. Clone và checkout
 ```bash
-# 1. Clone dự án
-git clone <url-repository>
+git clone https://github.com/longmoon2k4/PRM393-SE1946-TodoApp.git
 cd PRM393-SE1946-TodoApp
-
-# 2. Chuyển sang nhánh làm việc (Ví dụ: dev)
 git checkout dev
+```
 
-# 3. Tải thư viện
+### 5.2. Chạy Backend + MySQL
+```bash
+cd backend
+
+# 1) Khởi động MySQL (Docker) - tự tạo DB và bảng từ sql/init.sql
+docker compose up -d
+
+# 2) Chạy Spring Boot
+export JAVA_HOME=/home/smile/.sdkman/candidates/java/21.0.2-tem  # hoặc JDK 17+
+export PATH=$JAVA_HOME/bin:$PATH
+mvn spring-boot:run
+```
+
+- API base: `http://localhost:8080/api/v1`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- MySQL: `localhost:3306`, DB `todo_db`, user `root`, password `password`
+
+> Lần đầu chạy MySQL, container sẽ tự thực thi `sql/init.sql` để tạo đầy đủ các bảng.
+> Nếu muốn reset DB sạch: `docker compose down -v && docker compose up -d`.
+
+### 5.3. Chạy Flutter
+```bash
+cd ..   # về thư mục gốc
+cd PRM393-SE1946-TodoApp
 flutter pub get
-
-# 4. Chạy ứng dụng
 flutter run
 ```
+
+---
+
+## 🗄️ 6. Database
+
+Thiết kế chi tiết: [`docs/DATABASE_DESIGN.md`](./docs/DATABASE_DESIGN.md)
+
+Các bảng chính:
+- `users`, `projects`, `project_members`
+- `categories`, `tasks`, `subtasks`
+- `task_comments`, `activity_logs`
+- `tags`, `task_tags`
+
+Hibernate `ddl-auto=update` được bật để đồng bộ schema; `init.sql` đảm bảo DB có sẵn bảng ngay từ lần chạy đầu.
+
+---
+
+## 🌐 7. API Documentation
+
+Tài liệu API: [`docs/API_DOCUMENTATION.md`](./docs/API_DOCUMENTATION.md)
+
+Nhóm API:
+- **Users**: sync user từ Firebase
+- **Tasks**: CRUD, filter, status, order, soft delete
+- **Subtasks**: toggle hoàn thành
+- **Comments**: thêm bình luận
+- **Projects / Categories**: CRUD
+
+Swagger UI cho phép test trực tiếp: `http://localhost:8080/swagger-ui.html`
+
+---
+
+## 🔐 8. Xác thực
+
+- Frontend dùng Firebase Auth (Google/GitHub).
+- Backend hiện tại cho phép `permitAll` (dev mode) và đồng bộ user qua `/api/v1/users/sync`.
+- Khi triển khai production, nên bật verify Firebase ID Token ở backend.
+
+---
+
+## 🤝 9. Git Workflow
+
+1. Nhánh `main`: bản release ổn định (protected).
+2. Nhánh `dev`: hội tụ code.
+3. Mỗi thành viên code trên nhánh `feat/...` riêng.
+4. Daily flow:
+   - `git pull origin dev`
+   - code + commit
+   - push nhánh cá nhân
+   - tạo PR vào `dev`
+
+---
+
+## 🧪 10. Kiểm thử nhanh Backend
+
+```bash
+cd backend
+# Tạo user
+curl -X POST http://localhost:8080/api/v1/users/sync \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"test@gmail.com","name":"Test User"}'
+
+# Tạo task
+curl -X POST http://localhost:8080/api/v1/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Task demo","priority":"high"}'
+
+# Lấy danh sách
+curl http://localhost:8080/api/v1/tasks
+```
+
+---
+
+## 📄 License
+
+Dự án phục vụ học tập (PRM393).
