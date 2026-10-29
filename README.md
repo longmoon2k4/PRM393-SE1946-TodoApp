@@ -42,11 +42,11 @@ PRM393-SE1946-TodoApp/
 
 Bảng dưới đây quy định rõ ràng trách nhiệm của từng người ứng với Tính năng, Thư mục Code và Nhánh Git tương ứng:
 
-| Thành viên | Trách nhiệm (Tính năng) | Thư mục Code (`features/`) | Nhánh Git làm việc (Branch) |
+| Thành viên | Trách nhiệm & Yêu cầu chi tiết | Thư mục Code (`features/`) | Nhánh Git làm việc (Branch) |
 | :--- | :--- | :--- | :--- |
-| **Hà Vũ Long** | Xác thực (OAuth), Adaptive UI Engine, Bảng thống kê (Analytics) | `auth_and_dashboard/` | `feat/long-auth-adaptive-ui`<br>`feat/long-dashboard` |
-| **Vũ Hoàng Phúc** | Bảng công việc (Task Board), Bộ lọc (Search/Filter), Cử chỉ (Gestures) | `task_board_and_filter/` | `feat/phuc-task-list-gesture`<br>`feat/phuc-search-filter` |
-| **Nguyễn Hải Đăng**| Tạo/Sửa Task, Subtasks (Checklist), Cộng tác (Comment), Nhắc việc | `task_detail_and_collab/` | `feat/dang-task-detail-subtask`<br>`feat/dang-comment-reminder` |
+| **Hà Vũ Long** | Xác thực, Adaptive UI, Analytics. 👉 [Xem Yêu cầu chi tiết](./lib/features/auth_and_dashboard/REQUIREMENTS.md) | `auth_and_dashboard/` | `feat/long-auth-adaptive-ui`<br>`feat/long-dashboard` |
+| **Vũ Hoàng Phúc** | Task Board, Lọc, Cử chỉ. 👉 [Xem Yêu cầu chi tiết](./lib/features/task_board_and_filter/REQUIREMENTS.md) | `task_board_and_filter/` | `feat/phuc-task-list-gesture`<br>`feat/phuc-search-filter` |
+| **Nguyễn Hải Đăng**| CRUD Task, Checklist, Comment. 👉 [Xem Yêu cầu chi tiết](./lib/features/task_detail_and_collab/REQUIREMENTS.md) | `task_detail_and_collab/` | `feat/dang-task-detail-subtask`<br>`feat/dang-comment-reminder` |
 
 > **⚠️ Quy trình Git:** 
 > 1. Nhánh `main` đã bị khóa bảo vệ. Tuyệt đối không push trực tiếp.
