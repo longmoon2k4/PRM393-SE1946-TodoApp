@@ -11,9 +11,9 @@ class PriorityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor;
-    Color textColor = Colors.white;
-    String label;
+    final Color bgColor;
+    const Color textColor = Colors.white;
+    final String label;
 
     switch (priority) {
       case TaskPriority.low:
@@ -42,7 +42,7 @@ class PriorityBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: const TextStyle(
           color: textColor,
           fontSize: 12,
           fontWeight: FontWeight.bold,
