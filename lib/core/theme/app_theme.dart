@@ -15,12 +15,11 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.priorityMedium, // Royal Blue
-        background: AppColors.background,
-        surface: AppColors.surface,
+        surface: AppColors.background, // Thay thế 'background' bị deprecated
       ),
       
       // 1. Ép khuôn Font chữ (Typography)
-      textTheme: baseTextTheme.copyWith(
+      textTheme: TextTheme(
         titleLarge: baseTextTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
         titleMedium: baseTextTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         bodyLarge: baseTextTheme.bodyLarge?.copyWith(color: const Color(0xFF334155)), // Slate 700
@@ -52,10 +51,10 @@ class AppTheme {
       ),
 
       // 3. Ép khuôn Thẻ (Cards - dùng cho SlidableTaskCard)
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.05),
+        shadowColor: Colors.black.withAlpha(13), // ~0.05 opacity (0.05 * 255 = 12.75)
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16), // Thẻ bo góc to hơn nút
           side: const BorderSide(color: AppColors.divider, width: 1),

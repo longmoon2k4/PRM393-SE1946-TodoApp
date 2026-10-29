@@ -4,7 +4,9 @@ class AppAssets {
   AppAssets._(); // Private constructor để không cho phép khởi tạo object
 
   // --- Thư mục Hình ảnh (images) ---
-  // VD: static const String logo = 'assets/images/logo.png';
+  static const String logo = 'assets/images/logo.png';
+  static const String emptyTasks = 'assets/images/empty_tasks.png';
+  static const String error404 = 'assets/images/error_404.png';
   
   // --- Thư mục Biểu tượng (icons) ---
   // Ghi chú: Ưu tiên dùng thư viện `lucide_icons_flutter` thay vì import SVG riêng lẻ.
