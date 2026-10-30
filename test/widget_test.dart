@@ -1,30 +1,54 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:todo_app/main.dart';
+import 'package:todo_app/core/models/task_model.dart';
+import 'package:todo_app/core/models/user_model.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('UserModel and TaskItem Unit Tests', () {
+    test('UserModel JSON serialization and copyWith test', () {
+      const user = UserModel(
+        id: 'u-1',
+        name: 'Hà Vũ Long',
+        email: 'long@gmail.com',
+        avatarUrl: 'https://example.com/avatar.png',
+        backlogThreshold: 12,
+        notifyOnOverload: true,
+        notifyOnDeadline: true,
+      );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      final json = user.toJson();
+      expect(json['id'], 'u-1');
+      expect(json['backlogThreshold'], 12);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      final fromJson = UserModel.fromJson(json);
+      expect(fromJson.name, 'Hà Vũ Long');
+      expect(fromJson.backlogThreshold, 12);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      final updated = user.copyWith(backlogThreshold: 15);
+      expect(updated.backlogThreshold, 15);
+      expect(updated.name, 'Hà Vũ Long');
+    });
+
+    test('TaskItem deadline and overdue calculations', () {
+      final pastTask = TaskItem(
+        id: 't-past',
+        title: 'Task quá hạn',
+        status: TaskStatus.todo,
+        createdAt: DateTime.now().subtract(const Duration(days: 3)),
+        deadline: DateTime.now().subtract(const Duration(days: 1)),
+      );
+
+      expect(pastTask.isOverdue, isTrue);
+
+      final futureTask = TaskItem(
+        id: 't-future',
+        title: 'Task sắp tới hạn',
+        status: TaskStatus.inProgress,
+        createdAt: DateTime.now(),
+        deadline: DateTime.now().add(const Duration(hours: 4)),
+      );
+
+      expect(futureTask.isOverdue, isFalse);
+      expect(futureTask.isDueSoon, isTrue);
+    });
   });
 }
