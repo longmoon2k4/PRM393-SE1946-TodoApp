@@ -1,0 +1,71 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/task_model.dart';
+import '../models/user_model.dart';
+
+class LocalStorageService {
+  static const String _userKey = 'cached_user_profile';
+  static const String _tasksKey = 'cached_task_items';
+  static const String _lastSyncKey = 'last_sync_timestamp';
+
+  static SharedPreferences? _prefs;
+
+  static Future<void> init() async {
+    _prefs ??= await SharedPreferences.getInstance();
+  }
+
+  // --- USER PROFILE ---
+  static UserModel? getCachedUser() {
+    final raw = _prefs?.getString(_userKey);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      return UserModel.fromJson(decoded);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<bool> saveUser(UserModel user) async {
+    final encoded = jsonEncode(user.toJson());
+    return await _prefs?.setString(_userKey, encoded) ?? false;
+  }
+
+  static Future<bool> clearUser() async {
+    return await _prefs?.remove(_userKey) ?? false;
+  }
+
+  // --- TASKS CACHE ---
+  static List<TaskItem>? getCachedTasks() {
+    final raw = _prefs?.getString(_tasksKey);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decodedList = jsonDecode(raw) as List<dynamic>;
+      return decodedList
+          .map((item) => TaskItem.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<bool> saveTasks(List<TaskItem> tasks) async {
+    final encoded = jsonEncode(tasks.map((t) => t.toJson()).toList());
+    return await _prefs?.setString(_tasksKey, encoded) ?? false;
+  }
+
+  // --- SYNC TIMESTAMP ---
+  static DateTime? getLastSyncTime() {
+    final raw = _prefs?.getString(_lastSyncKey);
+    if (raw == null) return null;
+    return DateTime.tryParse(raw);
+  }
+
+  static Future<bool> updateLastSyncTime() async {
+    return await _prefs?.setString(
+          _lastSyncKey,
+          DateTime.now().toIso8601String(),
+        ) ??
+        false;
+  }
+}
