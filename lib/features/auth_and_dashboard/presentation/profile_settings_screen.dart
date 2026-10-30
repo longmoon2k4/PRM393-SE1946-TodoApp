@@ -371,92 +371,101 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     Color subtextColor,
     bool isDark,
   ) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              'Cảnh báo quá tải công việc',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: textColor,
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Material(
+              color: Colors.transparent,
+              child: SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  'Cảnh báo quá tải công việc',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+                subtitle: Text(
+                  'Nhận thông báo khi số lượng việc vượt ngưỡng',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: subtextColor,
+                  ),
+                ),
+                value: _notifyOverload,
+                onChanged: (val) {
+                  setState(() => _notifyOverload = val);
+                  ref
+                      .read(authProvider.notifier)
+                      .updateNotificationPreferences(notifyOnOverload: val);
+                },
               ),
             ),
-            subtitle: Text(
-              'Nhận thông báo khi số lượng việc vượt ngưỡng',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                color: subtextColor,
+            Divider(height: 16, color: borderColor),
+            Material(
+              color: Colors.transparent,
+              child: SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  'Nhắc nhở hạn chót',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+                subtitle: Text(
+                  'Thông báo trước 24 giờ kể cả khi không có mạng',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: subtextColor,
+                  ),
+                ),
+                value: _notifyDeadline,
+                onChanged: (val) {
+                  setState(() => _notifyDeadline = val);
+                  ref
+                      .read(authProvider.notifier)
+                      .updateNotificationPreferences(notifyOnDeadline: val);
+                },
               ),
             ),
-            value: _notifyOverload,
-            onChanged: (val) {
-              setState(() => _notifyOverload = val);
-              ref
-                  .read(authProvider.notifier)
-                  .updateNotificationPreferences(notifyOnOverload: val);
-            },
-          ),
-          Divider(height: 16, color: borderColor),
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              'Nhắc nhở hạn chót',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: textColor,
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () async {
+                  await NotificationService.showTestNotification();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Đã gửi thông báo kiểm tra hệ thống.'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(LucideIcons.bell, size: 14),
+                label: const Text('Kiểm tra quyền thông báo'),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  textStyle: const TextStyle(fontSize: 13),
+                ),
               ),
             ),
-            subtitle: Text(
-              'Thông báo trước 24 giờ kể cả khi không có mạng',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                color: subtextColor,
-              ),
-            ),
-            value: _notifyDeadline,
-            onChanged: (val) {
-              setState(() => _notifyDeadline = val);
-              ref
-                  .read(authProvider.notifier)
-                  .updateNotificationPreferences(notifyOnDeadline: val);
-            },
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () async {
-                await NotificationService.showTestNotification();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Đã gửi thông báo kiểm tra hệ thống.'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(LucideIcons.bell, size: 14),
-              label: const Text('Kiểm tra quyền thông báo'),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                textStyle: const TextStyle(fontSize: 13),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

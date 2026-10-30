@@ -81,7 +81,9 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> _ensureGoogleInitialized() async {
     if (!_googleSignInInitialized) {
       try {
-        await GoogleSignIn.instance.initialize();
+        await GoogleSignIn.instance.initialize(
+          serverClientId: '387812790123-v375adnsh554sb3bhepqlvta35sq01k9.apps.googleusercontent.com',
+        );
         _googleSignInInitialized = true;
       } catch (e) {
         debugPrint('GoogleSignIn initialize: $e');
@@ -95,10 +97,18 @@ class AuthNotifier extends Notifier<AuthState> {
 
     try {
       await _ensureGoogleInitialized();
-      final GoogleSignInAccount googleUser =
-          await GoogleSignIn.instance.authenticate();
+      
+      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
+      
+      if (googleUser == null) {
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          errorMessage: 'Người dùng đã hủy đăng nhập.',
+        );
+        return false;
+      }
 
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
