@@ -103,8 +103,8 @@ final adaptiveStateProvider = Provider<AdaptiveState>((ref) {
   if (activeCount > threshold) {
     mode = AdaptiveMode.overload;
 
-    // Bắn thông báo cục bộ khi bị quá tải
-    if (notifyOnOverload) {
+    // Bắn thông báo cục bộ khi bị quá tải (Chỉ khi đã đăng nhập)
+    if (notifyOnOverload && authState.status == AuthStatus.authenticated) {
       NotificationService.showOverloadAlert(
         taskCount: activeCount,
         threshold: threshold,
