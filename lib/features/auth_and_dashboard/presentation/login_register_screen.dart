@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/adaptive_theme_provider.dart';
 import '../providers/auth_provider.dart';
 
 class LoginRegisterScreen extends ConsumerStatefulWidget {
@@ -33,50 +33,55 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
     }
   }
 
-  void _showOfflineErrorSheet(String errorMsg) {
+  void _showOfflineErrorSheet(String errorMsg, bool isDark) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
+        final bgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+        final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+        final subtextColor =
+            isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-          decoration: const BoxDecoration(
-            color: Color(0xFF1E293B), // Slate 800
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 44,
+                width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(50),
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
                   'assets/images/error_404.png',
-                  height: 140,
+                  height: 120,
                   fit: BoxFit.contain,
                   errorBuilder: (ctx, err, stack) => const Icon(
                     LucideIcons.wifiOff,
-                    size: 80,
+                    size: 64,
                     color: Color(0xFFEF4444),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                'Lỗi kết nối hoặc Xác thực',
+                'Không thể kết nối',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: textColor,
                 ),
               ),
               const SizedBox(height: 8),
@@ -85,27 +90,26 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
-                  color: const Color(0xFF94A3B8),
+                  color: subtextColor,
                 ),
               ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
+                child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
                     _handleGoogleSignIn();
                   },
-                  icon: const Icon(LucideIcons.refreshCw, size: 18),
-                  label: const Text('Thử lại kết nối'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3B82F6),
+                    backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  child: const Text('Thử lại'),
                 ),
               ),
             ],
@@ -117,48 +121,77 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = ref.watch(themeModeProvider);
     final authState = ref.watch(authProvider);
 
     // Lắng nghe khi có lỗi xác thực để hiện BottomSheet
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next.status == AuthStatus.error && next.errorMessage != null) {
-        _showOfflineErrorSheet(next.errorMessage!);
+        _showOfflineErrorSheet(next.errorMessage!, isDark);
       }
     });
 
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFFAFAFA);
+    final surfaceColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final borderColor =
+        isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subtextColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Dark slate theme
+      backgroundColor: bgColor,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
-                        const Spacer(flex: 1),
-
-                        // Logo Card with glowing effect
-                        Container(
-                          width: 88,
-                          height: 88,
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF2563EB), Color(0xFF4F46E5)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                        // Top Bar: Theme Switcher Toggle Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                ref
+                                    .read(themeModeProvider.notifier)
+                                    .toggleTheme();
+                              },
+                              icon: Icon(
+                                isDark ? LucideIcons.sun : LucideIcons.moon,
+                                size: 20,
+                                color: isDark
+                                    ? const Color(0xFFF1F5F9)
+                                    : const Color(0xFF475569),
+                              ),
+                              tooltip: isDark
+                                  ? 'Chuyển sang Giao diện Sáng'
+                                  : 'Chuyển sang Giao diện Tối',
                             ),
-                            borderRadius: BorderRadius.circular(24),
+                          ],
+                        ),
+
+                        const Spacer(flex: 2),
+
+                        // App Brand Logo
+                        Container(
+                          width: 64,
+                          height: 64,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: surfaceColor,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: borderColor),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF3B82F6).withAlpha(80),
-                                blurRadius: 28,
-                                offset: const Offset(0, 10),
+                                color: Colors.black.withAlpha(isDark ? 30 : 8),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
@@ -166,73 +199,40 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                             'assets/images/logo.png',
                             fit: BoxFit.contain,
                             errorBuilder: (ctx, err, stack) => const Icon(
-                              Icons.task_alt_rounded,
-                              size: 44,
-                              color: Colors.white,
+                              LucideIcons.checkSquare,
+                              size: 32,
+                              color: Color(0xFF2563EB),
                             ),
                           ),
-                        )
-                            .animate()
-                            .scale(
-                              duration: 600.ms,
-                              curve: Curves.easeOutBack,
-                            )
-                            .fadeIn(),
+                        ),
 
                         const SizedBox(height: 24),
 
-                        // App Title & Slogan
+                        // Headline & Subtitle
                         Text(
-                          'Todo Adaptive App',
+                          'Đăng nhập tài khoản',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.4,
+                            color: textColor,
                           ),
-                        ).animate().fadeIn(delay: 200.ms),
+                        ),
 
                         const SizedBox(height: 8),
 
                         Text(
-                          'Tự động thích ứng giao diện theo khối lượng công việc và hỗ trợ làm việc ngoại tuyến mượt mà.',
+                          'Quản lý công việc và cộng tác nhóm thông minh.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
-                            height: 1.5,
-                            color: const Color(0xFF94A3B8), // Slate 400
+                            color: subtextColor,
                           ),
-                        ).animate().fadeIn(delay: 300.ms),
+                        ),
 
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 40),
 
-                        // Feature Badges
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          alignment: WrapAlignment.center,
-                          children: [
-                            _buildPillBadge(
-                              icon: LucideIcons.palette,
-                              label: 'Adaptive UI',
-                              color: const Color(0xFF10B981),
-                            ),
-                            _buildPillBadge(
-                              icon: LucideIcons.cloudOff,
-                              label: 'Offline-First',
-                              color: const Color(0xFF3B82F6),
-                            ),
-                            _buildPillBadge(
-                              icon: LucideIcons.bellRing,
-                              label: 'Smart Alerts',
-                              color: const Color(0xFFF59E0B),
-                            ),
-                          ],
-                        ).animate().fadeIn(delay: 400.ms),
-
-                        const Spacer(flex: 2),
-
-                        // Error Banner if present
+                        // Error message if any
                         if (authState.status == AuthStatus.error &&
                             authState.errorMessage != null)
                           Container(
@@ -242,123 +242,111 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEF4444).withAlpha(30),
-                              borderRadius: BorderRadius.circular(14),
+                              color: const Color(0xFFEF4444).withAlpha(15),
+                              borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: const Color(0xFFEF4444).withAlpha(80),
+                                color: const Color(0xFFEF4444).withAlpha(40),
                               ),
                             ),
                             child: Row(
                               children: [
                                 const Icon(
-                                  LucideIcons.triangleAlert,
+                                  LucideIcons.alertCircle,
                                   color: Color(0xFFEF4444),
-                                  size: 20,
+                                  size: 18,
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     authState.errorMessage!,
                                     style: GoogleFonts.plusJakartaSans(
-                                      color: Colors.white,
-                                      fontSize: 12,
+                                      color: const Color(0xFFEF4444),
+                                      fontSize: 13,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                          ).animate().shake(),
+                          ),
 
-                        // Sole Sign-In Method: Google OAuth 2.0
+                        // Primary Google OAuth Sign-In Button
                         Container(
                           width: double.infinity,
+                          height: 52,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
+                            color: surfaceColor,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: borderColor),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.white.withAlpha(20),
-                                blurRadius: 20,
-                                offset: const Offset(0, 4),
+                                color: Colors.black.withAlpha(isDark ? 20 : 6),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
                               ),
                             ],
                           ),
-                          child: ElevatedButton(
-                            onPressed: (_isSigningIn ||
-                                    authState.status == AuthStatus.loading)
-                                ? null
-                                : _handleGoogleSignIn,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF0F172A),
-                              disabledBackgroundColor:
-                                  Colors.white.withAlpha(160),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                                horizontal: 20,
-                              ),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: (_isSigningIn ||
-                                    authState.status == AuthStatus.loading)
-                                ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Color(0xFF2563EB),
-                                      ),
-                                    ),
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      // Google 'G' official style icon
-                                      _buildGoogleIcon(),
-                                      const SizedBox(width: 14),
-                                      Text(
-                                        'Đăng nhập bằng Google',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.2,
-                                          color: const Color(0xFF1E293B),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(14),
+                              onTap: (_isSigningIn ||
+                                      authState.status == AuthStatus.loading)
+                                  ? null
+                                  : _handleGoogleSignIn,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                child: (_isSigningIn ||
+                                        authState.status == AuthStatus.loading)
+                                    ? const Center(
+                                        child: SizedBox(
+                                          width: 22,
+                                          height: 22,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                              Color(0xFF2563EB),
+                                            ),
+                                          ),
                                         ),
+                                      )
+                                    : Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          _buildGoogleIcon(),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            'Tiếp tục với Google',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                              color: textColor,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                          ),
-                        )
-                            .animate()
-                            .fadeIn(delay: 500.ms)
-                            .slideY(begin: 0.2, end: 0),
-
-                        const SizedBox(height: 20),
-
-                        // Security & Privacy Notice
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              LucideIcons.shieldCheck,
-                              size: 14,
-                              color: Color(0xFF64748B),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Bảo mật bởi Firebase OAuth 2.0 & Spring Security',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                color: const Color(0xFF64748B),
                               ),
                             ),
-                          ],
-                        ).animate().fadeIn(delay: 600.ms),
+                          ),
+                        ),
 
-                        const Spacer(flex: 1),
+                        const Spacer(flex: 3),
+
+                        // Footer Terms & Privacy Policy
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: Text(
+                            'Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              height: 1.4,
+                              color: subtextColor,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -371,51 +359,18 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
     );
   }
 
-  Widget _buildPillBadge({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: color.withAlpha(25),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withAlpha(60)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildGoogleIcon() {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-      ),
+    return SizedBox(
+      width: 20,
+      height: 20,
       child: Stack(
         alignment: Alignment.center,
         children: [
           Text(
             'G',
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
+            style: GoogleFonts.roboto(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
               color: const Color(0xFF4285F4),
             ),
           ),

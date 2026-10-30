@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth_and_dashboard/providers/auth_provider.dart';
 import '../models/task_model.dart';
 import '../providers/core_tasks_provider.dart';
+import '../services/local_storage_service.dart';
 import '../services/notification_service.dart';
 import 'app_theme.dart';
 
@@ -12,11 +13,34 @@ enum AdaptiveMode {
   overload, // Quá tải (Vượt ngưỡng công việc quy định)
 }
 
+/// Quản lý chế độ Sáng / Tối (Dark Mode) cho toàn ứng dụng
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, bool>(() {
+  return ThemeModeNotifier();
+});
+
+class ThemeModeNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    return LocalStorageService.getIsDarkMode() ?? false;
+  }
+
+  void toggleTheme() {
+    state = !state;
+    LocalStorageService.saveIsDarkMode(state);
+  }
+
+  void setTheme(bool isDark) {
+    state = isDark;
+    LocalStorageService.saveIsDarkMode(state);
+  }
+}
+
 class AdaptiveState {
   final AdaptiveMode mode;
   final int activeTaskCount;
   final int overdueTaskCount;
   final int backlogThreshold;
+  final bool isDark;
   final ThemeData theme;
 
   const AdaptiveState({
@@ -24,6 +48,7 @@ class AdaptiveState {
     required this.activeTaskCount,
     required this.overdueTaskCount,
     required this.backlogThreshold,
+    required this.isDark,
     required this.theme,
   });
 
@@ -34,22 +59,22 @@ class AdaptiveState {
   String get modeName {
     switch (mode) {
       case AdaptiveMode.calm:
-        return 'Calm Mode';
+        return 'Calm';
       case AdaptiveMode.focus:
-        return 'Focus Mode';
+        return 'Focus';
       case AdaptiveMode.overload:
-        return 'Overload Mode';
+        return 'Overload';
     }
   }
 
   String get modeDescription {
     switch (mode) {
       case AdaptiveMode.calm:
-        return 'Khối lượng công việc nhẹ nhàng. Tiếp tục duy trì phong độ!';
+        return 'Khối lượng công việc ổn định.';
       case AdaptiveMode.focus:
-        return 'Số lượng công việc đang tăng. Hãy tập trung giải quyết việc ưu tiên cao!';
+        return 'Số lượng công việc đang tăng, hãy tập trung vào các ưu tiên cao.';
       case AdaptiveMode.overload:
-        return 'Cảnh báo quá tải! Bạn có quá nhiều việc chưa hoàn thành. Cần phân bổ lại ngay.';
+        return 'Cảnh báo: Khối lượng công việc vượt ngưỡng quy định.';
     }
   }
 }
@@ -58,6 +83,7 @@ class AdaptiveState {
 final adaptiveStateProvider = Provider<AdaptiveState>((ref) {
   final tasks = ref.watch(coreTasksProvider);
   final authState = ref.watch(authProvider);
+  final isDark = ref.watch(themeModeProvider);
 
   final threshold = authState.user?.backlogThreshold ?? 10;
   final notifyOnOverload = authState.user?.notifyOnOverload ?? true;
@@ -73,11 +99,9 @@ final adaptiveStateProvider = Provider<AdaptiveState>((ref) {
   final overdueCount = tasks.where((t) => t.isOverdue && t.deletedAt == null).length;
 
   AdaptiveMode mode;
-  ThemeData theme;
 
   if (activeCount > threshold) {
     mode = AdaptiveMode.overload;
-    theme = AppTheme.overloadTheme;
 
     // Bắn thông báo cục bộ khi bị quá tải
     if (notifyOnOverload) {
@@ -88,17 +112,18 @@ final adaptiveStateProvider = Provider<AdaptiveState>((ref) {
     }
   } else if (activeCount >= (threshold * 0.6).round() || overdueCount > 0) {
     mode = AdaptiveMode.focus;
-    theme = AppTheme.focusTheme;
   } else {
     mode = AdaptiveMode.calm;
-    theme = AppTheme.calmTheme;
   }
+
+  final theme = AppTheme.getAdaptiveTheme(mode: mode, isDark: isDark);
 
   return AdaptiveState(
     mode: mode,
     activeTaskCount: activeCount,
     overdueTaskCount: overdueCount,
     backlogThreshold: threshold,
+    isDark: isDark,
     theme: theme,
   );
 });

@@ -7,11 +7,21 @@ class LocalStorageService {
   static const String _userKey = 'cached_user_profile';
   static const String _tasksKey = 'cached_task_items';
   static const String _lastSyncKey = 'last_sync_timestamp';
+  static const String _themeModeKey = 'app_is_dark_mode';
 
   static SharedPreferences? _prefs;
 
   static Future<void> init() async {
     _prefs ??= await SharedPreferences.getInstance();
+  }
+
+  // --- THEME PREFERENCE ---
+  static bool? getIsDarkMode() {
+    return _prefs?.getBool(_themeModeKey);
+  }
+
+  static Future<bool> saveIsDarkMode(bool isDark) async {
+    return await _prefs?.setBool(_themeModeKey, isDark) ?? false;
   }
 
   // --- USER PROFILE ---
