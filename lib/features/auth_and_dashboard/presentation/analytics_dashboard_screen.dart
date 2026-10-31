@@ -447,7 +447,7 @@ class _AnalyticsDashboardScreenState
       backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
-      titleSpacing: 16,
+      titleSpacing: 12,
       toolbarHeight: 68,
       title: Row(
         children: [
@@ -455,13 +455,13 @@ class _AnalyticsDashboardScreenState
           GestureDetector(
             onTap: () => context.push('/profile'),
             child: Container(
-              width: 44,
-              height: 44,
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: modeColor,
-                  width: 2.2,
+                  width: 2.0,
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -483,13 +483,13 @@ class _AnalyticsDashboardScreenState
                       )
                     : Icon(
                         LucideIcons.user,
-                        size: 20,
+                        size: 18,
                         color: isDark ? Colors.white : const Color(0xFF334155),
                       ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 9),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -498,7 +498,7 @@ class _AnalyticsDashboardScreenState
                 Text(
                   _getTimeGreeting(),
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     color: subtextColor,
@@ -506,11 +506,11 @@ class _AnalyticsDashboardScreenState
                   ),
                 ),
                 Text(
-                  user?.name ?? 'Hà Vũ Long',
+                  user?.name ?? 'Long Moon',
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
+                    fontSize: 15.5,
                     fontWeight: FontWeight.w800,
                     color: textColor,
                   ),
@@ -525,10 +525,10 @@ class _AnalyticsDashboardScreenState
         GestureDetector(
           onTap: () => _showAdaptiveInfoDialog(context, adaptive, isDark),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
             decoration: BoxDecoration(
               color: modeColor.withAlpha(isDark ? 40 : 20),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: modeColor.withAlpha(isDark ? 90 : 70),
                 width: 1.2,
@@ -539,16 +539,16 @@ class _AnalyticsDashboardScreenState
               children: [
                 Icon(
                   _getModeIcon(adaptive.mode),
-                  size: 13,
+                  size: 12,
                   color: modeColor,
                 ),
-                const SizedBox(width: 5),
+                const SizedBox(width: 4),
                 Text(
                   adaptive.modeName,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11.5,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 0.2,
+                    letterSpacing: 0.1,
                     color: modeColor,
                   ),
                 ),
@@ -558,30 +558,47 @@ class _AnalyticsDashboardScreenState
         ),
         const SizedBox(width: 4),
         // Dark/Light Mode Switcher
-        IconButton(
-          visualDensity: VisualDensity.compact,
-          padding: const EdgeInsets.all(6),
-          icon: Icon(
-            isDark ? LucideIcons.sun : LucideIcons.moon,
-            size: 19,
-            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF475569),
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+            shape: BoxShape.circle,
           ),
-          onPressed: () {
-            ref.read(themeModeProvider.notifier).toggleTheme();
-          },
-          tooltip: isDark ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối',
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: Icon(
+              isDark ? LucideIcons.sun : LucideIcons.moon,
+              size: 16,
+              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF475569),
+            ),
+            onPressed: () {
+              ref.read(themeModeProvider.notifier).toggleTheme();
+            },
+            tooltip: isDark ? 'Giao diện Sáng' : 'Giao diện Tối',
+          ),
         ),
+        const SizedBox(width: 4),
         // Settings / Profile Button
-        IconButton(
-          visualDensity: VisualDensity.compact,
-          padding: const EdgeInsets.all(6),
-          icon: Icon(
-            LucideIcons.settings,
-            size: 19,
-            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF475569),
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+            shape: BoxShape.circle,
           ),
-          onPressed: () => context.push('/profile'),
-          tooltip: 'Cài đặt hồ sơ & ngưỡng',
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: Icon(
+              LucideIcons.settings,
+              size: 16,
+              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF475569),
+            ),
+            onPressed: () => context.push('/profile'),
+            tooltip: 'Cài đặt hồ sơ & ngưỡng',
+          ),
         ),
         const SizedBox(width: 8),
       ],
@@ -868,9 +885,9 @@ class _AnalyticsDashboardScreenState
     }
 
     final hubLabel = isOverload
-        ? '🚨 Áp lực Quá tải (${adaptive.activeTaskCount}/${adaptive.backlogThreshold} việc)'
+        ? '🚨 Quá tải (${adaptive.activeTaskCount}/${adaptive.backlogThreshold} việc)'
         : (isFocus && stats.overdueCount > 0
-            ? '⚡ Tập trung giải quyết việc gấp'
+            ? '⚡ Cần tập trung việc gấp'
             : stats.productivityLabel);
 
     final hubAdvice = isOverload
@@ -938,24 +955,28 @@ class _AnalyticsDashboardScreenState
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: scoreColor.withAlpha(isDark ? 40 : 20),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: scoreColor.withAlpha(isDark ? 80 : 50),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3.5,
                             ),
-                          ),
-                          child: Text(
-                            hubLabel,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w800,
-                              color: scoreColor,
+                            decoration: BoxDecoration(
+                              color: scoreColor.withAlpha(isDark ? 40 : 20),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: scoreColor.withAlpha(isDark ? 80 : 50),
+                              ),
+                            ),
+                            child: Text(
+                              hubLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: scoreColor,
+                              ),
                             ),
                           ),
                         ),
