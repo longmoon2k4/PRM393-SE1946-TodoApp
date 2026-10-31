@@ -661,29 +661,36 @@ class _AnalyticsDashboardScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE11D48),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(LucideIcons.alertOctagon, size: 13, color: Colors.white),
-                    const SizedBox(width: 5),
-                    Text(
-                      'BÁO ĐỘNG QUÁ TẢI (OVERLOAD)',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 0.3,
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE11D48),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(LucideIcons.alertOctagon, size: 13, color: Colors.white),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          'CẢNH BÁO QUÁ TẢI',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -730,13 +737,17 @@ class _AnalyticsDashboardScreenState
                 child: ElevatedButton.icon(
                   onPressed: () => context.push('/board'),
                   icon: const Icon(LucideIcons.flame, size: 14),
-                  label: Text('Giải phóng việc gấp (${stats.urgentCount + stats.overdueCount})'),
+                  label: Text(
+                    'Xử lý việc gấp (${stats.urgentCount + stats.overdueCount})',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE11D48),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     textStyle: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                     ),
                     shape: RoundedRectangleBorder(
@@ -753,9 +764,9 @@ class _AnalyticsDashboardScreenState
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFE11D48),
                   side: const BorderSide(color: Color(0xFFE11D48)),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   textStyle: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                   ),
                   shape: RoundedRectangleBorder(
