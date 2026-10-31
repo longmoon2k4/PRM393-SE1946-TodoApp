@@ -4,7 +4,6 @@ import '../../features/auth_and_dashboard/providers/auth_provider.dart';
 import '../models/task_model.dart';
 import '../providers/core_tasks_provider.dart';
 import '../services/local_storage_service.dart';
-import '../services/notification_service.dart';
 import 'app_theme.dart';
 
 enum AdaptiveMode {
@@ -86,7 +85,6 @@ final adaptiveStateProvider = Provider<AdaptiveState>((ref) {
   final isDark = ref.watch(themeModeProvider);
 
   final threshold = authState.user?.backlogThreshold ?? 10;
-  final notifyOnOverload = authState.user?.notifyOnOverload ?? true;
 
   // Lọc các task đang hoạt động (chưa xóa mềm)
   final activeTasks = tasks.where((t) =>
@@ -102,14 +100,6 @@ final adaptiveStateProvider = Provider<AdaptiveState>((ref) {
 
   if (activeCount > threshold) {
     mode = AdaptiveMode.overload;
-
-    // Bắn thông báo cục bộ khi bị quá tải (Chỉ khi đã đăng nhập)
-    if (notifyOnOverload && authState.status == AuthStatus.authenticated) {
-      NotificationService.showOverloadAlert(
-        taskCount: activeCount,
-        threshold: threshold,
-      );
-    }
   } else if (activeCount >= (threshold * 0.6).round() || overdueCount > 0) {
     mode = AdaptiveMode.focus;
   } else {

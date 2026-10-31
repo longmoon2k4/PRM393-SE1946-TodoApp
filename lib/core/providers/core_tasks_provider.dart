@@ -5,6 +5,7 @@ import '../models/task_model.dart';
 import '../services/local_storage_service.dart';
 import '../services/notification_service.dart';
 import '../services/task_api_service.dart';
+import '../../features/auth_and_dashboard/providers/auth_provider.dart';
 
 /// Provider lưu trữ State của toàn bộ danh sách Task.
 /// Áp dụng mô hình Production-Ready Offline-First & Live Cloud Sync:
@@ -27,7 +28,6 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
     Future.microtask(() => syncFromBackend());
 
     if (cachedTasks != null && cachedTasks.isNotEmpty) {
-      unawaited(NotificationService.checkAndNotifyApproachingDeadlines(cachedTasks));
       return cachedTasks;
     }
 
@@ -48,7 +48,14 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
         state = serverTasks;
         await LocalStorageService.saveTasks(serverTasks);
         await LocalStorageService.updateLastSyncTime();
-        unawaited(NotificationService.checkAndNotifyApproachingDeadlines(serverTasks));
+
+        // Kiểm tra thông báo deadline định kỳ một cách thông minh và tôn trọng cài đặt người dùng
+        final auth = ref.read(authProvider);
+        final notifyDeadline = auth.user?.notifyOnDeadline ?? true;
+        unawaited(NotificationService.checkAndNotifyApproachingDeadlines(
+          tasks: serverTasks,
+          isEnabled: auth.status == AuthStatus.authenticated && notifyDeadline,
+        ));
         return true;
       }
       return true;
@@ -68,7 +75,6 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
     // 1. Cập nhật Optimistic UI
     state = [...state, newTask];
     await LocalStorageService.saveTasks(state);
-    unawaited(NotificationService.checkAndNotifyApproachingDeadlines(state));
 
     // 2. Đồng bộ lên Server Backend
     try {
@@ -94,7 +100,6 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
         if (task.id == updatedTask.id) updatedTask else task
     ];
     await LocalStorageService.saveTasks(state);
-    unawaited(NotificationService.checkAndNotifyApproachingDeadlines(state));
 
     // 2. Đồng bộ lên Server Backend
     try {
@@ -122,7 +127,6 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
         if (task.id == taskId) updatedTask else task
     ];
     await LocalStorageService.saveTasks(state);
-    unawaited(NotificationService.checkAndNotifyApproachingDeadlines(state));
 
     // 2. Đồng bộ lên Server Backend
     try {

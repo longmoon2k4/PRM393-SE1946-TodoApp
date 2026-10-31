@@ -6,6 +6,7 @@ import 'core/router/app_router.dart';
 import 'core/services/local_storage_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/adaptive_theme_provider.dart';
+import 'features/auth_and_dashboard/providers/auth_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -43,6 +44,26 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Quản lý thông báo quá tải thông minh: Chỉ cảnh báo khi chuyển trạng thái hoặc khối lượng tăng vọt
+    ref.listen<AdaptiveState>(adaptiveStateProvider, (previous, next) {
+      final auth = ref.read(authProvider);
+      final isAuth = auth.status == AuthStatus.authenticated;
+      final notifyOverload = auth.user?.notifyOnOverload ?? true;
+
+      if (next.mode == AdaptiveMode.overload) {
+        NotificationService.checkAndNotifyOverload(
+          taskCount: next.activeTaskCount,
+          threshold: next.backlogThreshold,
+          isEnabled: isAuth && notifyOverload,
+        );
+      } else if (previous != null &&
+          previous.mode == AdaptiveMode.overload &&
+          next.mode != AdaptiveMode.overload) {
+        // Đã giảm tải thành công: tự động thu hồi thông báo quá tải
+        NotificationService.cancelOverloadAlert();
+      }
+    });
+
     final theme = ref.watch(adaptiveThemeProvider);
 
     return MaterialApp.router(

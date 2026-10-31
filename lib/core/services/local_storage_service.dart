@@ -8,6 +8,9 @@ class LocalStorageService {
   static const String _tasksKey = 'cached_task_items';
   static const String _lastSyncKey = 'last_sync_timestamp';
   static const String _themeModeKey = 'app_is_dark_mode';
+  static const String _lastOverloadNotifiedTimeKey = 'last_overload_notified_timestamp';
+  static const String _lastOverloadNotifiedCountKey = 'last_overload_notified_count';
+  static const String _notifiedDeadlinesKey = 'notified_task_deadlines_map';
 
   static SharedPreferences? _prefs;
 
@@ -77,5 +80,50 @@ class LocalStorageService {
           DateTime.now().toIso8601String(),
         ) ??
         false;
+  }
+
+  // --- NOTIFICATION SMART ANTI-SPAM & TRACKING ---
+  static DateTime? getLastOverloadAlertTime() {
+    final raw = _prefs?.getString(_lastOverloadNotifiedTimeKey);
+    return raw != null ? DateTime.tryParse(raw) : null;
+  }
+
+  static int getLastOverloadNotifiedCount() {
+    return _prefs?.getInt(_lastOverloadNotifiedCountKey) ?? 0;
+  }
+
+  static Future<bool> setLastOverloadAlertTime(DateTime time, int count) async {
+    await _prefs?.setInt(_lastOverloadNotifiedCountKey, count);
+    return await _prefs?.setString(
+          _lastOverloadNotifiedTimeKey,
+          time.toIso8601String(),
+        ) ??
+        false;
+  }
+
+  static Future<bool> clearOverloadAlertHistory() async {
+    await _prefs?.remove(_lastOverloadNotifiedCountKey);
+    return await _prefs?.remove(_lastOverloadNotifiedTimeKey) ?? false;
+  }
+
+  static Map<String, String> getNotifiedDeadlines() {
+    final raw = _prefs?.getString(_notifiedDeadlinesKey);
+    if (raw == null || raw.isEmpty) return {};
+    try {
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      return decoded.map((k, v) => MapEntry(k, v.toString()));
+    } catch (_) {
+      return {};
+    }
+  }
+
+  static Future<bool> saveNotifiedDeadline(String taskId, String milestone) async {
+    final map = getNotifiedDeadlines();
+    map[taskId] = milestone;
+    return await _prefs?.setString(_notifiedDeadlinesKey, jsonEncode(map)) ?? false;
+  }
+
+  static Future<bool> clearNotifiedDeadlines() async {
+    return await _prefs?.remove(_notifiedDeadlinesKey) ?? false;
   }
 }
