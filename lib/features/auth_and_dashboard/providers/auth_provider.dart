@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/local_storage_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/services/task_api_service.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
@@ -47,7 +48,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'http://localhost:8080',
+      baseUrl: TaskApiService.defaultBaseUrl,
       connectTimeout: const Duration(seconds: 4),
       receiveTimeout: const Duration(seconds: 4),
     ),
