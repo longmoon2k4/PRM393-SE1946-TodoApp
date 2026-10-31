@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'core/router/app_router.dart';
 import 'core/services/local_storage_service.dart';
 import 'core/services/notification_service.dart';
@@ -9,6 +10,13 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Khởi tạo định dạng ngày tháng tiếng Việt
+  try {
+    await initializeDateFormatting('vi_VN', null);
+  } catch (e) {
+    debugPrint('Init date formatting error: $e');
+  }
 
   // Khởi tạo các dịch vụ ngoại tuyến và thông báo
   await LocalStorageService.init();

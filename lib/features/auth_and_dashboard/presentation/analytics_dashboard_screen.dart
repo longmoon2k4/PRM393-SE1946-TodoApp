@@ -204,6 +204,20 @@ class _AnalyticsDashboardScreenState
     return 'Chào buổi tối,';
   }
 
+  String _formatVietnameseDate(DateTime date) {
+    const weekdays = [
+      'Thứ Hai',
+      'Thứ Ba',
+      'Thứ Tư',
+      'Thứ Năm',
+      'Thứ Sáu',
+      'Thứ Bảy',
+      'Chủ Nhật'
+    ];
+    final weekday = weekdays[(date.weekday - 1) % 7];
+    return '$weekday, ${date.day} thg ${date.month}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final stats = ref.watch(statisticsProvider);
@@ -354,7 +368,7 @@ class _AnalyticsDashboardScreenState
     final modeColor = _getModeColor(adaptive.mode);
 
     final now = DateTime.now();
-    final dateStr = DateFormat('EEEE, d MMMM', 'vi').format(now);
+    final dateStr = _formatVietnameseDate(now);
 
     return AppBar(
       backgroundColor: Colors.transparent,
