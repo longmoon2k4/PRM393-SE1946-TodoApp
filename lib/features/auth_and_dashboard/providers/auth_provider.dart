@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/local_storage_service.dart';
+import '../../../core/services/notification_service.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
@@ -98,17 +99,10 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       await _ensureGoogleInitialized();
       
-      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
-      
-      if (googleUser == null) {
-        state = state.copyWith(
-          status: AuthStatus.unauthenticated,
-          errorMessage: 'Người dùng đã hủy đăng nhập.',
-        );
-        return false;
-      }
+      final GoogleSignInAccount googleUser =
+          await GoogleSignIn.instance.authenticate();
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
@@ -210,6 +204,7 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       await _firebaseAuth.signOut();
       await LocalStorageService.clearUser();
+      await NotificationService.cancelAllNotifications();
     } catch (e) {
       debugPrint('Firebase SignOut Error: $e');
     }

@@ -185,4 +185,14 @@ class NotificationService {
       }
     }
   }
+
+  /// Hủy toàn bộ các thông báo đang được hiển thị / lên lịch (Thường dùng khi Đăng xuất)
+  static Future<void> cancelAllNotifications() async {
+    if (!_isInitialized) return;
+    try {
+      await _plugin.cancelAll();
+    } catch (e) {
+      debugPrint('Failed to cancel all notifications: $e');
+    }
+  }
 }
