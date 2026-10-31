@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import '../../../core/models/task_model.dart';
@@ -303,10 +303,8 @@ class _AnalyticsDashboardScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Offline banner if disconnected
                     if (auth.isOffline) _buildOfflineBanner(isDark),
 
-                    // Emergency Overload HUD Banner
                     if (isOverload) ...[
                       _buildOverloadEmergencyBanner(
                         context: context,
@@ -324,7 +322,6 @@ class _AnalyticsDashboardScreenState
                       const SizedBox(height: 18),
                     ],
 
-                    // 1. Productivity Health Hub (Hero Card)
                     _buildProductivityHub(
                       context,
                       stats,
@@ -338,7 +335,6 @@ class _AnalyticsDashboardScreenState
 
                     const SizedBox(height: 18),
 
-                    // 2. Adaptive Workload Engine Visualizer Card
                     _buildWorkloadAdaptiveCard(
                       context,
                       adaptive,
@@ -351,7 +347,6 @@ class _AnalyticsDashboardScreenState
 
                     const SizedBox(height: 18),
 
-                    // 3. 4-Metrics Interactive Grid
                     _buildMetricsGrid(
                       context,
                       stats,
@@ -365,7 +360,6 @@ class _AnalyticsDashboardScreenState
 
                     const SizedBox(height: 18),
 
-                    // 4. Actionable Urgent Tasks (Cần xử lý ngay)
                     if (stats.topActionableTasks.isNotEmpty) ...[
                       _buildActionableTasksSection(
                         context,
@@ -381,7 +375,6 @@ class _AnalyticsDashboardScreenState
                       const SizedBox(height: 18),
                     ],
 
-                    // 5. Task Distribution Donut Chart
                     _buildDistributionCard(
                       context,
                       stats,
@@ -395,7 +388,6 @@ class _AnalyticsDashboardScreenState
 
                     const SizedBox(height: 18),
 
-                    // 6. Weekly Productivity Velocity Bar Chart
                     _buildWeeklyVelocityCard(
                       context,
                       stats,
@@ -409,7 +401,6 @@ class _AnalyticsDashboardScreenState
 
                     const SizedBox(height: 18),
 
-                    // 7. Priority Distribution Breakdown
                     _buildPriorityBreakdownCard(
                       context,
                       stats,
@@ -423,7 +414,6 @@ class _AnalyticsDashboardScreenState
 
                     const SizedBox(height: 28),
 
-                    // Navigation CTA to Task Board
                     _buildTaskBoardShortcut(context, adaptive),
                   ],
                 ),
@@ -451,7 +441,6 @@ class _AnalyticsDashboardScreenState
       toolbarHeight: 68,
       title: Row(
         children: [
-          // User Avatar with glowing status ring
           GestureDetector(
             onTap: () => context.push('/profile'),
             child: Container(
@@ -482,7 +471,7 @@ class _AnalyticsDashboardScreenState
                         ),
                       )
                     : Icon(
-                        LucideIcons.user,
+                        IconsaxPlusLinear.user,
                         size: 18,
                         color: isDark ? Colors.white : const Color(0xFF334155),
                       ),
@@ -521,7 +510,6 @@ class _AnalyticsDashboardScreenState
         ],
       ),
       actions: [
-        // Mode indicator pill (Clickable to show rules dialog)
         GestureDetector(
           onTap: () => _showAdaptiveInfoDialog(context, adaptive, isDark),
           child: Container(
@@ -557,7 +545,6 @@ class _AnalyticsDashboardScreenState
           ),
         ),
         const SizedBox(width: 4),
-        // Dark/Light Mode Switcher
         Container(
           width: 32,
           height: 32,
@@ -569,7 +556,7 @@ class _AnalyticsDashboardScreenState
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             icon: Icon(
-              isDark ? LucideIcons.sun : LucideIcons.moon,
+              isDark ? IconsaxPlusLinear.sun_1 : IconsaxPlusLinear.moon,
               size: 16,
               color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF475569),
             ),
@@ -580,7 +567,6 @@ class _AnalyticsDashboardScreenState
           ),
         ),
         const SizedBox(width: 4),
-        // Settings / Profile Button
         Container(
           width: 32,
           height: 32,
@@ -592,7 +578,7 @@ class _AnalyticsDashboardScreenState
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             icon: Icon(
-              LucideIcons.settings,
+              IconsaxPlusLinear.setting_2,
               size: 16,
               color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF475569),
             ),
@@ -622,7 +608,7 @@ class _AnalyticsDashboardScreenState
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.wifiOff, size: 16, color: Color(0xFF3B82F6)),
+          const Icon(IconsaxPlusLinear.cloud_cross, size: 16, color: Color(0xFF3B82F6)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -641,7 +627,6 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  // Emergency Overload HUD Banner
   Widget _buildOverloadEmergencyBanner({
     required BuildContext context,
     required AdaptiveState adaptive,
@@ -688,7 +673,7 @@ class _AnalyticsDashboardScreenState
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(LucideIcons.alertOctagon, size: 13, color: Colors.white),
+                      const Icon(IconsaxPlusBold.danger, size: 13, color: Colors.white),
                       const SizedBox(width: 5),
                       Flexible(
                         child: Text(
@@ -753,7 +738,7 @@ class _AnalyticsDashboardScreenState
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () => context.push('/board'),
-                  icon: const Icon(LucideIcons.flame, size: 14),
+                  icon: const Icon(IconsaxPlusBold.danger, size: 14),
                   label: Text(
                     'Xử lý việc gấp (${stats.urgentCount + stats.overdueCount})',
                     maxLines: 1,
@@ -776,7 +761,7 @@ class _AnalyticsDashboardScreenState
               const SizedBox(width: 8),
               OutlinedButton.icon(
                 onPressed: () => context.push('/profile'),
-                icon: const Icon(LucideIcons.slidersHorizontal, size: 13),
+                icon: const Icon(IconsaxPlusLinear.setting_4, size: 13),
                 label: const Text('Đổi ngưỡng'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFE11D48),
@@ -825,7 +810,7 @@ class _AnalyticsDashboardScreenState
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              LucideIcons.zap,
+              IconsaxPlusBold.flash_1,
               size: 15,
               color: Color(0xFFD97706),
             ),
@@ -858,7 +843,6 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  // 1. Productivity Health Hub (Hero Gauge Card)
   Widget _buildProductivityHub(
     BuildContext context,
     TaskStatistics stats,
@@ -877,11 +861,11 @@ class _AnalyticsDashboardScreenState
     if (isOverload) {
       scoreColor = const Color(0xFFE11D48);
     } else if (score >= 80) {
-      scoreColor = const Color(0xFF10B981); // Emerald
+      scoreColor = const Color(0xFF10B981);
     } else if (score >= 60) {
-      scoreColor = const Color(0xFFD97706); // Warm Amber
+      scoreColor = const Color(0xFFD97706);
     } else {
-      scoreColor = const Color(0xFFEF4444); // Red
+      scoreColor = const Color(0xFFEF4444);
     }
 
     final hubLabel = isOverload
@@ -909,7 +893,6 @@ class _AnalyticsDashboardScreenState
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Circular Gauge Indicator
               CircularPercentIndicator(
                 radius: 46.0,
                 lineWidth: 8.5,
@@ -947,7 +930,6 @@ class _AnalyticsDashboardScreenState
 
               const SizedBox(width: 18),
 
-              // Title and details
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1003,14 +985,13 @@ class _AnalyticsDashboardScreenState
           Divider(height: 1, color: borderColor),
           const SizedBox(height: 16),
 
-          // Micro quick stat strip
           Row(
             children: [
               Expanded(
                 child: _buildMiniStat(
                   label: 'Tỷ lệ hoàn thành',
                   value: '${(stats.completionRate * 100).round()}%',
-                  icon: LucideIcons.checkCircle,
+                  icon: IconsaxPlusLinear.tick_circle,
                   iconColor: const Color(0xFF10B981),
                   textColor: textColor,
                   subtextColor: subtextColor,
@@ -1021,7 +1002,7 @@ class _AnalyticsDashboardScreenState
                 child: _buildMiniStat(
                   label: 'Cần giải quyết',
                   value: '${stats.todoCount + stats.inProgressCount} việc',
-                  icon: LucideIcons.clock,
+                  icon: IconsaxPlusLinear.clock,
                   iconColor: isOverload ? const Color(0xFFE11D48) : const Color(0xFF3B82F6),
                   textColor: textColor,
                   subtextColor: subtextColor,
@@ -1032,7 +1013,7 @@ class _AnalyticsDashboardScreenState
                 child: _buildMiniStat(
                   label: 'Hạn khẩn cấp',
                   value: '${stats.overdueCount + stats.dueSoonCount} việc',
-                  icon: LucideIcons.flame,
+                  icon: IconsaxPlusBold.danger,
                   iconColor: (isOverload || stats.overdueCount > 0)
                       ? const Color(0xFFE11D48)
                       : const Color(0xFFF59E0B),
@@ -1093,7 +1074,6 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  // 2. Adaptive Workload Engine Visualizer Card
   Widget _buildWorkloadAdaptiveCard(
     BuildContext context,
     AdaptiveState adaptive,
@@ -1132,7 +1112,7 @@ class _AnalyticsDashboardScreenState
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        isOverload ? LucideIcons.flame : LucideIcons.gauge,
+                        isOverload ? IconsaxPlusBold.danger : IconsaxPlusLinear.activity,
                         size: 16,
                         color: modeColor,
                       ),
@@ -1180,10 +1160,8 @@ class _AnalyticsDashboardScreenState
 
           const SizedBox(height: 16),
 
-          // Multi-zone track progress bar
           Stack(
             children: [
-              // Track background with 3 zones (Calm: 0-60%, Focus: 60-100%, Overload: >100%)
               Container(
                 height: 10,
                 width: double.infinity,
@@ -1194,7 +1172,6 @@ class _AnalyticsDashboardScreenState
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              // Current progress fill
               FractionallySizedBox(
                 widthFactor: percent,
                 child: Container(
@@ -1217,12 +1194,11 @@ class _AnalyticsDashboardScreenState
 
           const SizedBox(height: 12),
 
-          // Zone markers legend - 3-Segment Capsule Grid
           Row(
             children: [
               Expanded(
                 child: _buildZoneLegendPill(
-                  icon: LucideIcons.leaf,
+                  icon: IconsaxPlusLinear.status,
                   label: 'Calm',
                   range: '< 60%',
                   isActive: adaptive.mode == AdaptiveMode.calm,
@@ -1234,7 +1210,7 @@ class _AnalyticsDashboardScreenState
               const SizedBox(width: 8),
               Expanded(
                 child: _buildZoneLegendPill(
-                  icon: LucideIcons.zap,
+                  icon: IconsaxPlusLinear.flash_1,
                   label: 'Focus',
                   range: '60% - 100%',
                   isActive: adaptive.mode == AdaptiveMode.focus,
@@ -1246,7 +1222,7 @@ class _AnalyticsDashboardScreenState
               const SizedBox(width: 8),
               Expanded(
                 child: _buildZoneLegendPill(
-                  icon: LucideIcons.alertOctagon,
+                  icon: IconsaxPlusBold.danger,
                   label: 'Overload',
                   range: '> 100%',
                   isActive: adaptive.mode == AdaptiveMode.overload,
@@ -1260,7 +1236,6 @@ class _AnalyticsDashboardScreenState
 
           const SizedBox(height: 14),
 
-          // Description & CTA
           Row(
             children: [
               Expanded(
@@ -1299,7 +1274,7 @@ class _AnalyticsDashboardScreenState
                       ),
                       const SizedBox(width: 3),
                       Icon(
-                        LucideIcons.chevronRight,
+                        IconsaxPlusLinear.arrow_right_3,
                         size: 13,
                         color: Theme.of(context).primaryColor,
                       ),
@@ -1377,7 +1352,6 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  // 3. 4-Metrics Interactive Grid
   Widget _buildMetricsGrid(
     BuildContext context,
     TaskStatistics stats,
@@ -1397,7 +1371,7 @@ class _AnalyticsDashboardScreenState
                 title: 'Hoàn thành',
                 value: '${stats.doneCount}',
                 subtitle: '${(stats.completionRate * 100).round()}% tổng việc',
-                icon: LucideIcons.checkCheck,
+                icon: IconsaxPlusBold.tick_circle,
                 color: AppColors.statusDone,
                 cardBg: cardBg,
                 borderColor: borderColor,
@@ -1413,7 +1387,7 @@ class _AnalyticsDashboardScreenState
                 title: 'Đang làm',
                 value: '${stats.inProgressCount}',
                 subtitle: 'Đang xử lý dở',
-                icon: LucideIcons.timer,
+                icon: IconsaxPlusLinear.timer_1,
                 color: AppColors.statusInProgress,
                 cardBg: cardBg,
                 borderColor: borderColor,
@@ -1433,7 +1407,7 @@ class _AnalyticsDashboardScreenState
                 title: 'Chờ xử lý',
                 value: '${stats.todoCount}',
                 subtitle: 'Trong hàng đợi',
-                icon: LucideIcons.listTodo,
+                icon: IconsaxPlusLinear.calendar_2,
                 color: const Color(0xFF64748B),
                 cardBg: cardBg,
                 borderColor: borderColor,
@@ -1449,7 +1423,7 @@ class _AnalyticsDashboardScreenState
                 title: 'Quá hạn',
                 value: '${stats.overdueCount}',
                 subtitle: stats.overdueCount > 0 ? 'Cần xử lý gấp' : 'Không có việc trễ',
-                icon: LucideIcons.alertTriangle,
+                icon: IconsaxPlusLinear.danger,
                 color: AppColors.priorityUrgent,
                 cardBg: cardBg,
                 borderColor: borderColor,
@@ -1548,7 +1522,6 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  // 4. Actionable Urgent Tasks Section
   Widget _buildActionableTasksSection(
     BuildContext context,
     List<TaskItem> tasks,
@@ -1563,7 +1536,6 @@ class _AnalyticsDashboardScreenState
     final isOverload = adaptive.mode == AdaptiveMode.overload;
     final isFocus = adaptive.mode == AdaptiveMode.focus;
 
-    // Trong Overload Mode: Tự động thu gọn các task mức ưu tiên thấp (Requirement 1.2)
     final displayedTasks = isOverload
         ? tasks.where((t) => t.isOverdue || t.priority == TaskPriority.urgent || t.priority == TaskPriority.high).toList()
         : tasks;
@@ -1589,8 +1561,8 @@ class _AnalyticsDashboardScreenState
                   children: [
                     Icon(
                       isOverload
-                          ? LucideIcons.flame
-                          : (isFocus ? LucideIcons.zap : LucideIcons.checkSquare),
+                          ? IconsaxPlusBold.danger
+                          : (isFocus ? IconsaxPlusBold.flash_1 : IconsaxPlusLinear.task_square),
                       size: 16,
                       color: isOverload
                           ? AppColors.overloadPrimary
@@ -1669,7 +1641,7 @@ class _AnalyticsDashboardScreenState
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.shieldCheck, size: 14, color: Color(0xFF64748B)),
+                  const Icon(IconsaxPlusLinear.shield_tick, size: 14, color: Color(0xFF64748B)),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -1726,7 +1698,6 @@ class _AnalyticsDashboardScreenState
       ),
       child: Row(
         children: [
-          // Quick complete checkbox button
           InkWell(
             onTap: () {
               final updated = task.copyWith(status: TaskStatus.done);
@@ -1801,7 +1772,6 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  // 5. Task Distribution Donut Chart
   Widget _buildDistributionCard(
     BuildContext context,
     TaskStatistics stats,
@@ -2044,7 +2014,6 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  // 6. Weekly Productivity Velocity Bar Chart
   Widget _buildWeeklyVelocityCard(
     BuildContext context,
     TaskStatistics stats,
@@ -2211,7 +2180,6 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  // 7. Priority Distribution Breakdown
   Widget _buildPriorityBreakdownCard(
     BuildContext context,
     TaskStatistics stats,
@@ -2343,7 +2311,7 @@ class _AnalyticsDashboardScreenState
             height: 100,
             fit: BoxFit.contain,
             errorBuilder: (ctx, err, stack) => Icon(
-              LucideIcons.inbox,
+              IconsaxPlusLinear.archive,
               size: 48,
               color: subtextColor,
             ),
@@ -2379,17 +2347,17 @@ class _AnalyticsDashboardScreenState
     switch (adaptive.mode) {
       case AdaptiveMode.overload:
         btnColor = AppColors.overloadPrimary;
-        btnIcon = LucideIcons.flame;
+        btnIcon = IconsaxPlusBold.danger;
         btnLabel = 'Xem danh sách việc khẩn cấp →';
         break;
       case AdaptiveMode.focus:
         btnColor = AppColors.focusPrimary;
-        btnIcon = LucideIcons.zap;
+        btnIcon = IconsaxPlusBold.flash_1;
         btnLabel = 'Mở bảng công việc cần xử lý →';
         break;
       case AdaptiveMode.calm:
         btnColor = AppColors.calmPrimary;
-        btnIcon = LucideIcons.kanban;
+        btnIcon = IconsaxPlusBold.task_square;
         btnLabel = 'Mở bảng công việc →';
         break;
     }
@@ -2470,11 +2438,11 @@ class _AnalyticsDashboardScreenState
   IconData _getModeIcon(AdaptiveMode mode) {
     switch (mode) {
       case AdaptiveMode.calm:
-        return LucideIcons.leaf;
+        return IconsaxPlusLinear.status;
       case AdaptiveMode.focus:
-        return LucideIcons.zap;
+        return IconsaxPlusBold.flash_1;
       case AdaptiveMode.overload:
-        return LucideIcons.alertOctagon;
+        return IconsaxPlusBold.danger;
     }
   }
 }

@@ -17,7 +17,7 @@ class ProjectModel {
   final String name;
   final String? description;
   final DateTime createdAt;
-  final DateTime? deletedAt; // Xóa mềm dự án
+  final DateTime? deletedAt;
   final List<ProjectMember> members;
 
   const ProjectModel({

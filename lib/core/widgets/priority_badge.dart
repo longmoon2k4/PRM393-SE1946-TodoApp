@@ -3,7 +3,6 @@ import '../models/task_model.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 
-/// Chip hiển thị mức độ ưu tiên của Task (Low, Medium, High, Urgent)
 class PriorityBadge extends StatelessWidget {
   final TaskPriority priority;
 
@@ -38,7 +37,7 @@ class PriorityBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.p12, vertical: AppSizes.p4),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: AppSizes.brMax, // Hình viên thuốc (Pill shape)
+        borderRadius: AppSizes.brMax,
       ),
       child: Text(
         label,

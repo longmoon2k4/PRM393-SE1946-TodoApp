@@ -56,7 +56,6 @@ class AuthNotifier extends Notifier<AuthState> {
 
   @override
   AuthState build() {
-    // Tự động kiểm tra phiên đăng nhập đã lưu trong Local Cache hoặc Firebase
     final cachedUser = LocalStorageService.getCachedUser();
     final firebaseUser = _firebaseAuth.currentUser;
 
@@ -93,13 +92,12 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  /// Đăng nhập duy nhất bằng Google OAuth 2.0
   Future<bool> signInWithGoogle() async {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
 
     try {
       await _ensureGoogleInitialized();
-      
+
       final GoogleSignInAccount googleUser =
           await GoogleSignIn.instance.authenticate();
 
@@ -120,7 +118,6 @@ class AuthNotifier extends Notifier<AuthState> {
         return false;
       }
 
-      // Lấy ngưỡng công việc cũ nếu có trong cache, mặc định 10
       final cachedUser = LocalStorageService.getCachedUser();
       final user = UserModel(
         id: fbUser.uid,
@@ -132,10 +129,8 @@ class AuthNotifier extends Notifier<AuthState> {
         notifyOnDeadline: cachedUser?.notifyOnDeadline ?? true,
       );
 
-      // Lưu ngay vào LocalStorage để sẵn sàng cho chế độ offline
       await LocalStorageService.saveUser(user);
 
-      // Đồng bộ thông tin với Backend Spring Boot (nếu có kết nối)
       try {
         final idToken = await fbUser.getIdToken();
         await _dio.post(
@@ -171,7 +166,6 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  /// Cập nhật ngưỡng công việc tồn đọng (Backlog Threshold)
   Future<void> updateBacklogThreshold(int newThreshold) async {
     if (state.user == null) return;
     final updated = state.user!.copyWith(backlogThreshold: newThreshold);
@@ -179,7 +173,6 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(user: updated);
   }
 
-  /// Cập nhật tùy chọn nhận thông báo
   Future<void> updateNotificationPreferences({
     bool? notifyOnOverload,
     bool? notifyOnDeadline,
@@ -193,7 +186,6 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(user: updated);
   }
 
-  /// Đăng xuất khỏi Firebase và xóa phiên cục bộ
   Future<void> signOut() async {
     state = state.copyWith(status: AuthStatus.loading);
     try {

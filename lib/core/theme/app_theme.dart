@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'adaptive_theme_provider.dart';
 import 'app_colors.dart';
 
-/// Quản lý Global Theme của toàn ứng dụng (Design System).
-/// Chuẩn Production-Ready, hỗ trợ cả Light Mode và Dark Mode mượt mà.
 class AppTheme {
   AppTheme._();
 
@@ -17,8 +15,8 @@ class AppTheme {
 
   static ThemeData get darkTheme => _createTheme(
         primaryColor: AppColors.priorityMedium,
-        backgroundColor: const Color(0xFF0F172A), // Slate 900
-        cardColor: const Color(0xFF1E293B), // Slate 800
+        backgroundColor: const Color(0xFF0F172A),
+        cardColor: const Color(0xFF1E293B),
         isDark: true,
       );
 
@@ -35,19 +33,19 @@ class AppTheme {
       switch (mode) {
         case AdaptiveMode.calm:
           primaryColor = AppColors.calmAccent;
-          backgroundColor = const Color(0xFF061816); // Deep Mint-Teal Obsidian
+          backgroundColor = const Color(0xFF061816);
           cardColor = const Color(0xFF0D2522);
           customBorderColor = const Color(0xFF134E4A);
           break;
         case AdaptiveMode.focus:
           primaryColor = AppColors.focusAccent;
-          backgroundColor = const Color(0xFF191206); // Deep Amber-Gold Obsidian
+          backgroundColor = const Color(0xFF191206);
           cardColor = const Color(0xFF261D0C);
           customBorderColor = const Color(0xFF78350F);
           break;
         case AdaptiveMode.overload:
           primaryColor = AppColors.overloadAccent;
-          backgroundColor = const Color(0xFF1F080C); // Deep Alert Crimson Obsidian
+          backgroundColor = const Color(0xFF1F080C);
           cardColor = const Color(0xFF300E15);
           customBorderColor = const Color(0xFF9F1239);
           break;
@@ -109,7 +107,6 @@ class AppTheme {
         surface: backgroundColor,
       ),
 
-      // 1. Typography
       textTheme: TextTheme(
         titleLarge: baseTextTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,
@@ -127,7 +124,6 @@ class AppTheme {
         ),
       ),
 
-      // 2. Buttons
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
@@ -152,7 +148,6 @@ class AppTheme {
         ),
       ),
 
-      // 3. Cards
       cardTheme: CardThemeData(
         color: cardColor,
         elevation: 0,
@@ -163,7 +158,6 @@ class AppTheme {
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       ),
 
-      // 4. Inputs
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: isDark ? const Color(0xFF1E293B) : Colors.white,
@@ -184,7 +178,6 @@ class AppTheme {
         hintStyle: TextStyle(color: secondaryTextColor),
       ),
 
-      // 5. FAB
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
@@ -193,7 +186,6 @@ class AppTheme {
         ),
       ),
 
-      // 6. Drawer
       drawerTheme: DrawerThemeData(
         backgroundColor: cardColor,
         elevation: 0,

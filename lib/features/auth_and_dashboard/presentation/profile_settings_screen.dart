@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../../core/providers/core_tasks_provider.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/adaptive_theme_provider.dart';
@@ -127,7 +127,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
-            LucideIcons.arrowLeft,
+            IconsaxPlusLinear.arrow_left,
             color: textColor,
           ),
           onPressed: () => context.pop(),
@@ -147,7 +147,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Hero Profile & User Stats Card
             _buildProfileHeroCard(
               user,
               stats,
@@ -161,7 +160,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
             const SizedBox(height: 22),
 
-            // 2. Interactive Adaptive UI Simulation Studio
             _buildSectionHeader('GIAO DIỆN THÍCH ỨNG & NGƯỠNG TẢI', subtextColor),
             const SizedBox(height: 8),
             _buildAdaptiveStudioCard(
@@ -175,7 +173,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
             const SizedBox(height: 22),
 
-            // 3. Appearance Card (Dark mode toggle)
             _buildSectionHeader('GIAO DIỆN & MÀU SẮC', subtextColor),
             const SizedBox(height: 8),
             _buildAppearanceCard(
@@ -189,7 +186,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
             const SizedBox(height: 22),
 
-            // 4. Notification Settings Card
             _buildSectionHeader('CÀI ĐẶT THÔNG BÁO', subtextColor),
             const SizedBox(height: 8),
             _buildNotificationCard(
@@ -203,7 +199,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
             const SizedBox(height: 22),
 
-            // 5. System, Cloud Sync & Data Management
             _buildSectionHeader('ĐỒNG BỘ & DỮ LIỆU', subtextColor),
             const SizedBox(height: 8),
             _buildDataAndSyncCard(
@@ -219,13 +214,12 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
             const SizedBox(height: 32),
 
-            // 6. Sign Out Button - Centered Enterprise Destructive Button
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton.icon(
                 onPressed: _handleSignOut,
-                icon: const Icon(LucideIcons.logOut, size: 16, color: Color(0xFFEF4444)),
+                icon: const Icon(IconsaxPlusLinear.logout_1, size: 16, color: Color(0xFFEF4444)),
                 label: Text(
                   'Đăng xuất tài khoản',
                   style: GoogleFonts.plusJakartaSans(
@@ -252,7 +246,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
             const SizedBox(height: 16),
 
-            // App Version & Credits
             Center(
               child: Text(
                 'Smart Workflow & Todo App • Phiên bản 2.4.0',
@@ -329,7 +322,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     );
   }
 
-  // 1. Hero Profile & User Stats Card
   Widget _buildProfileHeroCard(
     dynamic user,
     TaskStatistics stats,
@@ -353,7 +345,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
         children: [
           Row(
             children: [
-              // Avatar with badge
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
@@ -377,7 +368,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                                 fit: BoxFit.cover,
                               ),
                             )
-                          : Icon(LucideIcons.user, size: 30, color: subtextColor),
+                          : Icon(IconsaxPlusLinear.user, size: 30, color: subtextColor),
                     ),
                   ),
                   Container(
@@ -448,7 +439,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           Divider(height: 1, color: borderColor),
           const SizedBox(height: 16),
 
-          // 3-Metric Summary Strip - Equal 1:1:1 Distribution
           Row(
             children: [
               Expanded(
@@ -512,7 +502,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     );
   }
 
-  // 2. Interactive Adaptive UI Simulation Studio
   Widget _buildAdaptiveStudioCard(
     Color cardBg,
     Color borderColor,
@@ -587,7 +576,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
           const SizedBox(height: 14),
 
-          // Slider
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: Theme.of(context).primaryColor,
@@ -610,7 +598,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
           const SizedBox(height: 10),
 
-          // Live Simulation Preview Cards
           Text(
             'Trạng thái giao diện theo khối lượng việc:',
             style: GoogleFonts.plusJakartaSans(
@@ -621,7 +608,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           ),
           const SizedBox(height: 10),
 
-          // 3 Color Preview Cards
           Row(
             children: [
               _buildSimPreviewCard(
@@ -761,7 +747,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     );
   }
 
-  // 3. Appearance Card (Dark mode toggle)
   Widget _buildAppearanceCard(
     Color cardBg,
     Color borderColor,
@@ -790,7 +775,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isDark ? LucideIcons.moon : LucideIcons.sun,
+              isDark ? IconsaxPlusLinear.moon : IconsaxPlusLinear.sun_1,
               size: 18,
               color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFFF59E0B),
             ),
@@ -834,7 +819,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     );
   }
 
-  // 4. Notification Settings Card
   Widget _buildNotificationCard(
     Color cardBg,
     Color borderColor,
@@ -864,7 +848,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  LucideIcons.bellRing,
+                  IconsaxPlusLinear.notification_bing,
                   size: 18,
                   color: Color(0xFFEF4444),
                 ),
@@ -922,7 +906,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  LucideIcons.calendarClock,
+                  IconsaxPlusLinear.calendar_tick,
                   size: 18,
                   color: Color(0xFFF59E0B),
                 ),
@@ -975,7 +959,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     );
   }
 
-  // 5. Data & Sync Card
   Widget _buildDataAndSyncCard(
     bool isOffline,
     int totalTasks,
@@ -1007,7 +990,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  LucideIcons.database,
+                  IconsaxPlusLinear.cloud_connection,
                   size: 18,
                   color: Color(0xFF3B82F6),
                 ),
@@ -1075,7 +1058,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   );
                 }
               },
-              icon: const Icon(LucideIcons.refreshCw, size: 15, color: Color(0xFF2563EB)),
+              icon: const Icon(IconsaxPlusLinear.refresh, size: 15, color: Color(0xFF2563EB)),
               label: Text(
                 'Đồng bộ dữ liệu ngay',
                 style: GoogleFonts.plusJakartaSans(

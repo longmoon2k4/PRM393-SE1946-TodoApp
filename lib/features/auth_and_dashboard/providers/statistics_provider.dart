@@ -11,16 +11,13 @@ class TaskStatistics {
   final int overdueCount;
   final int dueSoonCount;
 
-  // Priority Breakdown
   final int urgentCount;
   final int highCount;
   final int mediumCount;
   final int lowCount;
 
-  // Weekly Completed Counts (Thứ 2 -> Chủ Nhật)
   final List<int> weeklyCompletedCounts;
 
-  // Danh sách các công việc cần chú ý xử lý ngay (Quá hạn hoặc Khẩn cấp chưa xong)
   final List<TaskItem> topActionableTasks;
 
   const TaskStatistics({
@@ -73,7 +70,6 @@ class TaskStatistics {
 final statisticsProvider = Provider<TaskStatistics>((ref) {
   final tasks = ref.watch(coreTasksProvider);
 
-  // Lọc chỉ lấy các task chưa bị xóa mềm
   final validTasks = tasks.where((t) => t.deletedAt == null).toList();
 
   int todo = 0;
@@ -100,7 +96,6 @@ final statisticsProvider = Provider<TaskStatistics>((ref) {
         break;
       case TaskStatus.done:
         done++;
-        // Thống kê ngày hoàn thành trong tuần (1 = T2, ..., 7 = CN)
         final weekday = task.createdAt.weekday;
         weeklyCompleted[(weekday - 1) % 7]++;
         break;
@@ -128,7 +123,6 @@ final statisticsProvider = Provider<TaskStatistics>((ref) {
     }
   }
 
-  // Lọc top task cần hành động ngay (ưu tiên: quá hạn > khẩn cấp > cao)
   final actionable = validTasks.where((t) =>
       t.status != TaskStatus.done &&
       t.status != TaskStatus.cancelled &&
