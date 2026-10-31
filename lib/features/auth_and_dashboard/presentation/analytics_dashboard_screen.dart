@@ -676,35 +676,40 @@ class _AnalyticsDashboardScreenState
 
           // Micro quick stat strip
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMiniStat(
-                label: 'Tỷ lệ hoàn thành',
-                value: '${(stats.completionRate * 100).round()}%',
-                icon: LucideIcons.checkCircle,
-                iconColor: const Color(0xFF10B981),
-                textColor: textColor,
-                subtextColor: subtextColor,
+              Expanded(
+                child: _buildMiniStat(
+                  label: 'Hoàn thành',
+                  value: '${(stats.completionRate * 100).round()}%',
+                  icon: LucideIcons.checkCircle,
+                  iconColor: const Color(0xFF10B981),
+                  textColor: textColor,
+                  subtextColor: subtextColor,
+                ),
               ),
               Container(width: 1, height: 26, color: borderColor),
-              _buildMiniStat(
-                label: 'Cần giải quyết',
-                value: '${stats.todoCount + stats.inProgressCount} việc',
-                icon: LucideIcons.clock,
-                iconColor: const Color(0xFF3B82F6),
-                textColor: textColor,
-                subtextColor: subtextColor,
+              Expanded(
+                child: _buildMiniStat(
+                  label: 'Cần giải quyết',
+                  value: '${stats.todoCount + stats.inProgressCount} việc',
+                  icon: LucideIcons.clock,
+                  iconColor: const Color(0xFF3B82F6),
+                  textColor: textColor,
+                  subtextColor: subtextColor,
+                ),
               ),
               Container(width: 1, height: 26, color: borderColor),
-              _buildMiniStat(
-                label: 'Hạn khẩn cấp',
-                value: '${stats.overdueCount + stats.dueSoonCount} việc',
-                icon: LucideIcons.flame,
-                iconColor: stats.overdueCount > 0
-                    ? const Color(0xFFEF4444)
-                    : const Color(0xFFF59E0B),
-                textColor: textColor,
-                subtextColor: subtextColor,
+              Expanded(
+                child: _buildMiniStat(
+                  label: 'Khẩn cấp',
+                  value: '${stats.overdueCount + stats.dueSoonCount} việc',
+                  icon: LucideIcons.flame,
+                  iconColor: stats.overdueCount > 0
+                      ? const Color(0xFFEF4444)
+                      : const Color(0xFFF59E0B),
+                  textColor: textColor,
+                  subtextColor: subtextColor,
+                ),
               ),
             ],
           ),
@@ -721,31 +726,42 @@ class _AnalyticsDashboardScreenState
     required Color textColor,
     required Color subtextColor,
   }) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: iconColor),
-        const SizedBox(width: 6),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: textColor,
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 14, color: iconColor),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                  ),
+                ),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    color: subtextColor,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
-                color: subtextColor,
-              ),
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -776,24 +792,31 @@ class _AnalyticsDashboardScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    LucideIcons.gauge,
-                    size: 16,
-                    color: modeColor,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Tải công việc & Engine Thích ứng',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      LucideIcons.gauge,
+                      size: 16,
+                      color: modeColor,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Tải công việc & Engine',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Text(
                 '${adaptive.activeTaskCount}/${adaptive.backlogThreshold} việc',
                 style: GoogleFonts.plusJakartaSans(
@@ -848,40 +871,55 @@ class _AnalyticsDashboardScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '🌿 Calm (0 - 60%)',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: adaptive.mode == AdaptiveMode.calm
-                      ? AppColors.calmPrimary
-                      : subtextColor,
-                  fontWeight: adaptive.mode == AdaptiveMode.calm
-                      ? FontWeight.w700
-                      : FontWeight.normal,
+              Expanded(
+                child: Text(
+                  '🌿 Calm (<60%)',
+                  textAlign: TextAlign.left,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: adaptive.mode == AdaptiveMode.calm
+                        ? AppColors.calmPrimary
+                        : subtextColor,
+                    fontWeight: adaptive.mode == AdaptiveMode.calm
+                        ? FontWeight.w700
+                        : FontWeight.normal,
+                  ),
                 ),
               ),
-              Text(
-                '⚡ Focus (60% - 100%)',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: adaptive.mode == AdaptiveMode.focus
-                      ? AppColors.focusPrimary
-                      : subtextColor,
-                  fontWeight: adaptive.mode == AdaptiveMode.focus
-                      ? FontWeight.w700
-                      : FontWeight.normal,
+              Expanded(
+                child: Text(
+                  '⚡ Focus (60-100%)',
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: adaptive.mode == AdaptiveMode.focus
+                        ? AppColors.focusPrimary
+                        : subtextColor,
+                    fontWeight: adaptive.mode == AdaptiveMode.focus
+                        ? FontWeight.w700
+                        : FontWeight.normal,
+                  ),
                 ),
               ),
-              Text(
-                '🚨 Overload (>100%)',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: adaptive.mode == AdaptiveMode.overload
-                      ? AppColors.overloadPrimary
-                      : subtextColor,
-                  fontWeight: adaptive.mode == AdaptiveMode.overload
-                      ? FontWeight.w700
-                      : FontWeight.normal,
+              Expanded(
+                child: Text(
+                  '🚨 Overload (>100%)',
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: adaptive.mode == AdaptiveMode.overload
+                        ? AppColors.overloadPrimary
+                        : subtextColor,
+                    fontWeight: adaptive.mode == AdaptiveMode.overload
+                        ? FontWeight.w700
+                        : FontWeight.normal,
+                  ),
                 ),
               ),
             ],
