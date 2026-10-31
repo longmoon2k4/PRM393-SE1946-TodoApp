@@ -149,9 +149,4 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
       debugPrint('Lỗi xóa Task trên server: $e');
     }
   }
-
-  /// Đặt lại và đồng bộ tươi dữ liệu từ Backend
-  Future<bool> resetToMock() async {
-    return await syncFromBackend();
-  }
 }

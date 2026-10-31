@@ -131,40 +131,6 @@ class NotificationService {
     }
   }
 
-  /// Bắn thông báo thử nghiệm từ màn hình Profile Settings
-  static Future<void> showTestNotification() async {
-    if (!_isInitialized) await init();
-
-    const androidDetails = AndroidNotificationDetails(
-      'test_channel',
-      'Kênh thông báo thử nghiệm',
-      channelDescription: 'Kênh để kiểm tra thông báo cục bộ',
-      importance: Importance.max,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-    );
-
-    const notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      ),
-    );
-
-    try {
-      await _plugin.show(
-        id: 9999,
-        title: '🔔 Thông báo cục bộ hoạt động tốt!',
-        body: 'Hệ thống thông báo ngoại tuyến trên thiết bị đã sẵn sàng hoạt động.',
-        notificationDetails: notificationDetails,
-      );
-    } catch (e) {
-      debugPrint('Failed to show test notification: $e');
-    }
-  }
-
   /// Quét danh sách task để bắn thông báo deadline nếu có task sắp hết hạn trong 24h
   static Future<void> checkAndNotifyApproachingDeadlines(
       List<TaskItem> tasks) async {

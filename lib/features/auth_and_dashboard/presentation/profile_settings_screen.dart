@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/providers/core_tasks_provider.dart';
-import '../../../core/services/notification_service.dart';
 import '../../../core/theme/adaptive_theme_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../providers/auth_provider.dart';
@@ -133,7 +132,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Hồ sơ & Cài đặt hệ thống',
+          'Hồ sơ & Cài đặt',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -162,7 +161,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
             const SizedBox(height: 22),
 
             // 2. Interactive Adaptive UI Simulation Studio
-            _buildSectionHeader('BỘ NÃO ADAPTIVE UI (ENGINE GIAO DIỆN THÍCH ỨNG)', subtextColor),
+            _buildSectionHeader('GIAO DIỆN THÍCH ỨNG & NGƯỠNG TẢI', subtextColor),
             const SizedBox(height: 8),
             _buildAdaptiveStudioCard(
               cardBg,
@@ -190,7 +189,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
             const SizedBox(height: 22),
 
             // 4. Notification Settings Card
-            _buildSectionHeader('THÔNG BÁO THÔNG MINH (NOTIFICATIONS)', subtextColor),
+            _buildSectionHeader('CÀI ĐẶT THÔNG BÁO', subtextColor),
             const SizedBox(height: 8),
             _buildNotificationCard(
               cardBg,
@@ -204,7 +203,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
             const SizedBox(height: 22),
 
             // 5. System, Cloud Sync & Data Management
-            _buildSectionHeader('KẾT NỐI HỆ THỐNG & DỮ LIỆU', subtextColor),
+            _buildSectionHeader('ĐỒNG BỘ & DỮ LIỆU', subtextColor),
             const SizedBox(height: 8),
             _buildDataAndSyncCard(
               auth.isOffline,
@@ -255,7 +254,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
             // App Version & Credits
             Center(
               child: Text(
-                'Smart Workflow & Adaptive Todo App • v2.4.0 (PRM393 FPT)',
+                'Smart Workflow & Todo App • Phiên bản 2.4.0',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   color: subtextColor,
@@ -430,7 +429,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Google OAuth 2.0 • Đã xác thực',
+                        'Tài khoản Google • Đã liên kết',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -544,7 +543,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ngưỡng kích hoạt quá tải',
+                      'Ngưỡng công việc tối đa',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -553,7 +552,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Kéo slider để thay đổi mốc đổi màu tự động',
+                      'Tự động kích hoạt chế độ tập trung & cảnh báo khi vượt ngưỡng',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         color: subtextColor,
@@ -612,7 +611,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
           // Live Simulation Preview Cards
           Text(
-            'Quy tắc chuyển màu theo ngưỡng $currentThreshold việc:',
+            'Trạng thái giao diện theo khối lượng việc:',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -627,7 +626,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               _buildSimPreviewCard(
                 title: 'Calm',
                 range: '1 - $calmLimit',
-                desc: 'Dịu mát',
+                desc: 'Bình thường',
                 color: AppColors.calmPrimary,
                 isCurrent: adaptive.activeTaskCount <= calmLimit,
                 isDark: isDark,
@@ -645,7 +644,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               _buildSimPreviewCard(
                 title: 'Overload',
                 range: '> $currentThreshold',
-                desc: 'Khẩn cấp',
+                desc: 'Quá tải',
                 color: AppColors.overloadPrimary,
                 isCurrent: adaptive.activeTaskCount > currentThreshold,
                 isDark: isDark,
@@ -744,9 +743,9 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   color: color,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text(
-                  title == 'Overload' ? '🚨 QUÁ TẢI' : 'HIỆN TẠI',
-                  style: const TextStyle(
+                child: const Text(
+                  'HIỆN TẠI',
+                  style: TextStyle(
                     fontSize: 7.5,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.4,
@@ -964,49 +963,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                await NotificationService.showTestNotification();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Đã gửi thông báo kiểm tra hệ thống thành công!'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-              icon: Icon(
-                LucideIcons.send,
-                size: 15,
-                color: Theme.of(context).primaryColor,
-              ),
-              label: Text(
-                'Gửi thông báo thử nghiệm',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor.withAlpha(isDark ? 35 : 18),
-                foregroundColor: Theme.of(context).primaryColor,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(
-                    color: Theme.of(context).primaryColor.withAlpha(isDark ? 80 : 50),
-                    width: 1.2,
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -1055,7 +1011,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Lưu trữ cục bộ & Cloud',
+                      'Đồng bộ đám mây',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -1064,7 +1020,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Đang lưu trữ $totalTasks công việc an toàn trong bộ nhớ máy',
+                      '$totalTasks công việc đã được lưu trữ',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         color: subtextColor,
@@ -1082,7 +1038,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  isOffline ? 'Offline' : 'Online',
+                  isOffline ? 'Ngoại tuyến' : 'Đã kết nối',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -1105,8 +1061,8 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(success
-                          ? 'Đã đồng bộ dữ liệu thực tế từ Cloud Server thành công!'
-                          : 'Đang dùng dữ liệu bộ nhớ máy (Server ngoại tuyến).'),
+                          ? 'Đã đồng bộ dữ liệu mới nhất thành công!'
+                          : 'Không thể kết nối máy chủ. Đang lưu trên thiết bị.'),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -1114,7 +1070,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               },
               icon: const Icon(LucideIcons.refreshCw, size: 15, color: Color(0xFF2563EB)),
               label: Text(
-                'Đồng bộ dữ liệu thời gian thực (Live Sync)',
+                'Đồng bộ dữ liệu ngay',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,

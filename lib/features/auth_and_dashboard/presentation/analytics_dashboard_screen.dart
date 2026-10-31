@@ -69,7 +69,7 @@ class _AnalyticsDashboardScreenState
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Cơ chế Adaptive UI',
+                  'Giao diện thích ứng thông minh',
                   style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
@@ -96,24 +96,24 @@ class _AnalyticsDashboardScreenState
                   ),
                   const SizedBox(height: 14),
                   _buildAdaptiveRuleItem(
-                    title: '🌿 Calm Mode (Dịu mát)',
-                    desc: 'Khối lượng việc < 60% ngưỡng. Giữ tinh thần thoải mái, nhẹ nhàng.',
+                    title: '🌿 Chế độ Cân bằng (Calm)',
+                    desc: 'Khối lượng công việc dưới 60% ngưỡng. Sắc thái dịu nhẹ, cân bằng.',
                     color: AppColors.calmPrimary,
                     isActive: adaptive.mode == AdaptiveMode.calm,
                     isDark: isDark,
                   ),
                   const SizedBox(height: 10),
                   _buildAdaptiveRuleItem(
-                    title: '⚡ Focus Mode (Tập trung)',
-                    desc: 'Khối lượng việc 60% - 100% ngưỡng hoặc có việc quá hạn. Tông màu ấm tăng tập trung.',
+                    title: '⚡ Chế độ Tập trung (Focus)',
+                    desc: 'Khối lượng công việc từ 60% - 100% ngưỡng hoặc có việc quá hạn. Sắc thái ấm hỗ trợ nâng cao tập trung.',
                     color: AppColors.focusPrimary,
                     isActive: adaptive.mode == AdaptiveMode.focus,
                     isDark: isDark,
                   ),
                   const SizedBox(height: 10),
                   _buildAdaptiveRuleItem(
-                    title: '🚨 Overload Mode (Quá tải)',
-                    desc: 'Vượt ngưỡng (${adaptive.backlogThreshold} việc). Kích hoạt màu đỏ khẩn cấp và cảnh báo thông báo.',
+                    title: '🚨 Chế độ Quá tải (Overload)',
+                    desc: 'Khối lượng vượt ngưỡng an toàn (${adaptive.backlogThreshold} việc). Kích hoạt cảnh báo và tự động tinh gọn danh sách việc.',
                     color: AppColors.overloadPrimary,
                     isActive: adaptive.mode == AdaptiveMode.overload,
                     isDark: isDark,
@@ -891,7 +891,7 @@ class _AnalyticsDashboardScreenState
             : stats.productivityLabel);
 
     final hubAdvice = isOverload
-        ? 'Cảnh báo: Backlog công việc (${adaptive.activeTaskCount} việc) đã vượt ngưỡng cho phép (${adaptive.backlogThreshold} việc)! Hệ thống đã kích hoạt chế độ tinh gọn để bạn ưu tiên xử lý việc khẩn cấp.'
+        ? 'Cảnh báo: Số lượng công việc chưa hoàn tất (${adaptive.activeTaskCount} việc) đã vượt ngưỡng an toàn (${adaptive.backlogThreshold} việc). Đã kích hoạt chế độ tinh gọn để bạn ưu tiên xử lý việc gấp.'
         : stats.productivityAdvice;
 
     return Container(
@@ -1141,8 +1141,8 @@ class _AnalyticsDashboardScreenState
                     Expanded(
                       child: Text(
                         isOverload
-                            ? 'Engine Thích ứng (🚨 Đang quá tải)'
-                            : 'Engine Thích ứng (Adaptive)',
+                            ? 'Khối lượng công việc (Cảnh báo quá tải)'
+                            : 'Khối lượng công việc',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
@@ -1600,7 +1600,7 @@ class _AnalyticsDashboardScreenState
                     Expanded(
                       child: Text(
                         isOverload
-                            ? 'Nhiệm vụ Cứu nguy (Chế độ Giảm tải)'
+                            ? 'Công việc cần ưu tiên xử lý ngay'
                             : (isFocus ? 'Cần xử lý ngay (Ưu tiên cao)' : 'Cần xử lý ngay'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1627,7 +1627,7 @@ class _AnalyticsDashboardScreenState
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  isOverload ? 'LỌC KHẨN CẤP' : 'Tick để xong nhanh',
+                  isOverload ? 'LỌC KHẨN CẤP' : 'Hoàn tất nhanh',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
@@ -1673,7 +1673,7 @@ class _AnalyticsDashboardScreenState
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Đã tự động thu gọn $hiddenLowPriorityCount việc mức ưu tiên thấp để giảm tải áp lực.',
+                      'Đã tự động ẩn $hiddenLowPriorityCount việc ưu tiên thấp để bạn tập trung việc khẩn cấp.',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         color: subtextColor,
@@ -2380,17 +2380,17 @@ class _AnalyticsDashboardScreenState
       case AdaptiveMode.overload:
         btnColor = AppColors.overloadPrimary;
         btnIcon = LucideIcons.flame;
-        btnLabel = 'Xử lý ngay các việc khẩn cấp (Giảm tải) →';
+        btnLabel = 'Xem danh sách việc khẩn cấp →';
         break;
       case AdaptiveMode.focus:
         btnColor = AppColors.focusPrimary;
         btnIcon = LucideIcons.zap;
-        btnLabel = 'Vào bảng công việc tập trung →';
+        btnLabel = 'Mở bảng công việc cần xử lý →';
         break;
       case AdaptiveMode.calm:
         btnColor = AppColors.calmPrimary;
         btnIcon = LucideIcons.kanban;
-        btnLabel = 'Xem Bảng Công Việc (Task Board) →';
+        btnLabel = 'Mở bảng công việc →';
         break;
     }
 
