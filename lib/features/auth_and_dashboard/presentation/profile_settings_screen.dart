@@ -104,10 +104,17 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     final stats = ref.watch(statisticsProvider);
     final adaptive = ref.watch(adaptiveStateProvider);
     final isDark = ref.watch(themeModeProvider);
+    final isOverload = adaptive.mode == AdaptiveMode.overload;
+    final isFocus = adaptive.mode == AdaptiveMode.focus;
 
-    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final borderColor =
-        isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final cardBg = Theme.of(context).cardColor;
+    final borderColor = isDark
+        ? (isOverload
+            ? const Color(0xFF9F1239)
+            : (isFocus ? const Color(0xFF78350F) : const Color(0xFF334155)))
+        : (isOverload
+            ? const Color(0xFFFECDD3)
+            : (isFocus ? const Color(0xFFFDE68A) : const Color(0xFFE2E8F0)));
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final subtextColor =
         isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
@@ -149,6 +156,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               textColor,
               subtextColor,
               isDark,
+              adaptive,
             ),
 
             const SizedBox(height: 22),
@@ -176,6 +184,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               textColor,
               subtextColor,
               isDark,
+              adaptive,
             ),
 
             const SizedBox(height: 22),
@@ -189,6 +198,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               textColor,
               subtextColor,
               isDark,
+              adaptive,
             ),
 
             const SizedBox(height: 22),
@@ -204,6 +214,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               textColor,
               subtextColor,
               isDark,
+              adaptive,
             ),
 
             const SizedBox(height: 32),
@@ -264,27 +275,38 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     required bool isDark,
     double radius = 20,
     Color? customBorderColor,
+    AdaptiveMode? mode,
   }) {
+    final effectiveBorder = customBorderColor ??
+        (mode == AdaptiveMode.overload
+            ? (isDark ? const Color(0xFF9F1239) : const Color(0xFFFECDD3))
+            : (mode == AdaptiveMode.focus
+                ? (isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A))
+                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))));
+
+    final shadowTint = mode == AdaptiveMode.overload
+        ? const Color(0xFFE11D48)
+        : (mode == AdaptiveMode.focus
+            ? const Color(0xFFD97706)
+            : const Color(0xFF0F172A));
+
     return BoxDecoration(
       color: cardBg,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: customBorderColor ??
-            (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-        width: 1.2,
+        color: effectiveBorder,
+        width: mode == AdaptiveMode.overload ? 1.5 : 1.2,
       ),
       boxShadow: [
         BoxShadow(
-          color: isDark
-              ? Colors.black.withAlpha(90)
-              : const Color(0xFF0F172A).withAlpha(16),
+          color: shadowTint.withAlpha(isDark
+              ? (mode == AdaptiveMode.overload ? 60 : 35)
+              : (mode == AdaptiveMode.overload ? 25 : 12)),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
         BoxShadow(
-          color: isDark
-              ? Colors.black.withAlpha(50)
-              : const Color(0xFF0F172A).withAlpha(8),
+          color: shadowTint.withAlpha(isDark ? 30 : 6),
           blurRadius: 3,
           offset: const Offset(0, 1),
         ),
@@ -316,11 +338,17 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     Color textColor,
     Color subtextColor,
     bool isDark,
+    AdaptiveState adaptive,
   ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         children: [
           Row(
@@ -499,7 +527,12 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -596,7 +629,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 range: '1 - $calmLimit',
                 desc: 'Dịu mát',
                 color: AppColors.calmPrimary,
-                isCurrent: adaptive.mode == AdaptiveMode.calm,
+                isCurrent: adaptive.activeTaskCount <= calmLimit,
                 isDark: isDark,
               ),
               const SizedBox(width: 8),
@@ -605,7 +638,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 range: '${calmLimit + 1} - $currentThreshold',
                 desc: 'Tập trung',
                 color: AppColors.focusPrimary,
-                isCurrent: adaptive.mode == AdaptiveMode.focus,
+                isCurrent: adaptive.activeTaskCount > calmLimit && adaptive.activeTaskCount <= currentThreshold,
                 isDark: isDark,
               ),
               const SizedBox(width: 8),
@@ -614,7 +647,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 range: '> $currentThreshold',
                 desc: 'Khẩn cấp',
                 color: AppColors.overloadPrimary,
-                isCurrent: adaptive.mode == AdaptiveMode.overload,
+                isCurrent: adaptive.activeTaskCount > currentThreshold,
                 isDark: isDark,
               ),
             ],
@@ -711,9 +744,9 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   color: color,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Text(
-                  'HIỆN TẠI',
-                  style: TextStyle(
+                child: Text(
+                  title == 'Overload' ? '🚨 QUÁ TẢI' : 'HIỆN TẠI',
+                  style: const TextStyle(
                     fontSize: 7.5,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.4,
@@ -735,11 +768,17 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     Color textColor,
     Color subtextColor,
     bool isDark,
+    AdaptiveState adaptive,
   ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Row(
         children: [
           Container(
@@ -802,11 +841,17 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     Color textColor,
     Color subtextColor,
     bool isDark,
+    AdaptiveState adaptive,
   ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -976,11 +1021,17 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     Color textColor,
     Color subtextColor,
     bool isDark,
+    AdaptiveState adaptive,
   ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -29,20 +29,27 @@ class AppTheme {
     Color primaryColor;
     Color backgroundColor;
     Color cardColor;
+    Color? customBorderColor;
 
     if (isDark) {
-      backgroundColor = const Color(0xFF0B1120); // Darker Slate
-      cardColor = const Color(0xFF1E293B);
-
       switch (mode) {
         case AdaptiveMode.calm:
           primaryColor = AppColors.calmAccent;
+          backgroundColor = const Color(0xFF061816); // Deep Mint-Teal Obsidian
+          cardColor = const Color(0xFF0D2522);
+          customBorderColor = const Color(0xFF134E4A);
           break;
         case AdaptiveMode.focus:
           primaryColor = AppColors.focusAccent;
+          backgroundColor = const Color(0xFF191206); // Deep Amber-Gold Obsidian
+          cardColor = const Color(0xFF261D0C);
+          customBorderColor = const Color(0xFF78350F);
           break;
         case AdaptiveMode.overload:
           primaryColor = AppColors.overloadAccent;
+          backgroundColor = const Color(0xFF1F080C); // Deep Alert Crimson Obsidian
+          cardColor = const Color(0xFF300E15);
+          customBorderColor = const Color(0xFF9F1239);
           break;
       }
     } else {
@@ -51,16 +58,19 @@ class AppTheme {
           primaryColor = AppColors.calmPrimary;
           backgroundColor = AppColors.calmBackground;
           cardColor = AppColors.calmCard;
+          customBorderColor = const Color(0xFFE2E8F0);
           break;
         case AdaptiveMode.focus:
           primaryColor = AppColors.focusPrimary;
           backgroundColor = AppColors.focusBackground;
           cardColor = AppColors.focusCard;
+          customBorderColor = AppColors.focusBorder;
           break;
         case AdaptiveMode.overload:
           primaryColor = AppColors.overloadPrimary;
           backgroundColor = AppColors.overloadBackground;
           cardColor = AppColors.overloadCard;
+          customBorderColor = AppColors.overloadBorder;
           break;
       }
     }
@@ -70,6 +80,7 @@ class AppTheme {
       backgroundColor: backgroundColor,
       cardColor: cardColor,
       isDark: isDark,
+      customBorderColor: customBorderColor,
     );
   }
 
@@ -78,14 +89,15 @@ class AppTheme {
     required Color backgroundColor,
     required Color cardColor,
     required bool isDark,
+    Color? customBorderColor,
   }) {
     final baseTextTheme = GoogleFonts.plusJakartaSansTextTheme();
 
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final secondaryTextColor =
         isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-    final borderColor =
-        isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final borderColor = customBorderColor ??
+        (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0));
 
     return ThemeData(
       useMaterial3: true,

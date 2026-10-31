@@ -221,27 +221,38 @@ class _AnalyticsDashboardScreenState
     required bool isDark,
     double radius = 20,
     Color? customBorderColor,
+    AdaptiveMode? mode,
   }) {
+    final effectiveBorder = customBorderColor ??
+        (mode == AdaptiveMode.overload
+            ? (isDark ? const Color(0xFF9F1239) : const Color(0xFFFECDD3))
+            : (mode == AdaptiveMode.focus
+                ? (isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A))
+                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))));
+
+    final shadowTint = mode == AdaptiveMode.overload
+        ? const Color(0xFFE11D48)
+        : (mode == AdaptiveMode.focus
+            ? const Color(0xFFD97706)
+            : const Color(0xFF0F172A));
+
     return BoxDecoration(
       color: cardBg,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: customBorderColor ??
-            (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-        width: 1.2,
+        color: effectiveBorder,
+        width: mode == AdaptiveMode.overload ? 1.5 : 1.2,
       ),
       boxShadow: [
         BoxShadow(
-          color: isDark
-              ? Colors.black.withAlpha(90)
-              : const Color(0xFF0F172A).withAlpha(16),
+          color: shadowTint.withAlpha(isDark
+              ? (mode == AdaptiveMode.overload ? 60 : 35)
+              : (mode == AdaptiveMode.overload ? 25 : 12)),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
         BoxShadow(
-          color: isDark
-              ? Colors.black.withAlpha(50)
-              : const Color(0xFF0F172A).withAlpha(8),
+          color: shadowTint.withAlpha(isDark ? 30 : 6),
           blurRadius: 3,
           offset: const Offset(0, 1),
         ),
@@ -256,10 +267,17 @@ class _AnalyticsDashboardScreenState
     final isDark = adaptive.isDark;
     final auth = ref.watch(authProvider);
     final user = auth.user;
+    final isOverload = adaptive.mode == AdaptiveMode.overload;
+    final isFocus = adaptive.mode == AdaptiveMode.focus;
 
-    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final borderColor =
-        isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final cardBg = Theme.of(context).cardColor;
+    final borderColor = isDark
+        ? (isOverload
+            ? const Color(0xFF9F1239)
+            : (isFocus ? const Color(0xFF78350F) : const Color(0xFF334155)))
+        : (isOverload
+            ? const Color(0xFFFECDD3)
+            : (isFocus ? const Color(0xFFFDE68A) : const Color(0xFFE2E8F0)));
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final subtextColor =
         isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
@@ -288,10 +306,29 @@ class _AnalyticsDashboardScreenState
                     // Offline banner if disconnected
                     if (auth.isOffline) _buildOfflineBanner(isDark),
 
+                    // Emergency Overload HUD Banner
+                    if (isOverload) ...[
+                      _buildOverloadEmergencyBanner(
+                        context: context,
+                        adaptive: adaptive,
+                        stats: stats,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 18),
+                    ] else if (isFocus && stats.overdueCount > 0) ...[
+                      _buildFocusAdvisoryBanner(
+                        context: context,
+                        overdueCount: stats.overdueCount,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 18),
+                    ],
+
                     // 1. Productivity Health Hub (Hero Card)
                     _buildProductivityHub(
                       context,
                       stats,
+                      adaptive,
                       cardBg,
                       borderColor,
                       textColor,
@@ -318,6 +355,7 @@ class _AnalyticsDashboardScreenState
                     _buildMetricsGrid(
                       context,
                       stats,
+                      adaptive,
                       cardBg,
                       borderColor,
                       textColor,
@@ -332,6 +370,8 @@ class _AnalyticsDashboardScreenState
                       _buildActionableTasksSection(
                         context,
                         stats.topActionableTasks,
+                        adaptive,
+                        stats,
                         cardBg,
                         borderColor,
                         textColor,
@@ -345,6 +385,7 @@ class _AnalyticsDashboardScreenState
                     _buildDistributionCard(
                       context,
                       stats,
+                      adaptive,
                       cardBg,
                       borderColor,
                       textColor,
@@ -358,6 +399,7 @@ class _AnalyticsDashboardScreenState
                     _buildWeeklyVelocityCard(
                       context,
                       stats,
+                      adaptive,
                       cardBg,
                       borderColor,
                       textColor,
@@ -371,6 +413,7 @@ class _AnalyticsDashboardScreenState
                     _buildPriorityBreakdownCard(
                       context,
                       stats,
+                      adaptive,
                       cardBg,
                       borderColor,
                       textColor,
@@ -381,7 +424,7 @@ class _AnalyticsDashboardScreenState
                     const SizedBox(height: 28),
 
                     // Navigation CTA to Task Board
-                    _buildTaskBoardShortcut(context),
+                    _buildTaskBoardShortcut(context, adaptive),
                   ],
                 ),
               ),
@@ -581,10 +624,217 @@ class _AnalyticsDashboardScreenState
     );
   }
 
+  // Emergency Overload HUD Banner
+  Widget _buildOverloadEmergencyBanner({
+    required BuildContext context,
+    required AdaptiveState adaptive,
+    required TaskStatistics stats,
+    required bool isDark,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF380E17), const Color(0xFF22080D)]
+              : [const Color(0xFFFFF1F2), const Color(0xFFFFE4E6)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFE11D48),
+          width: 1.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFE11D48).withAlpha(isDark ? 80 : 30),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE11D48),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(LucideIcons.alertOctagon, size: 13, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text(
+                      'BÁO ĐỘNG QUÁ TẢI (OVERLOAD)',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE11D48).withAlpha(isDark ? 50 : 25),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFFE11D48).withAlpha(120),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  '${(adaptive.loadPercentage * 100).round()}% tải',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFFE11D48),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Khối lượng công việc đã vượt ngưỡng an toàn!',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 15.5,
+              fontWeight: FontWeight.w800,
+              color: isDark ? Colors.white : const Color(0xFF9F1239),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Bạn đang có ${adaptive.activeTaskCount} việc đang dở dang (ngưỡng an toàn: ${adaptive.backlogThreshold} việc). Hệ thống tự động thu gọn các việc ưu tiên thấp để bạn tập trung dứt điểm việc gấp trước.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12.5,
+              height: 1.45,
+              color: isDark ? const Color(0xFFFECDD3) : const Color(0xFF881337),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => context.push('/board'),
+                  icon: const Icon(LucideIcons.flame, size: 14),
+                  label: Text('Giải phóng việc gấp (${stats.urgentCount + stats.overdueCount})'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE11D48),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    textStyle: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/profile'),
+                icon: const Icon(LucideIcons.slidersHorizontal, size: 13),
+                label: const Text('Đổi ngưỡng'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFE11D48),
+                  side: const BorderSide(color: Color(0xFFE11D48)),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  textStyle: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFocusAdvisoryBanner({
+    required BuildContext context,
+    required int overdueCount,
+    required bool isDark,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF281C0C)
+            : const Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFD97706),
+          width: 1.4,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD97706).withAlpha(isDark ? 50 : 25),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              LucideIcons.zap,
+              size: 15,
+              color: Color(0xFFD97706),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Chế độ Tập trung (Focus Mode)',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFD97706),
+                  ),
+                ),
+                Text(
+                  'Có $overdueCount công việc quá hạn cần ưu tiên xử lý dứt điểm.',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // 1. Productivity Health Hub (Hero Gauge Card)
   Widget _buildProductivityHub(
     BuildContext context,
     TaskStatistics stats,
+    AdaptiveState adaptive,
     Color cardBg,
     Color borderColor,
     Color textColor,
@@ -592,20 +842,39 @@ class _AnalyticsDashboardScreenState
     bool isDark,
   ) {
     final score = stats.productivityScore;
+    final isOverload = adaptive.mode == AdaptiveMode.overload;
+    final isFocus = adaptive.mode == AdaptiveMode.focus;
 
     Color scoreColor;
-    if (score >= 80) {
+    if (isOverload) {
+      scoreColor = const Color(0xFFE11D48);
+    } else if (score >= 80) {
       scoreColor = const Color(0xFF10B981); // Emerald
     } else if (score >= 60) {
-      scoreColor = const Color(0xFFF59E0B); // Amber
+      scoreColor = const Color(0xFFD97706); // Warm Amber
     } else {
       scoreColor = const Color(0xFFEF4444); // Red
     }
 
+    final hubLabel = isOverload
+        ? '🚨 Áp lực Quá tải (${adaptive.activeTaskCount}/${adaptive.backlogThreshold} việc)'
+        : (isFocus && stats.overdueCount > 0
+            ? '⚡ Tập trung giải quyết việc gấp'
+            : stats.productivityLabel);
+
+    final hubAdvice = isOverload
+        ? 'Cảnh báo: Backlog công việc (${adaptive.activeTaskCount} việc) đã vượt ngưỡng cho phép (${adaptive.backlogThreshold} việc)! Hệ thống đã kích hoạt chế độ tinh gọn để bạn ưu tiên xử lý việc khẩn cấp.'
+        : stats.productivityAdvice;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -627,7 +896,7 @@ class _AnalyticsDashboardScreenState
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
-                        color: textColor,
+                        color: isOverload ? const Color(0xFFE11D48) : textColor,
                       ),
                     ),
                     Text(
@@ -671,7 +940,7 @@ class _AnalyticsDashboardScreenState
                             ),
                           ),
                           child: Text(
-                            stats.productivityLabel,
+                            hubLabel,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w800,
@@ -683,11 +952,13 @@ class _AnalyticsDashboardScreenState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      stats.productivityAdvice,
+                      hubAdvice,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12.5,
                         height: 1.4,
-                        color: subtextColor,
+                        color: isOverload
+                            ? (isDark ? const Color(0xFFFECDD3) : const Color(0xFF881337))
+                            : subtextColor,
                       ),
                     ),
                   ],
@@ -719,7 +990,7 @@ class _AnalyticsDashboardScreenState
                   label: 'Cần giải quyết',
                   value: '${stats.todoCount + stats.inProgressCount} việc',
                   icon: LucideIcons.clock,
-                  iconColor: const Color(0xFF3B82F6),
+                  iconColor: isOverload ? const Color(0xFFE11D48) : const Color(0xFF3B82F6),
                   textColor: textColor,
                   subtextColor: subtextColor,
                 ),
@@ -730,10 +1001,12 @@ class _AnalyticsDashboardScreenState
                   label: 'Hạn khẩn cấp',
                   value: '${stats.overdueCount + stats.dueSoonCount} việc',
                   icon: LucideIcons.flame,
-                  iconColor: stats.overdueCount > 0
-                      ? const Color(0xFFEF4444)
+                  iconColor: (isOverload || stats.overdueCount > 0)
+                      ? const Color(0xFFE11D48)
                       : const Color(0xFFF59E0B),
-                  textColor: textColor,
+                  textColor: (isOverload || stats.overdueCount > 0)
+                      ? const Color(0xFFE11D48)
+                      : textColor,
                   subtextColor: subtextColor,
                 ),
               ),
@@ -798,13 +1071,19 @@ class _AnalyticsDashboardScreenState
     Color subtextColor,
     bool isDark,
   ) {
+    final isOverload = adaptive.mode == AdaptiveMode.overload;
     final modeColor = _getModeColor(adaptive.mode);
     final percent = adaptive.loadPercentage.clamp(0.0, 1.0);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -821,7 +1100,7 @@ class _AnalyticsDashboardScreenState
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        LucideIcons.gauge,
+                        isOverload ? LucideIcons.flame : LucideIcons.gauge,
                         size: 16,
                         color: modeColor,
                       ),
@@ -829,13 +1108,15 @@ class _AnalyticsDashboardScreenState
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Engine Thích ứng (Adaptive)',
+                        isOverload
+                            ? 'Engine Thích ứng (🚨 Đang quá tải)'
+                            : 'Engine Thích ứng (Adaptive)',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14.5,
                           fontWeight: FontWeight.w700,
-                          color: textColor,
+                          color: isOverload ? const Color(0xFFE11D48) : textColor,
                         ),
                       ),
                     ),
@@ -1068,6 +1349,7 @@ class _AnalyticsDashboardScreenState
   Widget _buildMetricsGrid(
     BuildContext context,
     TaskStatistics stats,
+    AdaptiveState adaptive,
     Color cardBg,
     Color borderColor,
     Color textColor,
@@ -1090,6 +1372,7 @@ class _AnalyticsDashboardScreenState
                 textColor: textColor,
                 subtextColor: subtextColor,
                 isDark: isDark,
+                mode: adaptive.mode,
               ),
             ),
             const SizedBox(width: 12),
@@ -1105,6 +1388,7 @@ class _AnalyticsDashboardScreenState
                 textColor: textColor,
                 subtextColor: subtextColor,
                 isDark: isDark,
+                mode: adaptive.mode,
               ),
             ),
           ],
@@ -1124,6 +1408,7 @@ class _AnalyticsDashboardScreenState
                 textColor: textColor,
                 subtextColor: subtextColor,
                 isDark: isDark,
+                mode: adaptive.mode,
               ),
             ),
             const SizedBox(width: 12),
@@ -1139,6 +1424,7 @@ class _AnalyticsDashboardScreenState
                 textColor: textColor,
                 subtextColor: subtextColor,
                 isDark: isDark,
+                mode: adaptive.mode,
               ),
             ),
           ],
@@ -1158,10 +1444,19 @@ class _AnalyticsDashboardScreenState
     required Color textColor,
     required Color subtextColor,
     required bool isDark,
+    AdaptiveMode? mode,
   }) {
+    final isOverloadHighlight = mode == AdaptiveMode.overload && title == 'Quá hạn';
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 18),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 18,
+        mode: mode,
+        customBorderColor: isOverloadHighlight ? const Color(0xFFE11D48) : null,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1225,15 +1520,32 @@ class _AnalyticsDashboardScreenState
   Widget _buildActionableTasksSection(
     BuildContext context,
     List<TaskItem> tasks,
+    AdaptiveState adaptive,
+    TaskStatistics stats,
     Color cardBg,
     Color borderColor,
     Color textColor,
     Color subtextColor,
     bool isDark,
   ) {
+    final isOverload = adaptive.mode == AdaptiveMode.overload;
+    final isFocus = adaptive.mode == AdaptiveMode.focus;
+
+    // Trong Overload Mode: Tự động thu gọn các task mức ưu tiên thấp (Requirement 1.2)
+    final displayedTasks = isOverload
+        ? tasks.where((t) => t.isOverdue || t.priority == TaskPriority.urgent || t.priority == TaskPriority.high).toList()
+        : tasks;
+
+    final hiddenLowPriorityCount = tasks.length - displayedTasks.length;
+
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1243,21 +1555,29 @@ class _AnalyticsDashboardScreenState
               Expanded(
                 child: Row(
                   children: [
-                    const Icon(
-                      LucideIcons.zap,
+                    Icon(
+                      isOverload
+                          ? LucideIcons.flame
+                          : (isFocus ? LucideIcons.zap : LucideIcons.checkSquare),
                       size: 16,
-                      color: Color(0xFFF59E0B),
+                      color: isOverload
+                          ? AppColors.overloadPrimary
+                          : (isFocus ? AppColors.focusPrimary : AppColors.calmPrimary),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Cần xử lý ngay',
+                        isOverload
+                            ? 'Nhiệm vụ Cứu nguy (Chế độ Giảm tải)'
+                            : (isFocus ? 'Cần xử lý ngay (Ưu tiên cao)' : 'Cần xử lý ngay'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: textColor,
+                          color: isOverload
+                              ? (isDark ? const Color(0xFFFDA4AF) : const Color(0xFFBE123C))
+                              : textColor,
                         ),
                       ),
                     ),
@@ -1265,23 +1585,73 @@ class _AnalyticsDashboardScreenState
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                'Tick để xong nhanh',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  color: subtextColor,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: (isOverload
+                          ? AppColors.overloadPrimary
+                          : (isFocus ? AppColors.focusPrimary : AppColors.calmPrimary))
+                      .withAlpha(isDark ? 40 : 20),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  isOverload ? 'LỌC KHẨN CẤP' : 'Tick để xong nhanh',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: isOverload ? AppColors.overloadPrimary : subtextColor,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 14),
-          ...tasks.map((task) => _buildActionableTaskTile(
-                task,
-                textColor,
-                subtextColor,
-                borderColor,
-                isDark,
-              )),
+          if (displayedTasks.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Center(
+                child: Text(
+                  'Không có việc khẩn cấp nào tồn đọng!',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: subtextColor,
+                  ),
+                ),
+              ),
+            )
+          else
+            ...displayedTasks.map((task) => _buildActionableTaskTile(
+                  task,
+                  textColor,
+                  subtextColor,
+                  borderColor,
+                  isDark,
+                )),
+          if (isOverload && hiddenLowPriorityCount > 0) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(LucideIcons.shieldCheck, size: 14, color: Color(0xFF64748B)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Đã tự động thu gọn $hiddenLowPriorityCount việc mức ưu tiên thấp để giảm tải áp lực.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: subtextColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1403,6 +1773,7 @@ class _AnalyticsDashboardScreenState
   Widget _buildDistributionCard(
     BuildContext context,
     TaskStatistics stats,
+    AdaptiveState adaptive,
     Color cardBg,
     Color borderColor,
     Color textColor,
@@ -1415,7 +1786,12 @@ class _AnalyticsDashboardScreenState
 
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1640,6 +2016,7 @@ class _AnalyticsDashboardScreenState
   Widget _buildWeeklyVelocityCard(
     BuildContext context,
     TaskStatistics stats,
+    AdaptiveState adaptive,
     Color cardBg,
     Color borderColor,
     Color textColor,
@@ -1651,7 +2028,12 @@ class _AnalyticsDashboardScreenState
 
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1801,6 +2183,7 @@ class _AnalyticsDashboardScreenState
   Widget _buildPriorityBreakdownCard(
     BuildContext context,
     TaskStatistics stats,
+    AdaptiveState adaptive,
     Color cardBg,
     Color borderColor,
     Color textColor,
@@ -1809,7 +2192,12 @@ class _AnalyticsDashboardScreenState
   ) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+        mode: adaptive.mode,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1951,14 +2339,39 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  Widget _buildTaskBoardShortcut(BuildContext context) {
+  Widget _buildTaskBoardShortcut(BuildContext context, AdaptiveState adaptive) {
+    Color btnColor;
+    IconData btnIcon;
+    String btnLabel;
+
+    switch (adaptive.mode) {
+      case AdaptiveMode.overload:
+        btnColor = AppColors.overloadPrimary;
+        btnIcon = LucideIcons.flame;
+        btnLabel = 'Xử lý ngay các việc khẩn cấp (Giảm tải) →';
+        break;
+      case AdaptiveMode.focus:
+        btnColor = AppColors.focusPrimary;
+        btnIcon = LucideIcons.zap;
+        btnLabel = 'Vào bảng công việc tập trung →';
+        break;
+      case AdaptiveMode.calm:
+        btnColor = AppColors.calmPrimary;
+        btnIcon = LucideIcons.kanban;
+        btnLabel = 'Xem Bảng Công Việc (Task Board) →';
+        break;
+    }
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () => context.push('/board'),
-        icon: const Icon(LucideIcons.listChecks, size: 18),
-        label: const Text('Xem Bảng Công Việc (Task Board)'),
+        icon: Icon(btnIcon, size: 18),
+        label: Text(btnLabel),
         style: ElevatedButton.styleFrom(
+          backgroundColor: btnColor,
+          foregroundColor: Colors.white,
+          elevation: 2,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
