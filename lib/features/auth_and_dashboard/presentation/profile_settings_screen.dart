@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/providers/core_tasks_provider.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/adaptive_theme_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../providers/auth_provider.dart';
@@ -904,6 +905,9 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   ref
                       .read(authProvider.notifier)
                       .updateNotificationPreferences(notifyOnOverload: val);
+                  if (!val) {
+                    NotificationService.cancelOverloadAlert();
+                  }
                 },
               ),
             ],
@@ -959,6 +963,9 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   ref
                       .read(authProvider.notifier)
                       .updateNotificationPreferences(notifyOnDeadline: val);
+                  if (!val) {
+                    NotificationService.cancelDeadlineAlert();
+                  }
                 },
               ),
             ],
