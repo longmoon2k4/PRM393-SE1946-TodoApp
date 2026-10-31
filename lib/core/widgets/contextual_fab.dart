@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../models/task_model.dart';
 import '../theme/app_colors.dart';
 
-/// Nút hành động nổi biến thiên theo ngữ cảnh.
-/// Tùy thuộc vào [contextType] mà nút sẽ hiển thị Icon/Text và hành động khác nhau.
-enum FabContextType { 
-  board,      // Đứng ở màn hình danh sách (Nút dấu +)
-  multiSelect,// Khi đang chọn nhiều task (Thanh công cụ)
-  taskDetail  // Đứng ở chi tiết Task (Trạng thái thay đổi)
+enum FabContextType {
+  board,
+  multiSelect,
+  taskDetail
 }
 
 class ContextualFab extends ConsumerWidget {
   final FabContextType contextType;
-  final TaskItem? currentTask; // Chỉ truyền vào nếu đang ở màn hình TaskDetail
-  final VoidCallback onPressed; // Hành động mặc định (vd: Mở BottomSheet khi ở board)
+  final TaskItem? currentTask;
+  final VoidCallback onPressed;
 
   const ContextualFab({
     super.key,
@@ -30,43 +28,40 @@ class ContextualFab extends ConsumerWidget {
       case FabContextType.board:
         return FloatingActionButton(
           onPressed: onPressed,
-          backgroundColor: AppColors.priorityMedium, // Royal Blue
-          child: const Icon(LucideIcons.plus, color: Colors.white),
+          backgroundColor: AppColors.priorityMedium,
+          child: const Icon(IconsaxPlusLinear.add, color: Colors.white),
         );
 
       case FabContextType.multiSelect:
-        // Vẽ nút dạng thanh ngang (Extended) cho chế độ chọn nhiều
         return FloatingActionButton.extended(
           onPressed: onPressed,
-          backgroundColor: AppColors.priorityHigh, // Amber (Cảnh báo nhẹ)
-          icon: const Icon(LucideIcons.listChecks, color: Colors.white),
+          backgroundColor: AppColors.priorityHigh,
+          icon: const Icon(IconsaxPlusLinear.task_square, color: Colors.white),
           label: const Text('Thao tác hàng loạt', style: TextStyle(color: Colors.white)),
         );
 
       case FabContextType.taskDetail:
-        // Đảm bảo phải truyền currentTask nếu dùng type taskDetail
         if (currentTask == null) return const SizedBox();
 
         String label;
         IconData icon;
         Color bgColor;
 
-        // Thay đổi giao diện dựa trên trạng thái của Task hiện tại
         switch (currentTask!.status) {
           case TaskStatus.todo:
             label = 'Bắt đầu làm';
-            icon = LucideIcons.play;
+            icon = IconsaxPlusLinear.play;
             bgColor = AppColors.statusInProgress;
             break;
           case TaskStatus.inProgress:
             label = 'Hoàn thành';
-            icon = LucideIcons.check;
+            icon = IconsaxPlusLinear.tick_circle;
             bgColor = AppColors.statusDone;
             break;
           case TaskStatus.done:
           case TaskStatus.cancelled:
             label = 'Khôi phục';
-            icon = LucideIcons.rotateCcw;
+            icon = IconsaxPlusLinear.refresh;
             bgColor = AppColors.priorityLow;
             break;
         }

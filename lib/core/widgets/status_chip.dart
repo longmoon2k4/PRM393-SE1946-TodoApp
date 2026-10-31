@@ -3,7 +3,6 @@ import '../models/task_model.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_sizes.dart';
 
-/// Chip hiển thị trạng thái quy trình của Task (Todo, In Progress, Done, Cancelled)
 class StatusChip extends StatelessWidget {
   final TaskStatus status;
 

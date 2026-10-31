@@ -10,12 +10,12 @@ class TaskItem {
   final String description;
   final TaskStatus status;
   final TaskPriority priority;
-  final double orderIndex; // Phục vụ tính năng kéo thả sắp xếp
+  final double orderIndex;
   final DateTime createdAt;
   final DateTime? startDate;
   final DateTime? deadline;
   final DateTime? reminderAt;
-  final DateTime? deletedAt; // Phục vụ tính năng Xóa mềm (Soft Delete) / Thùng rác
+  final DateTime? deletedAt;
   final String? categoryId;
   final String? projectId;
   final List<String> tags;
@@ -121,7 +121,6 @@ class TaskItem {
     };
   }
 
-  /// Xuất dữ liệu theo đúng chuẩn TaskRequest của Spring Boot REST API
   Map<String, dynamic> toBackendJson() {
     String statusStr;
     switch (status) {
@@ -184,7 +183,6 @@ class TaskItem {
       );
     }
 
-    // Trích xuất quan hệ nếu Backend trả về dạng Nested Object
     String? extractId(dynamic field) {
       if (field == null) return null;
       if (field is Map<String, dynamic>) {
@@ -193,7 +191,6 @@ class TaskItem {
       return field.toString();
     }
 
-    // Trích xuất tags hỗ trợ cả List<String> và List<TagObject>
     List<String> extractTags(dynamic tagsJson) {
       if (tagsJson is! List) return const [];
       return tagsJson

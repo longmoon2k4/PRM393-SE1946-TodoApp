@@ -34,7 +34,7 @@ class MockRepository {
       status: TaskStatus.inProgress,
       priority: TaskPriority.urgent,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      deadline: DateTime.now().add(const Duration(hours: 5)), // Sắp tới hạn
+      deadline: DateTime.now().add(const Duration(hours: 5)),
       tags: const ['Frontend', 'Flutter'],
       subtasks: const [
         SubTask(id: 'st-3', title: 'Thêm dependencies', isCompleted: true),
@@ -59,7 +59,7 @@ class MockRepository {
       status: TaskStatus.todo,
       priority: TaskPriority.high,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
-      deadline: DateTime.now().subtract(const Duration(days: 2)), // Đã quá hạn
+      deadline: DateTime.now().subtract(const Duration(days: 2)),
       tags: const ['Document'],
     ),
     TaskItem(

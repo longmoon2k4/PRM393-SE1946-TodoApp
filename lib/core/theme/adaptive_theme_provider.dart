@@ -7,12 +7,11 @@ import '../services/local_storage_service.dart';
 import 'app_theme.dart';
 
 enum AdaptiveMode {
-  calm, // Dịu mát (Ít việc)
-  focus, // Tập trung (Gần chạm ngưỡng hoặc có việc gấp)
-  overload, // Quá tải (Vượt ngưỡng công việc quy định)
+  calm,
+  focus,
+  overload,
 }
 
-/// Quản lý chế độ Sáng / Tối (Dark Mode) cho toàn ứng dụng
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, bool>(() {
   return ThemeModeNotifier();
 });
@@ -78,7 +77,6 @@ class AdaptiveState {
   }
 }
 
-/// Provider cung cấp trạng thái chi tiết của Adaptive Engine
 final adaptiveStateProvider = Provider<AdaptiveState>((ref) {
   final tasks = ref.watch(coreTasksProvider);
   final authState = ref.watch(authProvider);
@@ -86,7 +84,6 @@ final adaptiveStateProvider = Provider<AdaptiveState>((ref) {
 
   final threshold = authState.user?.backlogThreshold ?? 10;
 
-  // Lọc các task đang hoạt động (chưa xóa mềm)
   final activeTasks = tasks.where((t) =>
       t.deletedAt == null &&
       (t.status == TaskStatus.todo ||
@@ -118,7 +115,6 @@ final adaptiveStateProvider = Provider<AdaptiveState>((ref) {
   );
 });
 
-/// Provider trả về ThemeData chuẩn để MaterialApp.router tự động cập nhật
 final adaptiveThemeProvider = Provider<ThemeData>((ref) {
   final state = ref.watch(adaptiveStateProvider);
   return state.theme;

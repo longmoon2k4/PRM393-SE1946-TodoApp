@@ -477,14 +477,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-  icons_plus:
+  iconsax_plus:
     dependency: "direct main"
     description:
-      name: icons_plus
-      sha256: "8e2f601b8605d45dd55b106a0da084a1809125077a49574ca22e8bcd5b6e86f0"
+      name: iconsax_plus
+      sha256: e9e51b0652a1d3ceea5fedbfc2c1bb4ad432c2ceb7be7de2e30caf085678933c
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0"
+    version: "1.0.0"
   intl:
     dependency: "direct main"
     description:
@@ -573,14 +573,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.6.1"
-  lucide_icons_flutter:
-    dependency: "direct main"
-    description:
-      name: lucide_icons_flutter
-      sha256: a07370b432d4a88ed8fd6c26b5bbcc4e29fb7b24b6350517fd32209a6b1a50c1
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.1"
   matcher:
     dependency: transitive
     description:

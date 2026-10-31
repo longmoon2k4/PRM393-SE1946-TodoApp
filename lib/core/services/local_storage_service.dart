@@ -18,7 +18,6 @@ class LocalStorageService {
     _prefs ??= await SharedPreferences.getInstance();
   }
 
-  // --- THEME PREFERENCE ---
   static bool? getIsDarkMode() {
     return _prefs?.getBool(_themeModeKey);
   }
@@ -27,7 +26,6 @@ class LocalStorageService {
     return await _prefs?.setBool(_themeModeKey, isDark) ?? false;
   }
 
-  // --- USER PROFILE ---
   static UserModel? getCachedUser() {
     final raw = _prefs?.getString(_userKey);
     if (raw == null || raw.isEmpty) return null;
@@ -48,7 +46,6 @@ class LocalStorageService {
     return await _prefs?.remove(_userKey) ?? false;
   }
 
-  // --- TASKS CACHE ---
   static List<TaskItem>? getCachedTasks() {
     final raw = _prefs?.getString(_tasksKey);
     if (raw == null || raw.isEmpty) return null;
@@ -67,7 +64,6 @@ class LocalStorageService {
     return await _prefs?.setString(_tasksKey, encoded) ?? false;
   }
 
-  // --- SYNC TIMESTAMP ---
   static DateTime? getLastSyncTime() {
     final raw = _prefs?.getString(_lastSyncKey);
     if (raw == null) return null;
@@ -82,7 +78,6 @@ class LocalStorageService {
         false;
   }
 
-  // --- NOTIFICATION SMART ANTI-SPAM & TRACKING ---
   static DateTime? getLastOverloadAlertTime() {
     final raw = _prefs?.getString(_lastOverloadNotifiedTimeKey);
     return raw != null ? DateTime.tryParse(raw) : null;
