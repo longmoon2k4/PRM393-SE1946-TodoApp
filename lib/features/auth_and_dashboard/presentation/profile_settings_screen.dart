@@ -208,19 +208,32 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
 
             const SizedBox(height: 32),
 
-            // 6. Sign Out Button
+            // 6. Sign Out Button - Centered Enterprise Destructive Button
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
+              height: 50,
+              child: ElevatedButton.icon(
                 onPressed: _handleSignOut,
-                icon: const Icon(LucideIcons.logOut, size: 16),
-                label: const Text('Đăng xuất tài khoản'),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFEF4444)),
+                icon: const Icon(LucideIcons.logOut, size: 16, color: Color(0xFFEF4444)),
+                label: Text(
+                  'Đăng xuất tài khoản',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFEF4444),
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF4444).withAlpha(isDark ? 30 : 16),
                   foregroundColor: const Color(0xFFEF4444),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
+                    side: BorderSide(
+                      color: const Color(0xFFEF4444).withAlpha(isDark ? 90 : 60),
+                      width: 1.2,
+                    ),
                   ),
                 ),
               ),
@@ -243,6 +256,39 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  BoxDecoration _enterpriseCardDecoration({
+    required Color cardBg,
+    required bool isDark,
+    double radius = 20,
+    Color? customBorderColor,
+  }) {
+    return BoxDecoration(
+      color: cardBg,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        color: customBorderColor ??
+            (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
+        width: 1.0,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: isDark
+              ? Colors.black.withAlpha(90)
+              : const Color(0xFF0F172A).withAlpha(16),
+          blurRadius: 18,
+          offset: const Offset(0, 5),
+        ),
+        BoxShadow(
+          color: isDark
+              ? Colors.black.withAlpha(50)
+              : const Color(0xFF0F172A).withAlpha(6),
+          blurRadius: 4,
+          offset: const Offset(0, 1),
+        ),
+      ],
     );
   }
 
@@ -274,18 +320,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(isDark ? 30 : 6),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
       child: Column(
         children: [
           Row(
@@ -463,11 +498,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor),
-      ),
+      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -699,11 +730,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor),
-      ),
+      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
       child: Row(
         children: [
           Container(
@@ -770,11 +797,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor),
-      ),
+      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -798,7 +821,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Cảnh báo quá tải công việc',
+                      'Cảnh báo quá tải',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
@@ -809,7 +832,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Nhận push notification khi việc vượt ngưỡng',
+                      'Thông báo khi công việc vượt ngưỡng',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
@@ -853,7 +876,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Nhắc nhở hạn chót công việc',
+                      'Nhắc nhở hạn chót',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
@@ -864,7 +887,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Thông báo trước 24 giờ cả khi offline',
+                      'Thông báo trước 24 giờ đến hạn',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
@@ -887,10 +910,11 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            height: 48,
+            child: ElevatedButton.icon(
               onPressed: () async {
                 await NotificationService.showTestNotification();
                 if (mounted) {
@@ -902,12 +926,29 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   );
                 }
               },
-              icon: const Icon(LucideIcons.send, size: 14),
-              label: const Text('Bắn thông báo thử nghiệm (Test Notification)'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+              icon: Icon(
+                LucideIcons.send,
+                size: 15,
+                color: Theme.of(context).primaryColor,
+              ),
+              label: Text(
+                'Gửi thông báo thử nghiệm',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor.withAlpha(isDark ? 35 : 18),
+                foregroundColor: Theme.of(context).primaryColor,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(
+                    color: Theme.of(context).primaryColor.withAlpha(isDark ? 80 : 50),
+                    width: 1.2,
+                  ),
                 ),
               ),
             ),
@@ -930,11 +971,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor),
-      ),
+      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -958,13 +995,14 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Lưu trữ cục bộ & Đồng bộ Cloud',
+                      'Lưu trữ cục bộ & Cloud',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: textColor,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       'Đang lưu trữ $totalTasks công việc an toàn trong bộ nhớ máy',
                       style: GoogleFonts.plusJakartaSans(
@@ -999,7 +1037,8 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            height: 48,
+            child: ElevatedButton.icon(
               onPressed: () {
                 ref.read(coreTasksProvider.notifier).resetToMock();
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -1009,12 +1048,25 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   ),
                 );
               },
-              icon: const Icon(LucideIcons.rotateCcw, size: 14),
-              label: const Text('Khôi phục dữ liệu mẫu ban đầu (Mock Data)'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+              icon: const Icon(LucideIcons.rotateCcw, size: 15, color: Color(0xFF2563EB)),
+              label: Text(
+                'Khôi phục dữ liệu mẫu ban đầu',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF2563EB),
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3B82F6).withAlpha(isDark ? 35 : 16),
+                foregroundColor: const Color(0xFF2563EB),
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(
+                    color: const Color(0xFF3B82F6).withAlpha(isDark ? 80 : 50),
+                    width: 1.2,
+                  ),
                 ),
               ),
             ),
