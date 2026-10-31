@@ -8,6 +8,7 @@ import '../../../core/services/notification_service.dart';
 import '../../../core/theme/adaptive_theme_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../providers/auth_provider.dart';
+import '../providers/statistics_provider.dart';
 
 class ProfileSettingsScreen extends ConsumerStatefulWidget {
   const ProfileSettingsScreen({super.key});
@@ -57,16 +58,16 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
       builder: (context) {
         return AlertDialog(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(
-            'Đăng xuất',
+            'Đăng xuất tài khoản',
             style: GoogleFonts.plusJakartaSans(
               fontWeight: FontWeight.w700,
-              fontSize: 17,
+              fontSize: 18,
             ),
           ),
           content: Text(
-            'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản?',
+            'Bạn có chắc chắn muốn đăng xuất? Dữ liệu ngoại tuyến trên máy vẫn sẽ được bảo toàn.',
             style: GoogleFonts.plusJakartaSans(fontSize: 14),
           ),
           actions: [
@@ -79,6 +80,9 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.priorityUrgent,
                 foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               child: const Text('Đăng xuất'),
             ),
@@ -97,6 +101,8 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     final user = auth.user;
+    final stats = ref.watch(statisticsProvider);
+    final adaptive = ref.watch(adaptiveStateProvider);
     final isDark = ref.watch(themeModeProvider);
 
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
@@ -120,9 +126,9 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Cài đặt',
+          'Hồ sơ & Cài đặt hệ thống',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 17,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
             color: textColor,
           ),
@@ -134,46 +140,102 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Account Card
-            _buildProfileCard(user, cardBg, borderColor, textColor, subtextColor, isDark),
+            // 1. Hero Profile & User Stats Card
+            _buildProfileHeroCard(
+              user,
+              stats,
+              cardBg,
+              borderColor,
+              textColor,
+              subtextColor,
+              isDark,
+            ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
 
-            // 2. Appearance Section (Dark mode toggle & Backlog threshold)
-            _buildSectionHeader('GIAO DIỆN & HIỂN THỊ', subtextColor),
+            // 2. Interactive Adaptive UI Simulation Studio
+            _buildSectionHeader('BỘ NÃO ADAPTIVE UI (ENGINE GIAO DIỆN THÍCH ỨNG)', subtextColor),
             const SizedBox(height: 8),
-            _buildAppearanceCard(cardBg, borderColor, textColor, subtextColor, isDark),
+            _buildAdaptiveStudioCard(
+              cardBg,
+              borderColor,
+              textColor,
+              subtextColor,
+              isDark,
+              adaptive,
+            ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
 
-            // 3. Notification Settings Card
-            _buildSectionHeader('THÔNG BÁO', subtextColor),
+            // 3. Appearance Card (Dark mode toggle)
+            _buildSectionHeader('GIAO DIỆN & MÀU SẮC', subtextColor),
             const SizedBox(height: 8),
-            _buildNotificationCard(cardBg, borderColor, textColor, subtextColor, isDark),
+            _buildAppearanceCard(
+              cardBg,
+              borderColor,
+              textColor,
+              subtextColor,
+              isDark,
+            ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
 
-            // 4. Data Management
-            _buildSectionHeader('DỮ LIỆU', subtextColor),
+            // 4. Notification Settings Card
+            _buildSectionHeader('THÔNG BÁO THÔNG MINH (NOTIFICATIONS)', subtextColor),
             const SizedBox(height: 8),
-            _buildDataCard(cardBg, borderColor, textColor, subtextColor, isDark),
+            _buildNotificationCard(
+              cardBg,
+              borderColor,
+              textColor,
+              subtextColor,
+              isDark,
+            ),
+
+            const SizedBox(height: 22),
+
+            // 5. System, Cloud Sync & Data Management
+            _buildSectionHeader('KẾT NỐI HỆ THỐNG & DỮ LIỆU', subtextColor),
+            const SizedBox(height: 8),
+            _buildDataAndSyncCard(
+              auth.isOffline,
+              stats.totalTasks,
+              cardBg,
+              borderColor,
+              textColor,
+              subtextColor,
+              isDark,
+            ),
 
             const SizedBox(height: 32),
 
-            // 5. Sign Out Button
+            // 6. Sign Out Button
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton(
+              child: OutlinedButton.icon(
                 onPressed: _handleSignOut,
+                icon: const Icon(LucideIcons.logOut, size: 16),
+                label: const Text('Đăng xuất tài khoản'),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFFEF4444)),
                   foregroundColor: const Color(0xFFEF4444),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text('Đăng xuất tài khoản'),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // App Version & Credits
+            Center(
+              child: Text(
+                'Smart Workflow & Adaptive Todo App • v2.4.0 (PRM393 FPT)',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: subtextColor,
+                ),
               ),
             ),
 
@@ -191,7 +253,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
         title,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 11,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w800,
           letterSpacing: 0.8,
           color: subtextColor,
         ),
@@ -199,8 +261,10 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     );
   }
 
-  Widget _buildProfileCard(
+  // 1. Hero Profile & User Stats Card
+  Widget _buildProfileHeroCard(
     dynamic user,
+    TaskStatistics stats,
     Color cardBg,
     Color borderColor,
     Color textColor,
@@ -209,107 +273,204 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
   ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: borderColor),
-            ),
-            child: ClipOval(
-              child: user?.avatarUrl != null
-                  ? Image.network(
-                      user!.avatarUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (ctx, err, stack) => Image.asset(
-                        'assets/images/logo.png',
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Icon(LucideIcons.user, size: 24, color: subtextColor),
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(isDark ? 30 : 6),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user?.name ?? 'Người dùng',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // Avatar with badge
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor,
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: user?.avatarUrl != null
+                          ? Image.network(
+                              user!.avatarUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (ctx, err, stack) => Image.asset(
+                                'assets/images/logo.png',
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Icon(LucideIcons.user, size: 30, color: subtextColor),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  user?.email ?? 'Chưa liên kết email',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    color: subtextColor,
+                  Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF10B981),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      size: 11,
+                      color: Colors.white,
+                    ),
                   ),
+                ],
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            user?.name ?? 'Hà Vũ Long',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: textColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      user?.email ?? 'long@fpt.edu.vn',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        color: subtextColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withAlpha(25),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Google OAuth 2.0 • Đã xác thực',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 18),
+          Divider(height: 1, color: borderColor),
+          const SizedBox(height: 16),
+
+          // 3-Metric Summary Strip
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildProfileStatColumn(
+                'Tổng việc',
+                '${stats.totalTasks}',
+                textColor,
+                subtextColor,
+              ),
+              Container(width: 1, height: 28, color: borderColor),
+              _buildProfileStatColumn(
+                'Đã xong',
+                '${stats.doneCount}',
+                textColor,
+                subtextColor,
+              ),
+              Container(width: 1, height: 28, color: borderColor),
+              _buildProfileStatColumn(
+                'Điểm năng suất',
+                '${stats.productivityScore}đ',
+                const Color(0xFF10B981),
+                subtextColor,
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAppearanceCard(
+  Widget _buildProfileStatColumn(
+    String label,
+    String value,
+    Color valueColor,
+    Color subtextColor,
+  ) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: valueColor,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            color: subtextColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 2. Interactive Adaptive UI Simulation Studio
+  Widget _buildAdaptiveStudioCard(
     Color cardBg,
     Color borderColor,
     Color textColor,
     Color subtextColor,
     bool isDark,
+    AdaptiveState adaptive,
   ) {
     final currentThreshold = _sliderValue.round();
+    final calmLimit = (currentThreshold * 0.6).round();
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Dark Mode Toggle Switch
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Giao diện tối (Dark Mode)',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                ),
-              ),
-              Switch.adaptive(
-                value: isDark,
-                onChanged: (val) {
-                  ref.read(themeModeProvider.notifier).setTheme(val);
-                },
-              ),
-            ],
-          ),
-
-          Divider(height: 24, color: borderColor),
-
-          // Backlog Threshold Slider
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -317,15 +478,15 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ngưỡng công việc',
+                    'Ngưỡng kích hoạt quá tải',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
                       color: textColor,
                     ),
                   ),
                   Text(
-                    'Đổi màu thích ứng khi việc dồn ứ',
+                    'Kéo slider để thay đổi mốc đổi màu tự động',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       color: subtextColor,
@@ -333,22 +494,40 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   ),
                 ],
               ),
-              Text(
-                '$currentThreshold việc',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).primaryColor,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withAlpha(isDark ? 40 : 20),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                    width: 1.2,
+                  ),
+                ),
+                child: Text(
+                  '$currentThreshold việc',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+
+          const SizedBox(height: 14),
+
+          // Slider
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: Theme.of(context).primaryColor,
+              inactiveTrackColor: isDark
+                  ? const Color(0xFF334155)
+                  : const Color(0xFFE2E8F0),
               thumbColor: Theme.of(context).primaryColor,
               overlayColor: Theme.of(context).primaryColor.withAlpha(30),
+              trackHeight: 6,
             ),
             child: Slider(
               value: _sliderValue,
@@ -359,118 +538,146 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               onChangeEnd: _saveThreshold,
             ),
           ),
+
+          const SizedBox(height: 10),
+
+          // Live Simulation Preview Cards
+          Text(
+            'Quy tắc chuyển màu theo ngưỡng $currentThreshold việc:',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // 3 Color Preview Cards
+          Row(
+            children: [
+              _buildSimPreviewCard(
+                title: 'Calm',
+                range: '1 - $calmLimit',
+                desc: 'Dịu mát',
+                color: AppColors.calmPrimary,
+                bgColor: AppColors.calmPrimary.withAlpha(isDark ? 35 : 15),
+                isCurrent: adaptive.mode == AdaptiveMode.calm,
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _buildSimPreviewCard(
+                title: 'Focus',
+                range: '${calmLimit + 1} - $currentThreshold',
+                desc: 'Tập trung',
+                color: AppColors.focusPrimary,
+                bgColor: AppColors.focusPrimary.withAlpha(isDark ? 35 : 15),
+                isCurrent: adaptive.mode == AdaptiveMode.focus,
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _buildSimPreviewCard(
+                title: 'Overload',
+                range: '> $currentThreshold',
+                desc: 'Khẩn cấp',
+                color: AppColors.overloadPrimary,
+                bgColor: AppColors.overloadPrimary.withAlpha(isDark ? 35 : 15),
+                isCurrent: adaptive.mode == AdaptiveMode.overload,
+                isDark: isDark,
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildNotificationCard(
-    Color cardBg,
-    Color borderColor,
-    Color textColor,
-    Color subtextColor,
-    bool isDark,
-  ) {
-    return Material(
-      color: Colors.transparent,
+  Widget _buildSimPreviewCard({
+    required String title,
+    required String range,
+    required String desc,
+    required Color color,
+    required Color bgColor,
+    required bool isCurrent,
+    required bool isDark,
+  }) {
+    return Expanded(
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor),
+          color: bgColor,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isCurrent ? color : color.withAlpha(80),
+            width: isCurrent ? 2 : 1,
+          ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Material(
-              color: Colors.transparent,
-              child: SwitchListTile.adaptive(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'Cảnh báo quá tải công việc',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
                   ),
                 ),
-                subtitle: Text(
-                  'Nhận thông báo khi số lượng việc vượt ngưỡng',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: subtextColor,
-                  ),
-                ),
-                value: _notifyOverload,
-                onChanged: (val) {
-                  setState(() => _notifyOverload = val);
-                  ref
-                      .read(authProvider.notifier)
-                      .updateNotificationPreferences(notifyOnOverload: val);
-                },
-              ),
-            ),
-            Divider(height: 16, color: borderColor),
-            Material(
-              color: Colors.transparent,
-              child: SwitchListTile.adaptive(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'Nhắc nhở hạn chót',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-                subtitle: Text(
-                  'Thông báo trước 24 giờ kể cả khi không có mạng',
+                const SizedBox(width: 5),
+                Text(
+                  title,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
-                    color: subtextColor,
+                    fontWeight: FontWeight.w800,
+                    color: color,
                   ),
                 ),
-                value: _notifyDeadline,
-                onChanged: (val) {
-                  setState(() => _notifyDeadline = val);
-                  ref
-                      .read(authProvider.notifier)
-                      .updateNotificationPreferences(notifyOnDeadline: val);
-                },
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '$range việc',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
             ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () async {
-                  await NotificationService.showTestNotification();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Đã gửi thông báo kiểm tra hệ thống.'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
-                icon: const Icon(LucideIcons.bell, size: 14),
-                label: const Text('Kiểm tra quyền thông báo'),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  textStyle: const TextStyle(fontSize: 13),
+            const SizedBox(height: 2),
+            Text(
+              desc,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 10,
+                color: color,
+              ),
+            ),
+            if (isCurrent) ...[
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text(
+                  'HIỆN TẠI',
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDataCard(
+  // 3. Appearance Card (Dark mode toggle)
+  Widget _buildAppearanceCard(
     Color cardBg,
     Color borderColor,
     Color textColor,
@@ -479,49 +686,294 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
   ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFFF1F5F9).withAlpha(30)
+                          : const Color(0xFFF1F5F9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isDark ? LucideIcons.moon : LucideIcons.sun,
+                      size: 18,
+                      color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFFF59E0B),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Chế độ Giao diện Tối (Dark Mode)',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: textColor,
+                        ),
+                      ),
+                      Text(
+                        isDark ? 'Đang bật nền Slate 900' : 'Đang bật nền Sáng dịu',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          color: subtextColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Switch.adaptive(
+                value: isDark,
+                onChanged: (val) {
+                  ref.read(themeModeProvider.notifier).setTheme(val);
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 4. Notification Settings Card
+  Widget _buildNotificationCard(
+    Color cardBg,
+    Color borderColor,
+    Color textColor,
+    Color subtextColor,
+    bool isDark,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Lưu trữ cục bộ (Offline)',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: textColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Dữ liệu công việc được đồng bộ tự động vào bộ nhớ máy.',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              color: subtextColor,
-            ),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: () {
-              ref.read(coreTasksProvider.notifier).resetToMock();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Đã khôi phục dữ liệu ban đầu.'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            secondary: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEF4444).withAlpha(20),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                LucideIcons.bellRing,
+                size: 18,
+                color: Color(0xFFEF4444),
               ),
             ),
-            child: const Text('Đặt lại dữ liệu ban đầu'),
+            title: Text(
+              'Cảnh báo quá tải công việc',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+            ),
+            subtitle: Text(
+              'Nhận push notification khi số task chưa xong vượt ngưỡng',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: subtextColor,
+              ),
+            ),
+            value: _notifyOverload,
+            onChanged: (val) {
+              setState(() => _notifyOverload = val);
+              ref
+                  .read(authProvider.notifier)
+                  .updateNotificationPreferences(notifyOnOverload: val);
+            },
+          ),
+          Divider(height: 16, color: borderColor),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            secondary: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B).withAlpha(20),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                LucideIcons.calendarClock,
+                size: 18,
+                color: Color(0xFFF59E0B),
+              ),
+            ),
+            title: Text(
+              'Nhắc nhở hạn chót công việc',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+            ),
+            subtitle: Text(
+              'Thông báo trước 24 giờ kể cả khi thiết bị không có mạng',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: subtextColor,
+              ),
+            ),
+            value: _notifyDeadline,
+            onChanged: (val) {
+              setState(() => _notifyDeadline = val);
+              ref
+                  .read(authProvider.notifier)
+                  .updateNotificationPreferences(notifyOnDeadline: val);
+            },
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                await NotificationService.showTestNotification();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Đã gửi thông báo kiểm tra hệ thống thành công!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(LucideIcons.send, size: 14),
+              label: const Text('Bắn thông báo thử nghiệm (Test Notification)'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 5. Data & Sync Card
+  Widget _buildDataAndSyncCard(
+    bool isOffline,
+    int totalTasks,
+    Color cardBg,
+    Color borderColor,
+    Color textColor,
+    Color subtextColor,
+    bool isDark,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3B82F6).withAlpha(20),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  LucideIcons.database,
+                  size: 18,
+                  color: Color(0xFF3B82F6),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Lưu trữ cục bộ & Đồng bộ Cloud',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
+                    Text(
+                      'Đang lưu trữ $totalTasks công việc an toàn trong bộ nhớ máy',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: subtextColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isOffline
+                      ? const Color(0xFFF59E0B).withAlpha(25)
+                      : const Color(0xFF10B981).withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  isOffline ? 'Offline' : 'Online',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isOffline
+                        ? const Color(0xFFF59E0B)
+                        : const Color(0xFF10B981),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                ref.read(coreTasksProvider.notifier).resetToMock();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Đã khôi phục dữ liệu ban đầu thành công.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              icon: const Icon(LucideIcons.rotateCcw, size: 14),
+              label: const Text('Khôi phục dữ liệu mẫu ban đầu (Mock Data)'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
         ],
       ),

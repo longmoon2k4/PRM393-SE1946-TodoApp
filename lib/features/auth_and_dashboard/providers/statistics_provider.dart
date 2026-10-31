@@ -20,6 +20,9 @@ class TaskStatistics {
   // Weekly Completed Counts (Thứ 2 -> Chủ Nhật)
   final List<int> weeklyCompletedCounts;
 
+  // Danh sách các công việc cần chú ý xử lý ngay (Quá hạn hoặc Khẩn cấp chưa xong)
+  final List<TaskItem> topActionableTasks;
+
   const TaskStatistics({
     required this.totalTasks,
     required this.todoCount,
@@ -33,6 +36,7 @@ class TaskStatistics {
     required this.mediumCount,
     required this.lowCount,
     required this.weeklyCompletedCounts,
+    required this.topActionableTasks,
   });
 
   double get completionRate =>
@@ -41,8 +45,28 @@ class TaskStatistics {
   int get productivityScore {
     if (totalTasks == 0) return 100;
     final baseScore = (completionRate * 100).round();
-    final overduePenalty = overdueCount * 10;
+    final overduePenalty = overdueCount * 12;
     return (baseScore - overduePenalty).clamp(0, 100);
+  }
+
+  String get productivityLabel {
+    if (productivityScore >= 85) return 'Năng suất Xuất sắc 🚀';
+    if (productivityScore >= 70) return 'Tiến độ Ổn định 👍';
+    if (productivityScore >= 50) return 'Cần tập trung ⚠️';
+    return 'Cảnh báo quá tải 🚨';
+  }
+
+  String get productivityAdvice {
+    if (overdueCount > 0) {
+      return 'Có $overdueCount công việc quá hạn cần ưu tiên giải quyết ngay hôm nay.';
+    }
+    if (productivityScore >= 85) {
+      return 'Tiến độ rất xuất sắc! Tỷ lệ hoàn thành công việc đang đạt mức tối ưu.';
+    }
+    if (inProgressCount > 4) {
+      return 'Đang có nhiều việc thực hiện cùng lúc, nên tập trung hoàn tất dứt điểm.';
+    }
+    return 'Duy trì đều đặn phân bổ công việc để giữ điểm số năng suất cao.';
   }
 }
 
@@ -76,8 +100,8 @@ final statisticsProvider = Provider<TaskStatistics>((ref) {
         break;
       case TaskStatus.done:
         done++;
-        // Thống kê ngày hoàn thành trong tuần
-        final weekday = task.createdAt.weekday; // 1 = Monday, 7 = Sunday
+        // Thống kê ngày hoàn thành trong tuần (1 = T2, ..., 7 = CN)
+        final weekday = task.createdAt.weekday;
         weeklyCompleted[(weekday - 1) % 7]++;
         break;
       case TaskStatus.cancelled:
@@ -104,6 +128,20 @@ final statisticsProvider = Provider<TaskStatistics>((ref) {
     }
   }
 
+  // Lọc top task cần hành động ngay (ưu tiên: quá hạn > khẩn cấp > cao)
+  final actionable = validTasks.where((t) =>
+      t.status != TaskStatus.done &&
+      t.status != TaskStatus.cancelled &&
+      (t.isOverdue ||
+          t.priority == TaskPriority.urgent ||
+          t.priority == TaskPriority.high)).toList();
+
+  actionable.sort((a, b) {
+    if (a.isOverdue && !b.isOverdue) return -1;
+    if (!a.isOverdue && b.isOverdue) return 1;
+    return b.priority.index.compareTo(a.priority.index);
+  });
+
   return TaskStatistics(
     totalTasks: validTasks.length,
     todoCount: todo,
@@ -117,5 +155,6 @@ final statisticsProvider = Provider<TaskStatistics>((ref) {
     mediumCount: medium,
     lowCount: low,
     weeklyCompletedCounts: weeklyCompleted,
+    topActionableTasks: actionable.take(3).toList(),
   );
 });
