@@ -605,7 +605,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(14),
@@ -618,22 +618,27 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 8,
-                  height: 8,
+                  width: 6,
+                  height: 6,
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 5),
-                Text(
-                  title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: color,
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                    ),
                   ),
                 ),
               ],
@@ -641,8 +646,10 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
             const SizedBox(height: 4),
             Text(
               '$range việc',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: FontWeight.w700,
                 color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
@@ -650,15 +657,17 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
             const SizedBox(height: 2),
             Text(
               desc,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
+                fontSize: 9.5,
                 color: color,
               ),
             ),
             if (isCurrent) ...[
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(6),
@@ -666,7 +675,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 child: const Text(
                   'HIỆN TẠI',
                   style: TextStyle(
-                    fontSize: 8,
+                    fontSize: 7.5,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
                   ),

@@ -374,7 +374,7 @@ class _AnalyticsDashboardScreenState
       backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
-      titleSpacing: 20,
+      titleSpacing: 16,
       toolbarHeight: 70,
       title: Row(
         children: [
@@ -382,8 +382,8 @@ class _AnalyticsDashboardScreenState
           GestureDetector(
             onTap: () => context.push('/profile'),
             child: Container(
-              width: 44,
-              height: 44,
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -410,13 +410,13 @@ class _AnalyticsDashboardScreenState
                       )
                     : Icon(
                         LucideIcons.user,
-                        size: 22,
+                        size: 20,
                         color: isDark ? Colors.white : const Color(0xFF334155),
                       ),
               ),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,6 +424,8 @@ class _AnalyticsDashboardScreenState
               children: [
                 Text(
                   '${_getTimeGreeting()} $dateStr',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     color: subtextColor,
@@ -450,7 +452,7 @@ class _AnalyticsDashboardScreenState
         GestureDetector(
           onTap: () => _showAdaptiveInfoDialog(context, adaptive, isDark),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
             decoration: BoxDecoration(
               color: modeColor.withAlpha(isDark ? 40 : 20),
               borderRadius: BorderRadius.circular(20),
@@ -464,16 +466,16 @@ class _AnalyticsDashboardScreenState
               children: [
                 Icon(
                   _getModeIcon(adaptive.mode),
-                  size: 13,
+                  size: 12,
                   color: modeColor,
                 ),
-                const SizedBox(width: 5),
+                const SizedBox(width: 4),
                 Text(
                   adaptive.modeName,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 0.3,
+                    letterSpacing: 0.2,
                     color: modeColor,
                   ),
                 ),
@@ -481,12 +483,14 @@ class _AnalyticsDashboardScreenState
             ),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 2),
         // Dark/Light Mode Switcher
         IconButton(
+          visualDensity: VisualDensity.compact,
+          padding: const EdgeInsets.all(6),
           icon: Icon(
             isDark ? LucideIcons.sun : LucideIcons.moon,
-            size: 20,
+            size: 19,
             color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF475569),
           ),
           onPressed: () {
@@ -496,15 +500,17 @@ class _AnalyticsDashboardScreenState
         ),
         // Settings / Profile Button
         IconButton(
+          visualDensity: VisualDensity.compact,
+          padding: const EdgeInsets.all(6),
           icon: Icon(
             LucideIcons.settings,
-            size: 20,
+            size: 19,
             color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF475569),
           ),
           onPressed: () => context.push('/profile'),
           tooltip: 'Cài đặt hồ sơ & ngưỡng',
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
       ],
     );
   }
@@ -971,70 +977,76 @@ class _AnalyticsDashboardScreenState
     Color textColor,
     Color subtextColor,
   ) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cardWidth = (constraints.maxWidth - 12) / 2;
-
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
+    return Column(
+      children: [
+        Row(
           children: [
-            _buildMetricTile(
-              width: cardWidth,
-              title: 'Hoàn thành',
-              value: '${stats.doneCount}',
-              subtitle: '${(stats.completionRate * 100).round()}% tổng số việc',
-              icon: LucideIcons.checkCheck,
-              color: AppColors.statusDone,
-              cardBg: cardBg,
-              borderColor: borderColor,
-              textColor: textColor,
-              subtextColor: subtextColor,
+            Expanded(
+              child: _buildMetricTile(
+                title: 'Hoàn thành',
+                value: '${stats.doneCount}',
+                subtitle: '${(stats.completionRate * 100).round()}% tổng số việc',
+                icon: LucideIcons.checkCheck,
+                color: AppColors.statusDone,
+                cardBg: cardBg,
+                borderColor: borderColor,
+                textColor: textColor,
+                subtextColor: subtextColor,
+              ),
             ),
-            _buildMetricTile(
-              width: cardWidth,
-              title: 'Đang thực hiện',
-              value: '${stats.inProgressCount}',
-              subtitle: 'Đang xử lý dở',
-              icon: LucideIcons.timer,
-              color: AppColors.statusInProgress,
-              cardBg: cardBg,
-              borderColor: borderColor,
-              textColor: textColor,
-              subtextColor: subtextColor,
-            ),
-            _buildMetricTile(
-              width: cardWidth,
-              title: 'Cần làm',
-              value: '${stats.todoCount}',
-              subtitle: 'Đang xếp hàng',
-              icon: LucideIcons.listTodo,
-              color: const Color(0xFF64748B),
-              cardBg: cardBg,
-              borderColor: borderColor,
-              textColor: textColor,
-              subtextColor: subtextColor,
-            ),
-            _buildMetricTile(
-              width: cardWidth,
-              title: 'Quá hạn',
-              value: '${stats.overdueCount}',
-              subtitle: stats.overdueCount > 0 ? 'Cần xử lý gấp' : 'Không có việc trễ',
-              icon: LucideIcons.alertTriangle,
-              color: AppColors.priorityUrgent,
-              cardBg: cardBg,
-              borderColor: borderColor,
-              textColor: textColor,
-              subtextColor: subtextColor,
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildMetricTile(
+                title: 'Đang thực hiện',
+                value: '${stats.inProgressCount}',
+                subtitle: 'Đang xử lý dở',
+                icon: LucideIcons.timer,
+                color: AppColors.statusInProgress,
+                cardBg: cardBg,
+                borderColor: borderColor,
+                textColor: textColor,
+                subtextColor: subtextColor,
+              ),
             ),
           ],
-        );
-      },
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildMetricTile(
+                title: 'Cần làm',
+                value: '${stats.todoCount}',
+                subtitle: 'Đang xếp hàng',
+                icon: LucideIcons.listTodo,
+                color: const Color(0xFF64748B),
+                cardBg: cardBg,
+                borderColor: borderColor,
+                textColor: textColor,
+                subtextColor: subtextColor,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildMetricTile(
+                title: 'Quá hạn',
+                value: '${stats.overdueCount}',
+                subtitle: stats.overdueCount > 0 ? 'Cần xử lý gấp' : 'Không có việc trễ',
+                icon: LucideIcons.alertTriangle,
+                color: AppColors.priorityUrgent,
+                cardBg: cardBg,
+                borderColor: borderColor,
+                textColor: textColor,
+                subtextColor: subtextColor,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
   Widget _buildMetricTile({
-    required double width,
     required String title,
     required String value,
     required String subtitle,
@@ -1046,7 +1058,6 @@ class _AnalyticsDashboardScreenState
     required Color subtextColor,
   }) {
     return Container(
-      width: width,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardBg,
@@ -1059,12 +1070,16 @@ class _AnalyticsDashboardScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: subtextColor,
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: subtextColor,
+                  ),
                 ),
               ),
               Container(
@@ -1080,6 +1095,8 @@ class _AnalyticsDashboardScreenState
           const SizedBox(height: 10),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 24,
               fontWeight: FontWeight.w800,
@@ -1089,6 +1106,8 @@ class _AnalyticsDashboardScreenState
           const SizedBox(height: 2),
           Text(
             subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               color: subtextColor,
