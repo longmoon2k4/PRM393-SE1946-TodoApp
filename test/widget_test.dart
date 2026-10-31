@@ -50,5 +50,46 @@ void main() {
       expect(futureTask.isOverdue, isFalse);
       expect(futureTask.isDueSoon, isTrue);
     });
+
+    test('TaskItem Spring Boot REST API serialization and deserialization', () {
+      final task = TaskItem(
+        id: '101',
+        title: 'Hoàn thiện REST API',
+        description: 'Tích hợp MySQL và Spring Boot',
+        status: TaskStatus.inProgress,
+        priority: TaskPriority.urgent,
+        createdAt: DateTime(2026, 10, 31, 10, 0),
+        deadline: DateTime(2026, 10, 31, 23, 59),
+        assigneeId: 'u-101',
+        tags: const ['backend', 'spring'],
+      );
+
+      // Verify toBackendJson
+      final backendJson = task.toBackendJson();
+      expect(backendJson['status'], 'in_progress');
+      expect(backendJson['priority'], 'urgent');
+      expect(backendJson['title'], 'Hoàn thiện REST API');
+      expect(backendJson['assigneeId'], 'u-101');
+
+      // Verify fromJson with nested backend object format
+      final serverPayload = {
+        'id': 101,
+        'title': 'Hoàn thiện REST API',
+        'description': 'Tích hợp MySQL và Spring Boot',
+        'status': 'in_progress',
+        'priority': 'urgent',
+        'createdAt': '2026-10-31T10:00:00',
+        'dueDate': '2026-10-31T23:59:00',
+        'assignee': {'id': 'u-101', 'name': 'Hà Vũ Long'},
+        'tags': ['backend', 'spring'],
+      };
+
+      final parsed = TaskItem.fromJson(serverPayload);
+      expect(parsed.id, '101');
+      expect(parsed.status, TaskStatus.inProgress);
+      expect(parsed.priority, TaskPriority.urgent);
+      expect(parsed.assigneeId, 'u-101');
+      expect(parsed.tags, contains('backend'));
+    });
   });
 }

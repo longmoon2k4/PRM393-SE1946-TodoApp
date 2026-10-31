@@ -121,48 +121,124 @@ class TaskItem {
     };
   }
 
+  /// Xuất dữ liệu theo đúng chuẩn TaskRequest của Spring Boot REST API
+  Map<String, dynamic> toBackendJson() {
+    String statusStr;
+    switch (status) {
+      case TaskStatus.todo:
+        statusStr = 'todo';
+        break;
+      case TaskStatus.inProgress:
+        statusStr = 'in_progress';
+        break;
+      case TaskStatus.done:
+        statusStr = 'done';
+        break;
+      case TaskStatus.cancelled:
+        statusStr = 'cancelled';
+        break;
+    }
+
+    return {
+      'title': title,
+      'description': description,
+      'status': statusStr,
+      'priority': priority.name,
+      'orderIndex': orderIndex,
+      if (startDate != null) 'startDate': startDate!.toIso8601String(),
+      if (deadline != null) 'deadline': deadline!.toIso8601String(),
+      if (reminderAt != null) 'reminderAt': reminderAt!.toIso8601String(),
+      if (assigneeId != null) 'assigneeId': assigneeId,
+      if (projectId != null) 'projectId': projectId,
+      if (categoryId != null) 'categoryId': categoryId,
+      'tags': tags,
+    };
+  }
+
   factory TaskItem.fromJson(Map<String, dynamic> json) {
     TaskStatus parseStatus(String? val) {
+      if (val == null) return TaskStatus.todo;
+      final cleaned = val.toLowerCase().replaceAll('_', '');
+      if (cleaned == 'todo') return TaskStatus.todo;
+      if (cleaned == 'inprogress') return TaskStatus.inProgress;
+      if (cleaned == 'done') return TaskStatus.done;
+      if (cleaned == 'cancelled' || cleaned == 'canceled') {
+        return TaskStatus.cancelled;
+      }
       return TaskStatus.values.firstWhere(
-        (e) => e.name == val,
+        (e) => e.name.toLowerCase() == cleaned,
         orElse: () => TaskStatus.todo,
       );
     }
 
     TaskPriority parsePriority(String? val) {
+      if (val == null) return TaskPriority.medium;
+      final cleaned = val.toLowerCase();
+      if (cleaned == 'low') return TaskPriority.low;
+      if (cleaned == 'medium') return TaskPriority.medium;
+      if (cleaned == 'high') return TaskPriority.high;
+      if (cleaned == 'urgent') return TaskPriority.urgent;
       return TaskPriority.values.firstWhere(
-        (e) => e.name == val,
+        (e) => e.name.toLowerCase() == cleaned,
         orElse: () => TaskPriority.medium,
       );
     }
 
+    // Trích xuất quan hệ nếu Backend trả về dạng Nested Object
+    String? extractId(dynamic field) {
+      if (field == null) return null;
+      if (field is Map<String, dynamic>) {
+        return field['id']?.toString();
+      }
+      return field.toString();
+    }
+
+    // Trích xuất tags hỗ trợ cả List<String> và List<TagObject>
+    List<String> extractTags(dynamic tagsJson) {
+      if (tagsJson is! List) return const [];
+      return tagsJson
+          .map((e) {
+            if (e is Map<String, dynamic>) {
+              return e['name']?.toString() ?? '';
+            }
+            return e.toString();
+          })
+          .where((s) => s.isNotEmpty)
+          .toList();
+    }
+
+    final rawDeadline = json['deadline'] ?? json['dueDate'];
+    final rawCreatedAt = json['createdAt'];
+    final rawStartDate = json['startDate'];
+    final rawReminderAt = json['reminderAt'];
+    final rawDeletedAt = json['deletedAt'];
+
     return TaskItem(
-      id: json['id'] as String? ?? '',
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      status: parseStatus(json['status'] as String?),
-      priority: parsePriority(json['priority'] as String?),
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      status: parseStatus(json['status']?.toString()),
+      priority: parsePriority(json['priority']?.toString()),
       orderIndex: (json['orderIndex'] as num?)?.toDouble() ?? 0.0,
-      createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
+      createdAt: rawCreatedAt != null
+          ? DateTime.tryParse(rawCreatedAt.toString()) ?? DateTime.now()
           : DateTime.now(),
-      startDate: json['startDate'] != null
-          ? DateTime.tryParse(json['startDate'] as String)
+      startDate: rawStartDate != null
+          ? DateTime.tryParse(rawStartDate.toString())
           : null,
-      deadline: json['deadline'] != null
-          ? DateTime.tryParse(json['deadline'] as String)
+      deadline: rawDeadline != null
+          ? DateTime.tryParse(rawDeadline.toString())
           : null,
-      reminderAt: json['reminderAt'] != null
-          ? DateTime.tryParse(json['reminderAt'] as String)
+      reminderAt: rawReminderAt != null
+          ? DateTime.tryParse(rawReminderAt.toString())
           : null,
-      deletedAt: json['deletedAt'] != null
-          ? DateTime.tryParse(json['deletedAt'] as String)
+      deletedAt: rawDeletedAt != null
+          ? DateTime.tryParse(rawDeletedAt.toString())
           : null,
-      categoryId: json['categoryId'] as String?,
-      projectId: json['projectId'] as String?,
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
-          const [],
-      assigneeId: json['assigneeId'] as String?,
+      categoryId: extractId(json['category'] ?? json['categoryId']),
+      projectId: extractId(json['project'] ?? json['projectId']),
+      tags: extractTags(json['tags']),
+      assigneeId: extractId(json['assignee'] ?? json['assigneeId']),
       subtasks: (json['subtasks'] as List<dynamic>?)
               ?.map((e) => SubTask.fromJson(e as Map<String, dynamic>))
               .toList() ??

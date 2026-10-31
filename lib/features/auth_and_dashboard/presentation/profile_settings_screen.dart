@@ -270,22 +270,22 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
         color: customBorderColor ??
-            (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
-        width: 1.0,
+            (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+        width: 1.2,
       ),
       boxShadow: [
         BoxShadow(
           color: isDark
               ? Colors.black.withAlpha(90)
               : const Color(0xFF0F172A).withAlpha(16),
-          blurRadius: 18,
-          offset: const Offset(0, 5),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
         ),
         BoxShadow(
           color: isDark
               ? Colors.black.withAlpha(50)
-              : const Color(0xFF0F172A).withAlpha(6),
-          blurRadius: 4,
+              : const Color(0xFF0F172A).withAlpha(8),
+          blurRadius: 3,
           offset: const Offset(0, 1),
         ),
       ],
@@ -336,7 +336,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Theme.of(context).primaryColor,
-                        width: 2,
+                        width: 2.2,
                       ),
                     ),
                     child: ClipOval(
@@ -353,7 +353,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.all(3),
+                    padding: const EdgeInsets.all(3.5),
                     decoration: const BoxDecoration(
                       color: Color(0xFF10B981),
                       shape: BoxShape.circle,
@@ -371,21 +371,15 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            user?.name ?? 'Hà Vũ Long',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: textColor,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      user?.name ?? 'Hà Vũ Long',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: textColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 3),
                     Text(
@@ -394,12 +388,14 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                         fontSize: 13,
                         color: subtextColor,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
-                        vertical: 2,
+                        vertical: 3,
                       ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).primaryColor.withAlpha(25),
@@ -424,29 +420,34 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           Divider(height: 1, color: borderColor),
           const SizedBox(height: 16),
 
-          // 3-Metric Summary Strip
+          // 3-Metric Summary Strip - Equal 1:1:1 Distribution
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildProfileStatColumn(
-                'Tổng việc',
-                '${stats.totalTasks}',
-                textColor,
-                subtextColor,
+              Expanded(
+                child: _buildProfileStatColumn(
+                  'Tổng việc',
+                  '${stats.totalTasks}',
+                  textColor,
+                  subtextColor,
+                ),
               ),
               Container(width: 1, height: 28, color: borderColor),
-              _buildProfileStatColumn(
-                'Đã xong',
-                '${stats.doneCount}',
-                textColor,
-                subtextColor,
+              Expanded(
+                child: _buildProfileStatColumn(
+                  'Đã xong',
+                  '${stats.doneCount}',
+                  textColor,
+                  subtextColor,
+                ),
               ),
               Container(width: 1, height: 28, color: borderColor),
-              _buildProfileStatColumn(
-                'Điểm năng suất',
-                '${stats.productivityScore}đ',
-                const Color(0xFF10B981),
-                subtextColor,
+              Expanded(
+                child: _buildProfileStatColumn(
+                  'Điểm năng suất',
+                  '${stats.productivityScore}đ',
+                  const Color(0xFF10B981),
+                  subtextColor,
+                ),
               ),
             ],
           ),
@@ -517,6 +518,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                         color: textColor,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       'Kéo slider để thay đổi mốc đổi màu tự động',
                       style: GoogleFonts.plusJakartaSans(
@@ -529,7 +531,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor.withAlpha(isDark ? 40 : 20),
                   borderRadius: BorderRadius.circular(10),
@@ -541,7 +543,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 child: Text(
                   '$currentThreshold việc',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.w800,
                     color: Theme.of(context).primaryColor,
                   ),
@@ -594,7 +596,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 range: '1 - $calmLimit',
                 desc: 'Dịu mát',
                 color: AppColors.calmPrimary,
-                bgColor: AppColors.calmPrimary.withAlpha(isDark ? 35 : 15),
                 isCurrent: adaptive.mode == AdaptiveMode.calm,
                 isDark: isDark,
               ),
@@ -604,7 +605,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 range: '${calmLimit + 1} - $currentThreshold',
                 desc: 'Tập trung',
                 color: AppColors.focusPrimary,
-                bgColor: AppColors.focusPrimary.withAlpha(isDark ? 35 : 15),
                 isCurrent: adaptive.mode == AdaptiveMode.focus,
                 isDark: isDark,
               ),
@@ -614,7 +614,6 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                 range: '> $currentThreshold',
                 desc: 'Khẩn cấp',
                 color: AppColors.overloadPrimary,
-                bgColor: AppColors.overloadPrimary.withAlpha(isDark ? 35 : 15),
                 isCurrent: adaptive.mode == AdaptiveMode.overload,
                 isDark: isDark,
               ),
@@ -630,10 +629,16 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
     required String range,
     required String desc,
     required Color color,
-    required Color bgColor,
     required bool isCurrent,
     required bool isDark,
   }) {
+    final bgColor = isCurrent
+        ? color.withAlpha(isDark ? 40 : 20)
+        : (isDark ? const Color(0xFF0F172A).withAlpha(50) : const Color(0xFFF8FAFC));
+    final cardBorder = isCurrent
+        ? color
+        : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0));
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
@@ -641,11 +646,13 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           color: bgColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isCurrent ? color : color.withAlpha(80),
-            width: isCurrent ? 2 : 1,
+            color: cardBorder,
+            width: isCurrent ? 1.8 : 1.0,
           ),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -692,13 +699,14 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 9.5,
+                fontWeight: FontWeight.w600,
                 color: color,
               ),
             ),
             if (isCurrent) ...[
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(6),
@@ -708,6 +716,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                   style: TextStyle(
                     fontSize: 7.5,
                     fontWeight: FontWeight.w800,
+                    letterSpacing: 0.4,
                     color: Colors.white,
                   ),
                 ),
@@ -1039,18 +1048,22 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton.icon(
-              onPressed: () {
-                ref.read(coreTasksProvider.notifier).resetToMock();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Đã khôi phục dữ liệu ban đầu thành công.'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+              onPressed: () async {
+                final success = await ref.read(coreTasksProvider.notifier).syncFromBackend();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(success
+                          ? 'Đã đồng bộ dữ liệu thực tế từ Cloud Server thành công!'
+                          : 'Đang dùng dữ liệu bộ nhớ máy (Server ngoại tuyến).'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
               },
-              icon: const Icon(LucideIcons.rotateCcw, size: 15, color: Color(0xFF2563EB)),
+              icon: const Icon(LucideIcons.refreshCw, size: 15, color: Color(0xFF2563EB)),
               label: Text(
-                'Khôi phục dữ liệu mẫu ban đầu',
+                'Đồng bộ dữ liệu thời gian thực (Live Sync)',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,

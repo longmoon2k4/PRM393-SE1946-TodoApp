@@ -29,7 +29,7 @@ class _AnalyticsDashboardScreenState
 
   Future<void> _handleRefresh() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 600));
+    await ref.read(coreTasksProvider.notifier).syncFromBackend();
     if (mounted) setState(() => _isLoading = false);
   }
 
@@ -221,22 +221,22 @@ class _AnalyticsDashboardScreenState
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
         color: customBorderColor ??
-            (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
-        width: 1.0,
+            (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+        width: 1.2,
       ),
       boxShadow: [
         BoxShadow(
           color: isDark
               ? Colors.black.withAlpha(90)
               : const Color(0xFF0F172A).withAlpha(16),
-          blurRadius: 18,
-          offset: const Offset(0, 5),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
         ),
         BoxShadow(
           color: isDark
               ? Colors.black.withAlpha(50)
-              : const Color(0xFF0F172A).withAlpha(6),
-          blurRadius: 4,
+              : const Color(0xFF0F172A).withAlpha(8),
+          blurRadius: 3,
           offset: const Offset(0, 1),
         ),
       ],
@@ -399,20 +399,20 @@ class _AnalyticsDashboardScreenState
       elevation: 0,
       scrolledUnderElevation: 0,
       titleSpacing: 16,
-      toolbarHeight: 70,
+      toolbarHeight: 68,
       title: Row(
         children: [
           // User Avatar with glowing status ring
           GestureDetector(
             onTap: () => context.push('/profile'),
             child: Container(
-              width: 42,
-              height: 42,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: modeColor,
-                  width: 2,
+                  width: 2.2,
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -440,7 +440,7 @@ class _AnalyticsDashboardScreenState
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,6 +449,7 @@ class _AnalyticsDashboardScreenState
                 Text(
                   _getTimeGreeting(),
                   maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     color: subtextColor,
@@ -475,7 +476,7 @@ class _AnalyticsDashboardScreenState
         GestureDetector(
           onTap: () => _showAdaptiveInfoDialog(context, adaptive, isDark),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: modeColor.withAlpha(isDark ? 40 : 20),
               borderRadius: BorderRadius.circular(20),
@@ -489,14 +490,14 @@ class _AnalyticsDashboardScreenState
               children: [
                 Icon(
                   _getModeIcon(adaptive.mode),
-                  size: 12,
+                  size: 13,
                   color: modeColor,
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 5),
                 Text(
                   adaptive.modeName,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.2,
                     color: modeColor,
@@ -506,7 +507,7 @@ class _AnalyticsDashboardScreenState
             ),
           ),
         ),
-        const SizedBox(width: 2),
+        const SizedBox(width: 4),
         // Dark/Light Mode Switcher
         IconButton(
           visualDensity: VisualDensity.compact,
@@ -533,7 +534,7 @@ class _AnalyticsDashboardScreenState
           onPressed: () => context.push('/profile'),
           tooltip: 'Cài đặt hồ sơ & ngưỡng',
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 8),
       ],
     );
   }
@@ -608,7 +609,7 @@ class _AnalyticsDashboardScreenState
               // Circular Gauge Indicator
               CircularPercentIndicator(
                 radius: 46.0,
-                lineWidth: 8.0,
+                lineWidth: 8.5,
                 animation: true,
                 animationDuration: 1000,
                 percent: (score / 100).clamp(0.0, 1.0),
@@ -618,7 +619,7 @@ class _AnalyticsDashboardScreenState
                     Text(
                       '$score',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 22,
+                        fontSize: 24,
                         fontWeight: FontWeight.w800,
                         color: textColor,
                       ),
@@ -626,8 +627,8 @@ class _AnalyticsDashboardScreenState
                     Text(
                       'ĐIỂM',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
                         color: subtextColor,
                       ),
@@ -647,13 +648,14 @@ class _AnalyticsDashboardScreenState
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
+                            horizontal: 10,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
                             color: scoreColor.withAlpha(isDark ? 40 : 20),
@@ -665,20 +667,20 @@ class _AnalyticsDashboardScreenState
                           child: Text(
                             stats.productivityLabel,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w800,
                               color: scoreColor,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     Text(
                       stats.productivityAdvice,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        height: 1.35,
+                        fontSize: 12.5,
+                        height: 1.4,
                         color: subtextColor,
                       ),
                     ),
@@ -688,16 +690,16 @@ class _AnalyticsDashboardScreenState
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           Divider(height: 1, color: borderColor),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
 
           // Micro quick stat strip
           Row(
             children: [
               Expanded(
                 child: _buildMiniStat(
-                  label: 'Hoàn thành',
+                  label: 'Tỷ lệ hoàn thành',
                   value: '${(stats.completionRate * 100).round()}%',
                   icon: LucideIcons.checkCircle,
                   iconColor: const Color(0xFF10B981),
@@ -705,10 +707,10 @@ class _AnalyticsDashboardScreenState
                   subtextColor: subtextColor,
                 ),
               ),
-              Container(width: 1, height: 26, color: borderColor),
+              Container(width: 1, height: 28, color: borderColor),
               Expanded(
                 child: _buildMiniStat(
-                  label: 'Đang làm',
+                  label: 'Cần giải quyết',
                   value: '${stats.todoCount + stats.inProgressCount} việc',
                   icon: LucideIcons.clock,
                   iconColor: const Color(0xFF3B82F6),
@@ -716,10 +718,10 @@ class _AnalyticsDashboardScreenState
                   subtextColor: subtextColor,
                 ),
               ),
-              Container(width: 1, height: 26, color: borderColor),
+              Container(width: 1, height: 28, color: borderColor),
               Expanded(
                 child: _buildMiniStat(
-                  label: 'Khẩn cấp',
+                  label: 'Hạn khẩn cấp',
                   value: '${stats.overdueCount + stats.dueSoonCount} việc',
                   icon: LucideIcons.flame,
                   iconColor: stats.overdueCount > 0
@@ -752,19 +754,19 @@ class _AnalyticsDashboardScreenState
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 13, color: iconColor),
-            const SizedBox(width: 4),
+            Icon(icon, size: 14, color: iconColor),
+            const SizedBox(width: 5),
             Text(
               value,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
+                fontSize: 13.5,
                 fontWeight: FontWeight.w800,
                 color: textColor,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 3),
+        const SizedBox(height: 4),
         Text(
           label,
           textAlign: TextAlign.center,
@@ -807,25 +809,25 @@ class _AnalyticsDashboardScreenState
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
                         color: modeColor.withAlpha(isDark ? 40 : 20),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         LucideIcons.gauge,
-                        size: 15,
+                        size: 16,
                         color: modeColor,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Tải công việc & Engine',
+                        'Engine Thích ứng (Adaptive)',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
+                          fontSize: 14.5,
                           fontWeight: FontWeight.w700,
                           color: textColor,
                         ),
@@ -836,13 +838,13 @@ class _AnalyticsDashboardScreenState
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: modeColor.withAlpha(isDark ? 40 : 20),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: modeColor.withAlpha(isDark ? 90 : 60),
-                    width: 1,
+                    width: 1.2,
                   ),
                 ),
                 child: Text(
@@ -857,7 +859,7 @@ class _AnalyticsDashboardScreenState
             ],
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
 
           // Multi-zone track progress bar
           Stack(
@@ -894,39 +896,44 @@ class _AnalyticsDashboardScreenState
             ],
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
-          // Zone markers legend - Two-tier stacked layout for 100% zero truncation
+          // Zone markers legend - 3-Segment Capsule Grid
           Row(
             children: [
               Expanded(
-                child: _buildZoneLegendColumn(
-                  label: '🌿 Dịu mát',
+                child: _buildZoneLegendPill(
+                  icon: LucideIcons.leaf,
+                  label: 'Calm',
                   range: '< 60%',
                   isActive: adaptive.mode == AdaptiveMode.calm,
-                  activeColor: AppColors.calmPrimary,
+                  color: AppColors.calmPrimary,
+                  isDark: isDark,
                   subtextColor: subtextColor,
-                  alignment: CrossAxisAlignment.start,
                 ),
               ),
+              const SizedBox(width: 8),
               Expanded(
-                child: _buildZoneLegendColumn(
-                  label: '⚡ Tập trung',
+                child: _buildZoneLegendPill(
+                  icon: LucideIcons.zap,
+                  label: 'Focus',
                   range: '60% - 100%',
                   isActive: adaptive.mode == AdaptiveMode.focus,
-                  activeColor: AppColors.focusPrimary,
+                  color: AppColors.focusPrimary,
+                  isDark: isDark,
                   subtextColor: subtextColor,
-                  alignment: CrossAxisAlignment.center,
                 ),
               ),
+              const SizedBox(width: 8),
               Expanded(
-                child: _buildZoneLegendColumn(
-                  label: '🚨 Quá tải',
+                child: _buildZoneLegendPill(
+                  icon: LucideIcons.alertOctagon,
+                  label: 'Overload',
                   range: '> 100%',
                   isActive: adaptive.mode == AdaptiveMode.overload,
-                  activeColor: AppColors.overloadPrimary,
+                  color: AppColors.overloadPrimary,
+                  isDark: isDark,
                   subtextColor: subtextColor,
-                  alignment: CrossAxisAlignment.end,
                 ),
               ),
             ],
@@ -943,11 +950,11 @@ class _AnalyticsDashboardScreenState
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     color: subtextColor,
-                    height: 1.3,
+                    height: 1.35,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               InkWell(
                 onTap: () => context.push('/profile'),
                 borderRadius: BorderRadius.circular(10),
@@ -966,12 +973,12 @@ class _AnalyticsDashboardScreenState
                       Text(
                         'Đổi ngưỡng',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           color: Theme.of(context).primaryColor,
                         ),
                       ),
-                      const SizedBox(width: 2),
+                      const SizedBox(width: 3),
                       Icon(
                         LucideIcons.chevronRight,
                         size: 13,
@@ -988,37 +995,66 @@ class _AnalyticsDashboardScreenState
     );
   }
 
-  Widget _buildZoneLegendColumn({
+  Widget _buildZoneLegendPill({
+    required IconData icon,
     required String label,
     required String range,
     required bool isActive,
-    required Color activeColor,
+    required Color color,
+    required bool isDark,
     required Color subtextColor,
-    required CrossAxisAlignment alignment,
   }) {
-    return Column(
-      crossAxisAlignment: alignment,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 11,
-            fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-            color: isActive ? activeColor : subtextColor,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      decoration: BoxDecoration(
+        color: isActive
+            ? color.withAlpha(isDark ? 40 : 20)
+            : (isDark ? const Color(0xFF0F172A).withAlpha(50) : const Color(0xFFF8FAFC)),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isActive
+              ? color
+              : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+          width: isActive ? 1.5 : 1.0,
         ),
-        const SizedBox(height: 1),
-        Text(
-          range,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 10,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-            color: isActive ? activeColor.withAlpha(200) : subtextColor.withAlpha(160),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 12, color: isActive ? color : subtextColor),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                    color: isActive ? color : subtextColor,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            range,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+              color: isActive ? color : subtextColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1118,7 +1154,7 @@ class _AnalyticsDashboardScreenState
     required bool isDark,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1126,35 +1162,39 @@ class _AnalyticsDashboardScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Flexible(
+              Expanded(
                 child: Text(
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: subtextColor,
                   ),
                 ),
               ),
+              const SizedBox(width: 4),
               Container(
-                padding: const EdgeInsets.all(6),
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
-                  color: color.withAlpha(25),
+                  color: color.withAlpha(isDark ? 40 : 25),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 14, color: color),
+                child: Center(
+                  child: Icon(icon, size: 14, color: color),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 24,
+              fontSize: 26,
               fontWeight: FontWeight.w800,
               color: textColor,
             ),
@@ -1166,6 +1206,7 @@ class _AnalyticsDashboardScreenState
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
+              fontWeight: FontWeight.w500,
               color: subtextColor,
             ),
           ),
@@ -1400,11 +1441,11 @@ class _AnalyticsDashboardScreenState
           ),
           const SizedBox(height: 18),
           SizedBox(
-            height: 165,
+            height: 145,
             child: Row(
               children: [
                 Expanded(
-                  flex: 5,
+                  flex: 1,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -1426,7 +1467,7 @@ class _AnalyticsDashboardScreenState
                           ),
                           borderData: FlBorderData(show: false),
                           sectionsSpace: 3,
-                          centerSpaceRadius: 42,
+                          centerSpaceRadius: 36,
                           sections: _getPieSections(stats),
                         ),
                       ),
@@ -1436,7 +1477,7 @@ class _AnalyticsDashboardScreenState
                           Text(
                             '${(stats.completionRate * 100).round()}%',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18,
+                              fontSize: 17,
                               fontWeight: FontWeight.w800,
                               color: textColor,
                             ),
@@ -1444,7 +1485,7 @@ class _AnalyticsDashboardScreenState
                           Text(
                             'Đã xong',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10,
+                              fontSize: 9.5,
                               fontWeight: FontWeight.w600,
                               color: subtextColor,
                             ),
@@ -1454,8 +1495,9 @@ class _AnalyticsDashboardScreenState
                     ],
                   ),
                 ),
+                const SizedBox(width: 14),
                 Expanded(
-                  flex: 4,
+                  flex: 1,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1479,7 +1521,7 @@ class _AnalyticsDashboardScreenState
                       ),
                       const SizedBox(height: 8),
                       _buildLegendItem(
-                        'Cần làm',
+                        'Chờ xử lý',
                         stats.todoCount,
                         stats.totalTasks,
                         const Color(0xFF64748B),
@@ -1558,24 +1600,28 @@ class _AnalyticsDashboardScreenState
     return Row(
       children: [
         Container(
-          width: 9,
-          height: 9,
+          width: 8,
+          height: 8,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
         Expanded(
           child: Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
               color: subtextColor,
             ),
           ),
         ),
+        const SizedBox(width: 4),
         Text(
           '$count ($pct%)',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: FontWeight.w700,
             color: textColor,
           ),
