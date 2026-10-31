@@ -158,15 +158,20 @@ class _AnalyticsDashboardScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                  color: color,
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: color,
+                  ),
                 ),
               ),
-              if (isActive)
+              if (isActive) ...[
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
@@ -182,6 +187,7 @@ class _AnalyticsDashboardScreenState
                     ),
                   ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 4),
@@ -1141,26 +1147,33 @@ class _AnalyticsDashboardScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    LucideIcons.zap,
-                    size: 16,
-                    color: Color(0xFFF59E0B),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Cần xử lý ngay',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(
+                      LucideIcons.zap,
+                      size: 16,
+                      color: Color(0xFFF59E0B),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Cần xử lý ngay',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Text(
-                'Tick để hoàn thành nhanh',
+                'Tick để xong nhanh',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   color: subtextColor,
@@ -1319,14 +1332,19 @@ class _AnalyticsDashboardScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Phân bổ trạng thái',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
+              Expanded(
+                child: Text(
+                  'Phân bổ trạng thái',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 'Tổng: ${stats.totalTasks} việc',
                 style: GoogleFonts.plusJakartaSans(
@@ -1549,14 +1567,19 @@ class _AnalyticsDashboardScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Hiệu suất hoàn thành theo tuần',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
+              Expanded(
+                child: Text(
+                  'Hiệu suất hoàn thành theo tuần',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -1745,24 +1768,31 @@ class _AnalyticsDashboardScreenState
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             Text(
               '$count (${(percent * 100).round()}%)',
               style: GoogleFonts.plusJakartaSans(

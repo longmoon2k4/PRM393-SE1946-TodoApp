@@ -704,57 +704,55 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: borderColor),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFFF1F5F9).withAlpha(30)
-                          : const Color(0xFFF1F5F9),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      isDark ? LucideIcons.moon : LucideIcons.sun,
-                      size: 18,
-                      color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFFF59E0B),
-                    ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFFF1F5F9).withAlpha(30)
+                  : const Color(0xFFF1F5F9),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isDark ? LucideIcons.moon : LucideIcons.sun,
+              size: 18,
+              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFFF59E0B),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Giao diện tối (Dark Mode)',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
                   ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Chế độ Giao diện Tối (Dark Mode)',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
-                        ),
-                      ),
-                      Text(
-                        isDark ? 'Đang bật nền Slate 900' : 'Đang bật nền Sáng dịu',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: subtextColor,
-                        ),
-                      ),
-                    ],
+                ),
+                Text(
+                  isDark ? 'Đang bật nền Slate 900' : 'Đang bật nền Sáng dịu',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: subtextColor,
                   ),
-                ],
-              ),
-              Switch.adaptive(
-                value: isDark,
-                onChanged: (val) {
-                  ref.read(themeModeProvider.notifier).setTheme(val);
-                },
-              ),
-            ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Switch.adaptive(
+            value: isDark,
+            onChanged: (val) {
+              ref.read(themeModeProvider.notifier).setTheme(val);
+            },
           ),
         ],
       ),
@@ -780,82 +778,116 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            secondary: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEF4444).withAlpha(20),
-                shape: BoxShape.circle,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withAlpha(20),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  LucideIcons.bellRing,
+                  size: 18,
+                  color: Color(0xFFEF4444),
+                ),
               ),
-              child: const Icon(
-                LucideIcons.bellRing,
-                size: 18,
-                color: Color(0xFFEF4444),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cảnh báo quá tải công việc',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Nhận push notification khi việc vượt ngưỡng',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: subtextColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            title: Text(
-              'Cảnh báo quá tải công việc',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: textColor,
+              const SizedBox(width: 8),
+              Switch.adaptive(
+                value: _notifyOverload,
+                onChanged: (val) {
+                  setState(() => _notifyOverload = val);
+                  ref
+                      .read(authProvider.notifier)
+                      .updateNotificationPreferences(notifyOnOverload: val);
+                },
               ),
-            ),
-            subtitle: Text(
-              'Nhận push notification khi số task chưa xong vượt ngưỡng',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                color: subtextColor,
-              ),
-            ),
-            value: _notifyOverload,
-            onChanged: (val) {
-              setState(() => _notifyOverload = val);
-              ref
-                  .read(authProvider.notifier)
-                  .updateNotificationPreferences(notifyOnOverload: val);
-            },
+            ],
           ),
-          Divider(height: 16, color: borderColor),
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            secondary: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B).withAlpha(20),
-                shape: BoxShape.circle,
+          Divider(height: 24, color: borderColor),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF59E0B).withAlpha(20),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  LucideIcons.calendarClock,
+                  size: 18,
+                  color: Color(0xFFF59E0B),
+                ),
               ),
-              child: const Icon(
-                LucideIcons.calendarClock,
-                size: 18,
-                color: Color(0xFFF59E0B),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Nhắc nhở hạn chót công việc',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Thông báo trước 24 giờ cả khi offline',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: subtextColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            title: Text(
-              'Nhắc nhở hạn chót công việc',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: textColor,
+              const SizedBox(width: 8),
+              Switch.adaptive(
+                value: _notifyDeadline,
+                onChanged: (val) {
+                  setState(() => _notifyDeadline = val);
+                  ref
+                      .read(authProvider.notifier)
+                      .updateNotificationPreferences(notifyOnDeadline: val);
+                },
               ),
-            ),
-            subtitle: Text(
-              'Thông báo trước 24 giờ kể cả khi thiết bị không có mạng',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                color: subtextColor,
-              ),
-            ),
-            value: _notifyDeadline,
-            onChanged: (val) {
-              setState(() => _notifyDeadline = val);
-              ref
-                  .read(authProvider.notifier)
-                  .updateNotificationPreferences(notifyOnDeadline: val);
-            },
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
