@@ -99,17 +99,10 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       await _ensureGoogleInitialized();
       
-      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
-      
-      if (googleUser == null) {
-        state = state.copyWith(
-          status: AuthStatus.unauthenticated,
-          errorMessage: 'Người dùng đã hủy đăng nhập.',
-        );
-        return false;
-      }
+      final GoogleSignInAccount googleUser =
+          await GoogleSignIn.instance.authenticate();
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
