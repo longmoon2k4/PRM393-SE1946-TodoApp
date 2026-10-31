@@ -79,42 +79,48 @@ class _AnalyticsDashboardScreenState
               ),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Ứng dụng tự động điều chỉnh màu sắc giao diện theo tải công việc thời gian thực:',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  color: subtextColor,
-                ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ứng dụng tự động điều chỉnh màu sắc giao diện theo tải công việc thời gian thực:',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      color: subtextColor,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _buildAdaptiveRuleItem(
+                    title: '🌿 Calm Mode (Dịu mát)',
+                    desc: 'Khối lượng việc < 60% ngưỡng. Giữ tinh thần thoải mái, nhẹ nhàng.',
+                    color: AppColors.calmPrimary,
+                    isActive: adaptive.mode == AdaptiveMode.calm,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 10),
+                  _buildAdaptiveRuleItem(
+                    title: '⚡ Focus Mode (Tập trung)',
+                    desc: 'Khối lượng việc 60% - 100% ngưỡng hoặc có việc quá hạn. Tông màu ấm tăng tập trung.',
+                    color: AppColors.focusPrimary,
+                    isActive: adaptive.mode == AdaptiveMode.focus,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 10),
+                  _buildAdaptiveRuleItem(
+                    title: '🚨 Overload Mode (Quá tải)',
+                    desc: 'Vượt ngưỡng (${adaptive.backlogThreshold} việc). Kích hoạt màu đỏ khẩn cấp và cảnh báo thông báo.',
+                    color: AppColors.overloadPrimary,
+                    isActive: adaptive.mode == AdaptiveMode.overload,
+                    isDark: isDark,
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              _buildAdaptiveRuleItem(
-                title: '🌿 Calm Mode (Dịu mát)',
-                desc: 'Khối lượng việc < 60% ngưỡng. Giữ tinh thần thoải mái, nhẹ nhàng.',
-                color: AppColors.calmPrimary,
-                isActive: adaptive.mode == AdaptiveMode.calm,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 10),
-              _buildAdaptiveRuleItem(
-                title: '⚡ Focus Mode (Tập trung)',
-                desc: 'Khối lượng việc 60% - 100% ngưỡng hoặc có việc quá hạn. Tông màu ấm tăng tập trung.',
-                color: AppColors.focusPrimary,
-                isActive: adaptive.mode == AdaptiveMode.focus,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 10),
-              _buildAdaptiveRuleItem(
-                title: '🚨 Overload Mode (Quá tải)',
-                desc: 'Vượt ngưỡng (${adaptive.backlogThreshold} việc). Kích hoạt màu đỏ khẩn cấp và cảnh báo thông báo.',
-                color: AppColors.overloadPrimary,
-                isActive: adaptive.mode == AdaptiveMode.overload,
-                isDark: isDark,
-              ),
-            ],
+            ),
           ),
           actions: [
             TextButton(
