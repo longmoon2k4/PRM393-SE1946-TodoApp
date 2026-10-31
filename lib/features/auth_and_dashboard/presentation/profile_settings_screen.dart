@@ -474,26 +474,29 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ngưỡng kích hoạt quá tải',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ngưỡng kích hoạt quá tải',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Kéo slider để thay đổi mốc đổi màu tự động',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      color: subtextColor,
+                    Text(
+                      'Kéo slider để thay đổi mốc đổi màu tự động',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: subtextColor,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
