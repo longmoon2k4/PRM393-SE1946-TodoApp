@@ -22,6 +22,7 @@ class TaskItem {
   final String? assigneeId;
   final List<SubTask> subtasks;
   final List<TaskComment> comments;
+  final bool isSyncPending;
 
   const TaskItem({
     required this.id,
@@ -41,6 +42,7 @@ class TaskItem {
     this.assigneeId,
     this.subtasks = const [],
     this.comments = const [],
+    this.isSyncPending = false,
   });
 
   bool get isOverdue =>
@@ -77,6 +79,7 @@ class TaskItem {
     String? assigneeId,
     List<SubTask>? subtasks,
     List<TaskComment>? comments,
+    bool? isSyncPending,
   }) {
     return TaskItem(
       id: id ?? this.id,
@@ -96,6 +99,7 @@ class TaskItem {
       assigneeId: assigneeId ?? this.assigneeId,
       subtasks: subtasks ?? this.subtasks,
       comments: comments ?? this.comments,
+      isSyncPending: isSyncPending ?? this.isSyncPending,
     );
   }
 
@@ -118,6 +122,7 @@ class TaskItem {
       'assigneeId': assigneeId,
       'subtasks': subtasks.map((s) => s.toJson()).toList(),
       'comments': comments.map((c) => c.toJson()).toList(),
+      'isSyncPending': isSyncPending,
     };
   }
 
@@ -247,6 +252,7 @@ class TaskItem {
               ?.map((e) => TaskComment.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      isSyncPending: json['isSyncPending'] as bool? ?? false,
     );
   }
 }

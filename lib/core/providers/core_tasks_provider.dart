@@ -19,6 +19,10 @@ final coreTasksProvider =
 });
 
 class CoreTasksNotifier extends Notifier<List<TaskItem>> {
+  final Map<String, TaskItem> _pendingTaskUpdates = {};
+  final Map<String, Future<void>> _taskUpdateSyncs = {};
+  Future<bool>? _backendSync;
+
   @override
   List<TaskItem> build() {
     // 1. Nạp tức thì từ bộ nhớ đệm ngoại tuyến (Offline Storage)
@@ -35,7 +39,18 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
   }
 
   /// Đồng bộ dữ liệu thực tế từ Backend Server & Database MySQL
-  Future<bool> syncFromBackend() async {
+  Future<bool> syncFromBackend() {
+    final activeSync = _backendSync;
+    if (activeSync != null) return activeSync;
+
+    final sync = _syncFromBackend();
+    _backendSync = sync;
+    return sync.whenComplete(() {
+      if (identical(_backendSync, sync)) _backendSync = null;
+    });
+  }
+
+  Future<bool> _syncFromBackend() async {
     try {
       var serverTasks = await TaskApiService.instance.fetchTasks();
 
@@ -44,19 +59,38 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
         serverTasks = await TaskApiService.instance.seedInitialProductionDataIfEmpty();
       }
 
-      if (serverTasks.isNotEmpty) {
-        state = serverTasks;
-        await LocalStorageService.saveTasks(serverTasks);
+      final pendingTasks = <String, TaskItem>{
+        for (final task in state)
+          if (task.id.isNotEmpty && task.isSyncPending) task.id: task,
+        ..._pendingTaskUpdates,
+      };
+      _pendingTaskUpdates.addAll(pendingTasks);
+
+      if (serverTasks.isNotEmpty || pendingTasks.isNotEmpty) {
+        final pendingIds = pendingTasks.keys.toSet();
+        state = [
+          for (final task in serverTasks)
+            if (!pendingIds.contains(task.id)) task,
+          ...pendingTasks.values,
+        ];
+        await LocalStorageService.saveTasks(state);
         await LocalStorageService.updateLastSyncTime();
+
+        var allPendingUpdatesSynced = true;
+        for (final task in pendingTasks.values) {
+          if (!await _syncPendingTask(task.id)) {
+            allPendingUpdatesSynced = false;
+          }
+        }
 
         // Kiểm tra thông báo deadline định kỳ một cách thông minh và tôn trọng cài đặt người dùng
         final auth = ref.read(authProvider);
         final notifyDeadline = auth.user?.notifyOnDeadline ?? true;
         unawaited(NotificationService.checkAndNotifyApproachingDeadlines(
-          tasks: serverTasks,
+          tasks: state,
           isEnabled: auth.status == AuthStatus.authenticated && notifyDeadline,
         ));
-        return true;
+        return allPendingUpdatesSynced;
       }
       return true;
     } catch (e) {
@@ -94,18 +128,81 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
 
   /// Cập nhật thông tin của một Task đã tồn tại
   Future<void> updateTask(TaskItem updatedTask) async {
+    final taskToSave = updatedTask.id.isEmpty
+        ? updatedTask.copyWith(isSyncPending: false)
+        : updatedTask.copyWith(isSyncPending: true);
+
+    if (taskToSave.id.isNotEmpty) {
+      _pendingTaskUpdates[taskToSave.id] = taskToSave;
+    }
+
     // 1. Cập nhật Optimistic UI
     state = [
       for (final task in state)
-        if (task.id == updatedTask.id) updatedTask else task
+        if (_isSameTask(task, taskToSave)) taskToSave else task
     ];
     await LocalStorageService.saveTasks(state);
 
-    // 2. Đồng bộ lên Server Backend
+    if (taskToSave.id.isEmpty) return;
+
+    final activeSync = _backendSync;
+    if (activeSync != null) await activeSync;
+
+    await _syncPendingTask(taskToSave.id);
+  }
+
+  bool _isSameTask(TaskItem task, TaskItem updatedTask) {
+    if (updatedTask.id.isNotEmpty) return task.id == updatedTask.id;
+    return task.id.isEmpty &&
+        task.title == updatedTask.title &&
+        task.createdAt == updatedTask.createdAt;
+  }
+
+  Future<bool> _syncPendingTask(String taskId) async {
+    if (taskId.isEmpty) return false;
+
+    final existingSync = _taskUpdateSyncs[taskId];
+    if (existingSync != null) {
+      await existingSync;
+      return !_pendingTaskUpdates.containsKey(taskId);
+    }
+
+    final sync = _sendPendingTaskUpdates(taskId);
+    _taskUpdateSyncs[taskId] = sync;
     try {
-      await TaskApiService.instance.updateTask(updatedTask);
-    } catch (e) {
-      debugPrint('Lỗi cập nhật Task lên server (đã lưu offline): $e');
+      await sync;
+    } finally {
+      if (identical(_taskUpdateSyncs[taskId], sync)) {
+        _taskUpdateSyncs.remove(taskId);
+      }
+    }
+
+    return !_pendingTaskUpdates.containsKey(taskId);
+  }
+
+  Future<void> _sendPendingTaskUpdates(String taskId) async {
+    while (true) {
+      final task = _pendingTaskUpdates[taskId];
+      if (task == null) return;
+
+      try {
+        await TaskApiService.instance.updateTask(task);
+      } catch (e) {
+        debugPrint('Lỗi cập nhật Task lên server (đang chờ đồng bộ): $e');
+        return;
+      }
+
+      if (!identical(_pendingTaskUpdates[taskId], task)) continue;
+
+      _pendingTaskUpdates.remove(taskId);
+      state = [
+        for (final currentTask in state)
+          if (currentTask.id == taskId)
+            currentTask.copyWith(isSyncPending: false)
+          else
+            currentTask,
+      ];
+      await LocalStorageService.saveTasks(state);
     }
   }
 
