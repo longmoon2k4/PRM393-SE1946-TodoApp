@@ -24,6 +24,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
   @override
   void initState() {
     super.initState();
+    // Mỗi lần vào Board bắt đầu với bộ lọc sạch và không giữ lựa chọn cũ.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(multiSelectProvider.notifier).clear();
@@ -33,6 +34,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Ghép dữ liệu task với bộ lọc và lựa chọn để quyết định nội dung Board.
     final tasks = ref.watch(coreTasksProvider);
     final filters = ref.watch(taskFilterSortProvider);
     final selectedIds = ref.watch(multiSelectProvider);
@@ -43,6 +45,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
         filters.sortMode == TaskSortMode.manual &&
         !selectionMode;
 
+    // Đồng bộ selection với task còn hiển thị khi danh sách hoặc bộ lọc đổi.
     ref.listen<List<TaskItem>>(coreTasksProvider, (previous, next) {
       final currentFilters = ref.read(taskFilterSortProvider);
       final validIds = currentFilters
@@ -57,6 +60,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
       }
     });
 
+    // Phần khung: drawer, thanh trên cùng, tìm kiếm, số kết quả và các cột Kanban.
     return Scaffold(
       drawer: const CategoryProjectDrawer(),
       appBar: AppBar(
@@ -141,6 +145,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     bool selectionMode,
     bool canReorder,
   ) {
+    // Mỗi giá trị TaskStatus tạo một cột; cuộn ngang để xem đủ các cột.
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -184,6 +189,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
+    // Tiêu đề cho biết trạng thái và số task; danh sách bên dưới cuộn độc lập.
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
@@ -253,6 +259,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     required bool selectionMode,
     required bool canReorder,
   }) {
+    // Cột rỗng vẫn cho kéo xuống đồng bộ; canReorder quyết định có bật kéo sắp xếp.
     if (tasks.isEmpty) {
       return ListView(
         key: PageStorageKey('empty-${status.name}'),
@@ -311,6 +318,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     bool selectionMode,
     bool canReorder,
   ) {
+    // Nối thao tác trên thẻ với hàm cập nhật state hoặc mở hộp chọn bên dưới.
     return SlidableTaskCard(
       key: ValueKey(
         task.id.isEmpty
@@ -349,6 +357,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
   }
 
   Future<void> _completeSelectedTasks() async {
+    // Hoàn thành từng task đang chọn rồi xóa chế độ chọn sau khi cập nhật xong.
     final selectedIds = ref.read(multiSelectProvider);
     final tasks = ref.read(coreTasksProvider);
     final notifier = ref.read(coreTasksProvider.notifier);
@@ -369,6 +378,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
   }
 
   void _saveTask(TaskItem task) {
+    // Mọi thay đổi nhanh trên Board đi qua provider dùng chung của task.
     HapticFeedback.lightImpact();
     unawaited(ref.read(coreTasksProvider.notifier).updateTask(task));
   }
@@ -378,6 +388,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     int oldIndex,
     int newIndex,
   ) async {
+    // Sắp xếp trong cột hiện tại và lưu orderIndex của từng task đã đổi vị trí.
     final reordered = List<TaskItem>.from(currentTasks);
     if (oldIndex == newIndex) return;
 
@@ -403,6 +414,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
   }
 
   Future<void> _choosePriority(TaskItem task) async {
+    // Ưu tiên, dời hạn và giao việc đều mở UI nhập/chọn rồi lưu lại task.
     final priority = await showModalBottomSheet<TaskPriority>(
       context: context,
       showDragHandle: true,

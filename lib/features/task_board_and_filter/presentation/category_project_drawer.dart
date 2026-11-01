@@ -9,6 +9,7 @@ class CategoryProjectDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Project/category hiện được rút ra từ task chưa xóa, chưa gọi API riêng.
     final tasks = ref
         .watch(coreTasksProvider)
         .where((task) => task.deletedAt == null)
@@ -31,6 +32,7 @@ class CategoryProjectDrawer extends ConsumerWidget {
             .toList()
           ..sort();
 
+    // Chọn một ID sẽ cập nhật provider lọc; nếu chưa có ID thì báo trạng thái trống.
     return Drawer(
       child: SafeArea(
         child: ListView(

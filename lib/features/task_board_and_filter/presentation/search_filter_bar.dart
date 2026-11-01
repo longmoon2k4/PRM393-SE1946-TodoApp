@@ -15,6 +15,7 @@ class SearchFilterBar extends ConsumerStatefulWidget {
 }
 
 class _SearchFilterBarState extends ConsumerState<SearchFilterBar> {
+  // Controller giữ nội dung ô tìm kiếm; timer gom các lần gõ gần nhau.
   late final TextEditingController _controller;
   Timer? _searchTimer;
 
@@ -28,6 +29,7 @@ class _SearchFilterBarState extends ConsumerState<SearchFilterBar> {
 
   @override
   void dispose() {
+    // Hủy timer và controller khi rời màn để không còn callback nền.
     _searchTimer?.cancel();
     _controller.dispose();
     super.dispose();
@@ -35,6 +37,7 @@ class _SearchFilterBarState extends ConsumerState<SearchFilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    // Giữ ô nhập đồng bộ với provider nếu query bị xóa từ nơi khác.
     final filters = ref.watch(taskFilterSortProvider);
     ref.listen<TaskFilterSortState>(taskFilterSortProvider, (previous, next) {
       if (previous?.query != next.query) {
@@ -71,6 +74,7 @@ class _SearchFilterBarState extends ConsumerState<SearchFilterBar> {
                       ),
               ),
               onChanged: (value) {
+                // Chỉ cập nhật tiêu chí tìm kiếm sau khi người dùng ngừng gõ 300 ms.
                 setState(() {});
                 _searchTimer?.cancel();
                 _searchTimer = Timer(const Duration(milliseconds: 300), () {
@@ -113,6 +117,7 @@ class _TaskFilterSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Danh sách tag lấy từ task hiện có; sheet chỉ sửa state lọc/sắp xếp.
     final filters = ref.watch(taskFilterSortProvider);
     final tasks = ref
         .watch(coreTasksProvider)

@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/task_model.dart';
 
+// Tập giá trị dùng trong phần lọc hạn và cách sắp xếp danh sách task.
 enum TaskDueFilter { any, today, thisWeek, overdue }
 
 enum TaskSortMode { manual, deadline, priority, newest }
 
+// Giữ các điều kiện tìm/lọc/sắp xếp trong một state để Board cùng đọc.
 class TaskFilterSortState {
   final String query;
   final TaskStatus? status;
@@ -27,6 +29,7 @@ class TaskFilterSortState {
     this.categoryId,
   });
 
+  // Dùng để hiện dấu hiệu trên nút lọc khi đang có điều kiện lọc.
   bool get hasFilters =>
       query.trim().isNotEmpty ||
       status != null ||
@@ -36,6 +39,7 @@ class TaskFilterSortState {
       projectId != null ||
       categoryId != null;
 
+  // Các cờ clear* cho phép xóa riêng giá trị nullable như status hoặc tag.
   TaskFilterSortState copyWith({
     String? query,
     TaskStatus? status,
@@ -63,6 +67,7 @@ class TaskFilterSortState {
     );
   }
 
+  // Lọc task trước, sau đó sắp xếp kết quả theo chế độ người dùng chọn.
   List<TaskItem> filterTasks(List<TaskItem> tasks) {
     final search = query.trim().toLowerCase();
     final now = DateTime.now();
@@ -140,6 +145,7 @@ class TaskFilterSortState {
   }
 }
 
+// Notifier tạo state mới mỗi khi người dùng đổi một tiêu chí lọc.
 final taskFilterSortProvider =
     NotifierProvider<TaskFilterSortNotifier, TaskFilterSortState>(
       TaskFilterSortNotifier.new,

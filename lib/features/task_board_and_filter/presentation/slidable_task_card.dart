@@ -36,6 +36,7 @@ class SlidableTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Checkbox dùng để chọn nhiều khi selectionMode bật, còn bình thường là hoàn thành.
     final card = Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
@@ -72,8 +73,10 @@ class SlidableTaskCard extends StatelessWidget {
       ),
     );
 
+    // Tắt vuốt trong lúc chọn nhiều để thao tác chạm không bị hiểu thành gesture.
     if (selectionMode) return card;
 
+    // Vuốt đầu thẻ đổi trạng thái; vuốt cuối thẻ mở các thao tác nhanh khác.
     return Slidable(
       key: key,
       startActionPane: ActionPane(
@@ -133,6 +136,7 @@ class SlidableTaskCard extends StatelessWidget {
   }
 
   Widget _taskSubtitle(BuildContext context) {
+    // Thông tin phụ trên thẻ được gom thành nhãn trạng thái, ưu tiên, hạn và tag.
     final details = <Widget>[];
     if (task.description.isNotEmpty) {
       details.add(
@@ -206,6 +210,7 @@ class SlidableTaskCard extends StatelessWidget {
   }
 
   TaskStatus _nextStatus(TaskStatus status) {
+    // Thứ tự chu kỳ trạng thái dùng bởi nút vuốt bên trái.
     switch (status) {
       case TaskStatus.todo:
         return TaskStatus.inProgress;
