@@ -4,6 +4,7 @@ import '../models/task_model.dart';
 import '../models/user_model.dart';
 
 class LocalStorageService {
+  // SharedPreferences lưu JSON task và một số thiết lập nhỏ trên thiết bị.
   static const String _userKey = 'cached_user_profile';
   static const String _tasksKey = 'cached_task_items';
   static const String _lastSyncKey = 'last_sync_timestamp';
@@ -14,6 +15,7 @@ class LocalStorageService {
 
   static SharedPreferences? _prefs;
 
+  // Phải gọi trước khi provider đọc/ghi cache.
   static Future<void> init() async {
     _prefs ??= await SharedPreferences.getInstance();
   }
@@ -46,6 +48,7 @@ class LocalStorageService {
     return await _prefs?.remove(_userKey) ?? false;
   }
 
+  // Task được serialize bằng TaskItem.toJson/fromJson để khôi phục sau khi mở app.
   static List<TaskItem>? getCachedTasks() {
     final raw = _prefs?.getString(_tasksKey);
     if (raw == null || raw.isEmpty) return null;
@@ -78,6 +81,7 @@ class LocalStorageService {
         false;
   }
 
+  // Các khóa phía dưới ghi nhớ thông báo đã gửi để tránh lặp thông báo liên tục.
   static DateTime? getLastOverloadAlertTime() {
     final raw = _prefs?.getString(_lastOverloadNotifiedTimeKey);
     return raw != null ? DateTime.tryParse(raw) : null;

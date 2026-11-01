@@ -8,6 +8,7 @@ class TaskApiService {
 
   static final TaskApiService instance = TaskApiService._();
 
+  // Mọi Android target hiện dùng 10.0.2.2; địa chỉ này trỏ về máy host trong emulator.
   static String get defaultBaseUrl {
     if (kIsWeb) return 'http://localhost:8080';
     if (defaultTargetPlatform == TargetPlatform.android) {
@@ -16,6 +17,7 @@ class TaskApiService {
     return 'http://localhost:8080';
   }
 
+  // Dio gom cấu hình HTTP; interceptor gắn Firebase token nếu người dùng đã đăng nhập.
   late final Dio _dio = Dio(
     BaseOptions(
       baseUrl: defaultBaseUrl,
@@ -59,6 +61,7 @@ class TaskApiService {
     if (priority != null) queryParams['priority'] = priority;
     if (search != null) queryParams['search'] = search;
 
+    // GET /api/v1/tasks trả danh sách; task xóa mềm bị loại khỏi danh sách UI.
     final response = await _dio.get(
       '/api/v1/tasks',
       queryParameters: queryParams,
@@ -83,6 +86,7 @@ class TaskApiService {
   }
 
   Future<TaskItem> createTask(TaskItem task) async {
+    // Đổi model sang payload backend, gửi POST và đọc response thành TaskItem.
     final payload = task.toBackendJson();
     final response = await _dio.post('/api/v1/tasks', data: payload);
     if (response.statusCode == 200 || response.statusCode == 201) {
@@ -101,6 +105,7 @@ class TaskApiService {
   }
 
   Future<TaskItem> updateTaskStatus(String taskId, TaskStatus status) async {
+    // Gửi PATCH trạng thái; Board hiện cập nhật task qua updateTask() thay vì gọi hàm này.
     String statusStr;
     switch (status) {
       case TaskStatus.todo:
@@ -151,6 +156,7 @@ class TaskApiService {
   }
 
   Future<List<TaskItem>> seedInitialProductionDataIfEmpty() async {
+    // Thêm dữ liệu mẫu khi server có dưới 3 task để màn hình có dữ liệu trình diễn.
     try {
       final currentTasks = await fetchTasks();
       if (currentTasks.length >= 3) {
