@@ -212,6 +212,7 @@ class SlidableTaskCard extends StatelessWidget {
       case TaskStatus.inProgress:
         return TaskStatus.done;
       case TaskStatus.done:
+        return TaskStatus.cancelled;
       case TaskStatus.cancelled:
         return TaskStatus.todo;
     }

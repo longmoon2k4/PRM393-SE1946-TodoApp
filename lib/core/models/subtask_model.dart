@@ -2,7 +2,7 @@ class SubTask {
   final String id;
   final String title;
   final bool isCompleted;
-  final double orderIndex; // Phục vụ tính năng kéo thả sắp xếp
+  final double orderIndex;
 
   const SubTask({
     required this.id,

@@ -3,8 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '../models/task_model.dart';
 
-/// Dịch vụ kết nối RESTful API với Spring Boot Backend (Chuẩn Production).
-/// Xử lý tự động Token Firebase, Timeout, và chuyển đổi mô hình dữ liệu.
 class TaskApiService {
   TaskApiService._();
 
@@ -13,7 +11,6 @@ class TaskApiService {
   static String get defaultBaseUrl {
     if (kIsWeb) return 'http://localhost:8080';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      // Android Emulator ánh xạ localhost của máy host qua địa chỉ 10.0.2.2
       return 'http://10.0.2.2:8080';
     }
     return 'http://localhost:8080';
@@ -32,7 +29,6 @@ class TaskApiService {
   )..interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Tự động đính kèm Firebase ID Token nếu người dùng đã xác thực
           try {
             final fbUser = FirebaseAuth.instance.currentUser;
             if (fbUser != null) {
@@ -53,7 +49,6 @@ class TaskApiService {
       ),
     );
 
-  /// Lấy toàn bộ danh sách Task từ MySQL thông qua Spring Boot API
   Future<List<TaskItem>> fetchTasks({
     String? status,
     String? priority,
@@ -79,7 +74,6 @@ class TaskApiService {
     return [];
   }
 
-  /// Lấy chi tiết một Task kèm Checklist và Bình luận
   Future<TaskItem?> getTask(String taskId) async {
     final response = await _dio.get('/api/v1/tasks/$taskId');
     if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
@@ -88,7 +82,6 @@ class TaskApiService {
     return null;
   }
 
-  /// Tạo mới Task lên Backend Database
   Future<TaskItem> createTask(TaskItem task) async {
     final payload = task.toBackendJson();
     final response = await _dio.post('/api/v1/tasks', data: payload);
@@ -98,7 +91,6 @@ class TaskApiService {
     throw Exception('Không thể tạo Task trên server: ${response.statusCode}');
   }
 
-  /// Cập nhật thông tin toàn diện của Task
   Future<TaskItem> updateTask(TaskItem task) async {
     final payload = task.toBackendJson();
     final response = await _dio.put('/api/v1/tasks/${task.id}', data: payload);
@@ -108,7 +100,6 @@ class TaskApiService {
     throw Exception('Không thể cập nhật Task trên server: ${response.statusCode}');
   }
 
-  /// Cập nhật trạng thái Task nhanh (khi tick chọn hoặc vuốt thẻ)
   Future<TaskItem> updateTaskStatus(String taskId, TaskStatus status) async {
     String statusStr;
     switch (status) {
@@ -137,7 +128,6 @@ class TaskApiService {
     throw Exception('Không thể đổi trạng thái trên server: ${response.statusCode}');
   }
 
-  /// Xóa mềm Task (Soft delete đưa vào thùng rác trên Database)
   Future<void> deleteTask(String taskId) async {
     final response = await _dio.delete('/api/v1/tasks/$taskId');
     if (response.statusCode != 200 && response.statusCode != 204) {
@@ -145,7 +135,6 @@ class TaskApiService {
     }
   }
 
-  /// Kiểm tra trạng thái trực tuyến của Backend server
   Future<bool> isServerAvailable() async {
     try {
       final res = await _dio.get(
@@ -161,7 +150,6 @@ class TaskApiService {
     }
   }
 
-  /// Khởi tạo dữ liệu thực tế lên Database MySQL nếu Database đang trống
   Future<List<TaskItem>> seedInitialProductionDataIfEmpty() async {
     try {
       final currentTasks = await fetchTasks();
@@ -208,7 +196,7 @@ class TaskApiService {
           status: TaskStatus.inProgress,
           priority: TaskPriority.urgent,
           createdAt: now,
-          deadline: now.add(const Duration(hours: 18)), // Sắp đến hạn
+          deadline: now.add(const Duration(hours: 18)),
           tags: const ['Notification', 'Workflow'],
         ),
         TaskItem(

@@ -51,6 +51,14 @@ class CategoryProjectDrawer extends ConsumerWidget {
                 Navigator.pop(context);
               },
             ),
+            if (projectIds.isEmpty && categoryIds.isEmpty)
+              const ListTile(
+                leading: Icon(Icons.info_outline),
+                title: Text('Chưa có mục để lọc'),
+                subtitle: Text(
+                  'Hãy gán project hoặc category cho công việc trước.',
+                ),
+              ),
             if (projectIds.isNotEmpty) ...[
               const Divider(),
               const Padding(

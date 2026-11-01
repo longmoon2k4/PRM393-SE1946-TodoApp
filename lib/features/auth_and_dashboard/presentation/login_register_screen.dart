@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../../core/theme/adaptive_theme_provider.dart';
 import '../providers/auth_provider.dart';
 
@@ -69,7 +69,7 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                   height: 120,
                   fit: BoxFit.contain,
                   errorBuilder: (ctx, err, stack) => const Icon(
-                    LucideIcons.wifiOff,
+                    IconsaxPlusLinear.cloud_cross,
                     size: 64,
                     color: Color(0xFFEF4444),
                   ),
@@ -124,7 +124,6 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
     final isDark = ref.watch(themeModeProvider);
     final authState = ref.watch(authProvider);
 
-    // Lắng nghe khi có lỗi xác thực để hiện BottomSheet
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next.status == AuthStatus.error && next.errorMessage != null) {
         _showOfflineErrorSheet(next.errorMessage!, isDark);
@@ -152,7 +151,6 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
-                        // Top Bar: Theme Switcher Toggle Button
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -163,7 +161,7 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                                     .toggleTheme();
                               },
                               icon: Icon(
-                                isDark ? LucideIcons.sun : LucideIcons.moon,
+                                isDark ? IconsaxPlusLinear.sun_1 : IconsaxPlusLinear.moon,
                                 size: 20,
                                 color: isDark
                                     ? const Color(0xFFF1F5F9)
@@ -178,7 +176,6 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
 
                         const Spacer(flex: 2),
 
-                        // App Brand Logo
                         Container(
                           width: 64,
                           height: 64,
@@ -199,7 +196,7 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                             'assets/images/logo.png',
                             fit: BoxFit.contain,
                             errorBuilder: (ctx, err, stack) => const Icon(
-                              LucideIcons.checkSquare,
+                              IconsaxPlusBold.task_square,
                               size: 32,
                               color: Color(0xFF2563EB),
                             ),
@@ -208,7 +205,6 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
 
                         const SizedBox(height: 24),
 
-                        // Headline & Subtitle
                         Text(
                           'Đăng nhập tài khoản',
                           style: GoogleFonts.plusJakartaSans(
@@ -232,7 +228,6 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
 
                         const SizedBox(height: 40),
 
-                        // Error message if any
                         if (authState.status == AuthStatus.error &&
                             authState.errorMessage != null)
                           Container(
@@ -251,7 +246,7 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                             child: Row(
                               children: [
                                 const Icon(
-                                  LucideIcons.alertCircle,
+                                  IconsaxPlusLinear.info_circle,
                                   color: Color(0xFFEF4444),
                                   size: 18,
                                 ),
@@ -269,7 +264,6 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                             ),
                           ),
 
-                        // Primary Google OAuth Sign-In Button
                         Container(
                           width: double.infinity,
                           height: 52,
@@ -334,7 +328,6 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
 
                         const Spacer(flex: 3),
 
-                        // Footer Terms & Privacy Policy
                         Padding(
                           padding: const EdgeInsets.only(bottom: 24),
                           child: Text(

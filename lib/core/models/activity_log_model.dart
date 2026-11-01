@@ -2,7 +2,7 @@ class ActivityLog {
   final String id;
   final String taskId;
   final String userId;
-  final String actionType; // VD: 'CREATED_TASK', 'CHANGED_STATUS'
+  final String actionType;
   final String? oldValue;
   final String? newValue;
   final DateTime createdAt;

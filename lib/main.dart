@@ -12,18 +12,15 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Khởi tạo định dạng ngày tháng tiếng Việt
   try {
     await initializeDateFormatting('vi_VN', null);
   } catch (e) {
     debugPrint('Init date formatting error: $e');
   }
 
-  // Khởi tạo các dịch vụ ngoại tuyến và thông báo
   await LocalStorageService.init();
   await NotificationService.init();
 
-  // Khởi tạo Firebase
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -44,7 +41,6 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Quản lý thông báo quá tải thông minh: Chỉ cảnh báo khi chuyển trạng thái hoặc khối lượng tăng vọt
     ref.listen<AdaptiveState>(adaptiveStateProvider, (previous, next) {
       final auth = ref.read(authProvider);
       final isAuth = auth.status == AuthStatus.authenticated;
@@ -59,7 +55,6 @@ class MyApp extends ConsumerWidget {
       } else if (previous != null &&
           previous.mode == AdaptiveMode.overload &&
           next.mode != AdaptiveMode.overload) {
-        // Đã giảm tải thành công: tự động thu hồi thông báo quá tải
         NotificationService.cancelOverloadAlert();
       }
     });
@@ -70,7 +65,6 @@ class MyApp extends ConsumerWidget {
       title: 'Smart Workflow & Adaptive Todo App',
       debugShowCheckedModeBanner: false,
       theme: theme,
-      // Hiệu ứng chuyển theme mượt mà (fade & cubic transition)
       themeAnimationDuration: const Duration(milliseconds: 500),
       themeAnimationCurve: Curves.easeInOutCubic,
       routerConfig: appRouter,

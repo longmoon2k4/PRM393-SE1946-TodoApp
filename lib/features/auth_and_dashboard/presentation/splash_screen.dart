@@ -20,7 +20,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _bootstrapApp() async {
-    // Thời gian hiển thị splash ngắn gọn, chuẩn ứng dụng production
     await Future.delayed(const Duration(milliseconds: 1200));
 
     if (!mounted) return;
@@ -45,7 +44,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Minimalist Logo Box
             Container(
               width: 72,
               height: 72,
@@ -72,7 +70,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
             const SizedBox(height: 20),
 
-            // App Name
             Text(
               'Workflow',
               style: GoogleFonts.plusJakartaSans(
@@ -85,7 +82,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
             const SizedBox(height: 36),
 
-            // Minimalist spinner
             SizedBox(
               width: 20,
               height: 20,

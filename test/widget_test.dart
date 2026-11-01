@@ -64,14 +64,12 @@ void main() {
         tags: const ['backend', 'spring'],
       );
 
-      // Verify toBackendJson
       final backendJson = task.toBackendJson();
       expect(backendJson['status'], 'in_progress');
       expect(backendJson['priority'], 'urgent');
       expect(backendJson['title'], 'Hoàn thiện REST API');
       expect(backendJson['assigneeId'], 'u-101');
 
-      // Verify fromJson with nested backend object format
       final serverPayload = {
         'id': 101,
         'title': 'Hoàn thiện REST API',

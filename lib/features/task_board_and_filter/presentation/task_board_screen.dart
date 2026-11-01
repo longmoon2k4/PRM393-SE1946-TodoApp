@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/models/task_model.dart';
 import '../../../core/providers/core_tasks_provider.dart';
@@ -80,6 +81,11 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
               onPressed: _refreshTasks,
               icon: const Icon(Icons.sync),
             ),
+          IconButton(
+            tooltip: 'Trang chủ',
+            onPressed: () => context.go('/dashboard'),
+            icon: const Icon(Icons.home_outlined),
+          ),
         ],
       ),
       body: Column(
@@ -204,9 +210,8 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
                     taskStatusLabel(status),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
                 Container(
