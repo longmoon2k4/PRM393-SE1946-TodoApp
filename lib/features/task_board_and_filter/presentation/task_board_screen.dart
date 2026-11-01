@@ -23,8 +23,11 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(multiSelectProvider.notifier).clear();
-    ref.read(taskFilterSortProvider.notifier).clearFilters();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(multiSelectProvider.notifier).clear();
+      ref.read(taskFilterSortProvider.notifier).clearFilters();
+    });
   }
 
   @override
@@ -114,13 +117,122 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
             ),
           ),
           Expanded(
+            child: _kanbanBoard(
+              visibleTasks,
+              selectedIds,
+              selectionMode,
+              canReorder,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _kanbanBoard(
+    List<TaskItem> tasks,
+    Set<String> selectedIds,
+    bool selectionMode,
+    bool canReorder,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          height: constraints.maxHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final status in TaskStatus.values)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  child: SizedBox(
+                    width: 300,
+                    child: _statusColumn(
+                      status: status,
+                      tasks: tasks
+                          .where((task) => task.status == status)
+                          .toList(),
+                      selectedIds: selectedIds,
+                      selectionMode: selectionMode,
+                      canReorder: canReorder,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _statusColumn({
+    required TaskStatus status,
+    required List<TaskItem> tasks,
+    required Set<String> selectedIds,
+    required bool selectionMode,
+    required bool canReorder,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        border: Border.all(color: colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 9,
+                  height: 9,
+                  decoration: BoxDecoration(
+                    color: _statusAccent(status),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    taskStatusLabel(status),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text('${tasks.length}'),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: colorScheme.outlineVariant),
+          Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshTasks,
-              child: _taskList(
-                visibleTasks,
-                selectedIds,
-                selectionMode,
-                canReorder,
+              child: _statusTaskList(
+                status: status,
+                tasks: tasks,
+                selectedIds: selectedIds,
+                selectionMode: selectionMode,
+                canReorder: canReorder,
               ),
             ),
           ),
@@ -129,19 +241,22 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     );
   }
 
-  Widget _taskList(
-    List<TaskItem> tasks,
-    Set<String> selectedIds,
-    bool selectionMode,
-    bool canReorder,
-  ) {
+  Widget _statusTaskList({
+    required TaskStatus status,
+    required List<TaskItem> tasks,
+    required Set<String> selectedIds,
+    required bool selectionMode,
+    required bool canReorder,
+  }) {
     if (tasks.isEmpty) {
       return ListView(
+        key: PageStorageKey('empty-${status.name}'),
+        primary: false,
         physics: const AlwaysScrollableScrollPhysics(),
         children: const [
           SizedBox(
-            height: 280,
-            child: Center(child: Text('Không tìm thấy công việc')),
+            height: 160,
+            child: Center(child: Text('Không có công việc')),
           ),
         ],
       );
@@ -149,12 +264,14 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
 
     if (canReorder) {
       return ReorderableListView.builder(
+        key: PageStorageKey('tasks-${status.name}'),
+        primary: false,
         buildDefaultDragHandles: false,
         padding: const EdgeInsets.only(top: 4, bottom: 24),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: tasks.length,
         onReorderItem: (oldIndex, newIndex) {
-          unawaited(_reorderTasks(tasks, oldIndex, newIndex));
+          unawaited(_reorderColumnTasks(tasks, oldIndex, newIndex));
         },
         itemBuilder: (context, index) => _taskCard(
           tasks[index],
@@ -167,6 +284,8 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     }
 
     return ListView.builder(
+      key: PageStorageKey('tasks-${status.name}'),
+      primary: false,
       padding: const EdgeInsets.only(top: 4, bottom: 24),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: tasks.length,
@@ -249,7 +368,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     unawaited(ref.read(coreTasksProvider.notifier).updateTask(task));
   }
 
-  Future<void> _reorderTasks(
+  Future<void> _reorderColumnTasks(
     List<TaskItem> currentTasks,
     int oldIndex,
     int newIndex,
@@ -403,4 +522,17 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
   }
 
   String _shortId(String id) => id.length > 12 ? id.substring(0, 12) : id;
+
+  Color _statusAccent(TaskStatus status) {
+    switch (status) {
+      case TaskStatus.todo:
+        return Colors.blueGrey;
+      case TaskStatus.inProgress:
+        return Colors.blue;
+      case TaskStatus.done:
+        return Colors.green;
+      case TaskStatus.cancelled:
+        return Colors.grey;
+    }
+  }
 }
