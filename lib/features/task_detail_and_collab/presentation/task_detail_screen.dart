@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,32 @@ class TaskDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
+  static const Duration _commentPollInterval = Duration(seconds: 15);
+  static const String _debugAuthorId = 'debug-user';
+
+  Timer? _commentPollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_refreshComments);
+    _commentPollTimer = Timer.periodic(
+      _commentPollInterval,
+      (_) => _refreshComments(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _commentPollTimer?.cancel();
+    super.dispose();
+  }
+
+  void _refreshComments() {
+    if (!mounted) return;
+    ref.read(taskCrudProvider).refreshComments(widget.taskId);
+  }
+
   void _close(BuildContext context) {
     if (context.canPop()) {
       context.pop();
@@ -66,6 +93,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
       );
     }
 
+    final currentUser = ref.watch(currentUserProvider);
+    final commentAuthorId =
+        currentUser?.id ?? (kDebugMode ? _debugAuthorId : null);
     final dateFormat = DateFormat('HH:mm, dd/MM/yyyy');
 
     return Scaffold(
@@ -152,6 +182,12 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               subtitle: task.isOverdue ? 'Đã quá hạn' : null,
               color: task.isOverdue ? AppColors.priorityUrgent : null,
             ),
+            _InfoRow(
+              icon: IconsaxPlusLinear.notification,
+              label: task.reminderAt == null
+                  ? 'Chưa đặt giờ nhắc'
+                  : 'Nhắc lúc ${dateFormat.format(task.reminderAt!)}',
+            ),
             _AssigneeRow(task: task),
             _OptionRow(
               icon: IconsaxPlusLinear.folder,
@@ -202,7 +238,19 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const CommentTimelineWidget(),
+            const SizedBox(height: AppSizes.p8),
+            CommentTimelineWidget(
+              comments: task.comments,
+              currentUserId: commentAuthorId,
+              onSend: (content) => _notifyIfNotSynced(
+                ref.read(taskCrudProvider).addComment(
+                      task.id,
+                      authorId: commentAuthorId!,
+                      authorName: currentUser?.name ?? 'Mình',
+                      content: content,
+                    ),
+              ),
+            ),
           ],
         ),
       ),

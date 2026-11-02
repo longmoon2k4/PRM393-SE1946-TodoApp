@@ -7,8 +7,10 @@ import 'package:todo_app/core/models/subtask_model.dart';
 import 'package:todo_app/core/models/task_model.dart';
 import 'package:todo_app/core/providers/core_tasks_provider.dart';
 import 'package:todo_app/core/services/local_storage_service.dart';
+import 'package:todo_app/features/task_detail_and_collab/presentation/comment_timeline_widget.dart';
 import 'package:todo_app/features/task_detail_and_collab/presentation/task_detail_screen.dart';
 import 'package:todo_app/features/task_detail_and_collab/presentation/task_form_bottom_sheet.dart';
+import 'package:todo_app/features/task_detail_and_collab/providers/reminder_notification_service.dart';
 import 'package:todo_app/features/task_detail_and_collab/providers/task_crud_provider.dart';
 
 void main() {
@@ -157,6 +159,180 @@ void main() {
     });
   });
 
+  group('formatCommentTime', () {
+    final now = DateTime(2026, 11, 2, 12);
+
+    test('hiển thị đúng từng mốc', () {
+      String format(Duration ago) =>
+          formatCommentTime(now.subtract(ago), now: now);
+
+      expect(format(const Duration(seconds: 20)), 'Vừa xong');
+      expect(format(const Duration(minutes: 5)), '5 phút trước');
+      expect(format(const Duration(hours: 2)), '2 giờ trước');
+      expect(format(const Duration(days: 3)), '3 ngày trước');
+      expect(format(const Duration(days: 30)), '03/10/2026');
+    });
+
+    test('giờ máy chủ lệch nhẹ về tương lai vẫn là Vừa xong', () {
+      expect(
+        formatCommentTime(now.add(const Duration(minutes: 1)), now: now),
+        'Vừa xong',
+      );
+    });
+  });
+
+  group('CommentTimelineWidget', () {
+    final comments = [
+      TaskComment(
+        id: 'c2',
+        authorId: 'me',
+        authorName: 'Đăng',
+        content: 'Của mình',
+        createdAt: DateTime.now(),
+      ),
+      TaskComment(
+        id: 'c1',
+        authorId: 'other',
+        authorName: 'Phúc',
+        content: 'Của người khác',
+        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+      ),
+    ];
+
+    Future<List<String>> pump(WidgetTester tester, {String? userId = 'me'}) async {
+      final sent = <String>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CommentTimelineWidget(
+              comments: comments,
+              currentUserId: userId,
+              onSend: sent.add,
+            ),
+          ),
+        ),
+      );
+      return sent;
+    }
+
+    testWidgets('của mình bên phải, người khác bên trái, cũ ở trên', (tester) async {
+      await pump(tester);
+
+      final mine = tester.getCenter(find.text('Của mình'));
+      final other = tester.getCenter(find.text('Của người khác'));
+      final center = tester.getCenter(find.byType(Scaffold));
+
+      expect(mine.dx, greaterThan(center.dx));
+      expect(other.dx, lessThan(center.dx));
+      expect(other.dy, lessThan(mine.dy));
+      expect(find.text('2 giờ trước'), findsOneWidget);
+      expect(find.text('Phúc'), findsOneWidget);
+      expect(find.text('Đăng'), findsNothing);
+    });
+
+    testWidgets('gửi bình luận đã bỏ khoảng trắng và xóa ô nhập', (tester) async {
+      final sent = await pump(tester);
+
+      await tester.enterText(find.byType(TextField), '  Xin chào  ');
+      await tester.tap(find.byTooltip('Gửi bình luận'));
+      await tester.pump();
+
+      expect(sent, ['Xin chào']);
+      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, '');
+    });
+
+    testWidgets('chưa đăng nhập thì không gửi được', (tester) async {
+      await pump(tester, userId: null);
+
+      expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
+      expect(find.text('Đăng nhập để bình luận'), findsOneWidget);
+    });
+  });
+
+  group('buildReminderPlan', () {
+    final now = DateTime(2026, 11, 2, 12);
+
+    TaskItem task({
+      String id = 't1',
+      TaskStatus status = TaskStatus.todo,
+      DateTime? reminderAt,
+      DateTime? deadline,
+      DateTime? deletedAt,
+    }) {
+      return TaskItem(
+        id: id,
+        title: 'Task',
+        status: status,
+        createdAt: now,
+        reminderAt: reminderAt,
+        deadline: deadline,
+        deletedAt: deletedAt,
+      );
+    }
+
+    List<ScheduledReminder> plan(TaskItem item) =>
+        buildReminderPlan(tasks: [item], now: now);
+
+    test('đặt lịch cho giờ nhắc và 1 giờ trước deadline', () {
+      final items = plan(
+        task(
+          reminderAt: now.add(const Duration(hours: 1)),
+          deadline: now.add(const Duration(hours: 5)),
+        ),
+      );
+
+      expect(items.map((r) => r.scheduledAt), [
+        now.add(const Duration(hours: 1)),
+        now.add(const Duration(hours: 4)),
+      ]);
+      expect(items.map((r) => r.id).toSet().length, 2);
+    });
+
+    test('bỏ qua mốc đã qua', () {
+      expect(
+        plan(
+          task(
+            reminderAt: now.subtract(const Duration(minutes: 1)),
+            deadline: now.add(const Duration(minutes: 30)),
+          ),
+        ),
+        isEmpty,
+      );
+    });
+
+    test('bỏ qua task đã xong, đã hủy hoặc đã xóa', () {
+      final reminderAt = now.add(const Duration(hours: 1));
+
+      expect(plan(task(status: TaskStatus.done, reminderAt: reminderAt)), isEmpty);
+      expect(plan(task(status: TaskStatus.cancelled, reminderAt: reminderAt)), isEmpty);
+      expect(plan(task(deletedAt: now, reminderAt: reminderAt)), isEmpty);
+    });
+
+    test('tắt nhắc deadline vẫn giữ giờ nhắc', () {
+      final items = buildReminderPlan(
+        tasks: [
+          task(
+            reminderAt: now.add(const Duration(hours: 1)),
+            deadline: now.add(const Duration(hours: 5)),
+          ),
+        ],
+        now: now,
+        includeDeadlines: false,
+      );
+
+      expect(items.map((r) => r.scheduledAt), [now.add(const Duration(hours: 1))]);
+    });
+
+    test('id thông báo ổn định, dương và không trùng id có sẵn', () {
+      final id = ReminderNotificationService.notificationId('task-1', 0);
+
+      expect(ReminderNotificationService.notificationId('task-1', 0), id);
+      expect(ReminderNotificationService.notificationId('task-1', 1), id + 1);
+      expect(id, greaterThan(2001));
+      expect(id, lessThan(1 << 31));
+    });
+  });
+
   group('validateTaskDates', () {
     final now = DateTime(2026, 11, 2, 12);
     final past = now.subtract(const Duration(hours: 1));
@@ -165,13 +341,17 @@ void main() {
 
     test('hợp lệ khi không có mốc nào hoặc mốc ở tương lai', () {
       expect(validateTaskDates(now: now), isNull);
-      expect(validateTaskDates(now: now, deadline: later), isNull);
+      expect(validateTaskDates(now: now, deadline: later, reminderAt: future), isNull);
     });
 
-    test('chặn deadline trong quá khứ', () {
+    test('chặn deadline và giờ nhắc trong quá khứ', () {
       expect(
         validateTaskDates(now: now, deadline: past),
         'Deadline không được ở trong quá khứ',
+      );
+      expect(
+        validateTaskDates(now: now, reminderAt: past),
+        'Giờ nhắc phải ở trong tương lai',
       );
     });
 
@@ -186,7 +366,11 @@ void main() {
       expect(validateTaskDates(now: now, deadline: past, original: overdue), isNull);
     });
 
-    test('ngày bắt đầu phải trước deadline', () {
+    test('giờ nhắc và ngày bắt đầu phải trước deadline', () {
+      expect(
+        validateTaskDates(now: now, deadline: future, reminderAt: later),
+        'Giờ nhắc phải trước deadline',
+      );
       expect(
         validateTaskDates(now: now, deadline: future, startDate: later),
         'Ngày bắt đầu phải trước deadline',

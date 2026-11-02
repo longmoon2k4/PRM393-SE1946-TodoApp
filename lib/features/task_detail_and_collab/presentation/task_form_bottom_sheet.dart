@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_sizes.dart';
+import '../providers/reminder_notification_service.dart';
 import '../providers/task_crud_provider.dart';
 
 /// Trả về nội dung lỗi, hoặc `null` nếu các mốc thời gian hợp lệ.
@@ -15,12 +16,21 @@ String? validateTaskDates({
   required DateTime now,
   DateTime? startDate,
   DateTime? deadline,
+  DateTime? reminderAt,
   TaskItem? original,
 }) {
   if (deadline != null &&
       deadline != original?.deadline &&
       !deadline.isAfter(now)) {
     return 'Deadline không được ở trong quá khứ';
+  }
+  if (reminderAt != null &&
+      reminderAt != original?.reminderAt &&
+      !reminderAt.isAfter(now)) {
+    return 'Giờ nhắc phải ở trong tương lai';
+  }
+  if (deadline != null && reminderAt != null && reminderAt.isAfter(deadline)) {
+    return 'Giờ nhắc phải trước deadline';
   }
   if (deadline != null && startDate != null && startDate.isAfter(deadline)) {
     return 'Ngày bắt đầu phải trước deadline';
@@ -59,6 +69,7 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
   late TaskPriority _priority;
   DateTime? _startDate;
   DateTime? _deadline;
+  DateTime? _reminderAt;
   String? _dateError;
 
   bool get _isEditing => widget.task != null;
@@ -70,6 +81,7 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
     _priority = widget.task?.priority ?? TaskPriority.medium;
     _startDate = widget.task?.startDate;
     _deadline = widget.task?.deadline;
+    _reminderAt = widget.task?.reminderAt;
   }
 
   @override
@@ -112,6 +124,22 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
     if (picked != null) setState(() => _deadline = picked);
   }
 
+  Future<void> _pickReminder() async {
+    final picked = await _pickDateTime(_reminderAt);
+    if (picked == null || !mounted) return;
+    setState(() => _reminderAt = picked);
+
+    final messenger = ScaffoldMessenger.of(context);
+    final isGranted = await ReminderNotificationService.requestPermissions();
+    if (!isGranted) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Chưa có quyền thông báo nên nhắc nhở sẽ không hiện trên thiết bị này.'),
+        ),
+      );
+    }
+  }
+
   void _addChecklistItem() {
     final title = _checklistController.text.trim();
     if (title.isEmpty) return;
@@ -127,6 +155,7 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
       now: DateTime.now(),
       startDate: _startDate,
       deadline: _deadline,
+      reminderAt: _reminderAt,
       original: widget.task,
     );
     setState(() => _dateError = dateError);
@@ -143,6 +172,7 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
           priority: _priority,
           startDate: _startDate,
           deadline: _deadline,
+          reminderAt: _reminderAt,
         ),
       );
     } else {
@@ -150,6 +180,7 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
         title: title,
         priority: _priority,
         deadline: _deadline,
+        reminderAt: _reminderAt,
         checklistTitles: _checklistTitles,
       );
     }
@@ -221,6 +252,14 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
                 canClear: widget.task?.deadline == null,
                 onPick: _pickDeadline,
                 onClear: () => setState(() => _deadline = null),
+              ),
+              _DateTimeRow(
+                icon: IconsaxPlusLinear.notification,
+                emptyLabel: 'Đặt giờ nhắc',
+                value: _reminderAt,
+                canClear: widget.task?.reminderAt == null,
+                onPick: _pickReminder,
+                onClear: () => setState(() => _reminderAt = null),
               ),
               if (_dateError != null)
                 Padding(

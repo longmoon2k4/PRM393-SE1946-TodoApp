@@ -47,7 +47,9 @@ class NotificationService {
           if (payload == 'overload_alert' || payload == 'approaching_list') {
             appRouter.go('/dashboard');
           } else if (payload != null && payload.startsWith('task_')) {
-            appRouter.go('/dashboard');
+            appRouter.go('/task-detail/${payload.substring('task_'.length)}');
+          } else if (payload != null && payload.startsWith('reminder|')) {
+            appRouter.go('/task-detail/${payload.split('|')[1]}');
           }
         },
       );

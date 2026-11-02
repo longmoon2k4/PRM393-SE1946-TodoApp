@@ -7,6 +7,7 @@ import 'core/services/local_storage_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/adaptive_theme_provider.dart';
 import 'features/auth_and_dashboard/providers/auth_provider.dart';
+import 'features/task_detail_and_collab/providers/reminder_notification_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -58,6 +59,8 @@ class MyApp extends ConsumerWidget {
         NotificationService.cancelOverloadAlert();
       }
     });
+
+    ref.watch(reminderSyncProvider);
 
     final theme = ref.watch(adaptiveThemeProvider);
 
