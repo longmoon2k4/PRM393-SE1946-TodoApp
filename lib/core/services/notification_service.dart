@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import '../models/task_model.dart';
 import '../router/app_router.dart';
 import 'local_storage_service.dart';
@@ -7,6 +8,7 @@ import 'local_storage_service.dart';
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
+  static FlutterLocalNotificationsPlugin get plugin => _plugin;
   static bool _isInitialized = false;
 
   static const int overloadNotificationId = 1001;
@@ -21,8 +23,9 @@ class NotificationService {
     if (_isInitialized) return;
 
     try {
-      const androidSettings =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
       const darwinSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
@@ -55,14 +58,18 @@ class NotificationService {
       );
 
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-        final androidImpl = _plugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+        final androidImpl = _plugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
         await androidImpl?.requestNotificationsPermission();
       }
 
       _isInitialized = true;
     } catch (e) {
-      debugPrint('NotificationService init error (platform may not support): $e');
+      debugPrint(
+        'NotificationService init error (platform may not support): $e',
+      );
     }
   }
 
@@ -85,8 +92,8 @@ class NotificationService {
     final now = DateTime.now();
 
     final bool isFirstTime = lastAlertTime == null;
-    final bool isCooldownElapsed = lastAlertTime != null &&
-        now.difference(lastAlertTime).inHours >= 2;
+    final bool isCooldownElapsed =
+        lastAlertTime != null && now.difference(lastAlertTime).inHours >= 2;
     final bool isSurge = taskCount >= lastCount + 2;
 
     if (isFirstTime || isCooldownElapsed || isSurge) {
@@ -112,7 +119,8 @@ class NotificationService {
         await _plugin.show(
           id: overloadNotificationId,
           title: '⚠️ Cảnh báo: Khối lượng công việc vượt ngưỡng!',
-          body: 'Bạn đang có $taskCount việc dở dang (ngưỡng an toàn: $threshold việc). Hãy ưu tiên dứt điểm việc gấp trước.',
+          body:
+              'Bạn đang có $taskCount việc dở dang (ngưỡng an toàn: $threshold việc). Hãy ưu tiên dứt điểm việc gấp trước.',
           notificationDetails: notificationDetails,
           payload: 'overload_alert',
         );
@@ -152,11 +160,15 @@ class NotificationService {
     final now = DateTime.now();
     final notifiedMap = LocalStorageService.getNotifiedDeadlines();
 
-    final pendingTasks = tasks.where((t) =>
-        t.deletedAt == null &&
-        t.status != TaskStatus.done &&
-        t.status != TaskStatus.cancelled &&
-        t.deadline != null).toList();
+    final pendingTasks = tasks
+        .where(
+          (t) =>
+              t.deletedAt == null &&
+              t.status != TaskStatus.done &&
+              t.status != TaskStatus.cancelled &&
+              t.deadline != null,
+        )
+        .toList();
 
     if (pendingTasks.isEmpty) return;
 
@@ -177,8 +189,7 @@ class NotificationService {
           urgentTask = task;
           break;
         }
-      }
-      else if (hoursLeft <= 24) {
+      } else if (hoursLeft <= 24) {
         final lastMilestone = notifiedMap[task.id];
         if (lastMilestone == null) {
           approachingTasks.add(task);
@@ -214,12 +225,16 @@ class NotificationService {
         await _plugin.show(
           id: deadlineNotificationId,
           title: '⏰ Công việc sắp đến hạn chót!',
-          body: 'Công việc "${urgentTask.title}" chỉ còn $timeStr là hết hạn. Hãy tập trung xử lý!',
+          body:
+              'Công việc "${urgentTask.title}" chỉ còn $timeStr là hết hạn. Hãy tập trung xử lý!',
           notificationDetails: notificationDetails,
           payload: 'task_${urgentTask.id}',
         );
 
-        await LocalStorageService.saveNotifiedDeadline(urgentTask.id, 'urgent_3h');
+        await LocalStorageService.saveNotifiedDeadline(
+          urgentTask.id,
+          'urgent_3h',
+        );
       } catch (e) {
         debugPrint('Failed to show urgent deadline notification: $e');
       }
@@ -249,7 +264,8 @@ class NotificationService {
           await _plugin.show(
             id: deadlineNotificationId,
             title: '⏰ Bạn có ${approachingTasks.length} công việc sắp đến hạn',
-            body: 'Ưu tiên: "$firstTitle" cùng ${approachingTasks.length - 1} công việc khác cần hoàn tất trong 24 giờ tới.',
+            body:
+                'Ưu tiên: "$firstTitle" cùng ${approachingTasks.length - 1} công việc khác cần hoàn tất trong 24 giờ tới.',
             notificationDetails: notificationDetails,
             payload: 'approaching_list',
           );

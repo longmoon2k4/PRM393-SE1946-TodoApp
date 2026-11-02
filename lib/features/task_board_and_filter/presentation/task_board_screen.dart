@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../core/models/task_model.dart';
 import '../../../core/providers/core_tasks_provider.dart';
+import '../../../core/widgets/contextual_fab.dart';
+import '../../task_detail_and_collab/presentation/task_form_bottom_sheet.dart';
 import '../providers/multi_select_provider.dart';
 import '../providers/task_filter_sort_provider.dart';
 import 'category_project_drawer.dart';
@@ -63,6 +66,12 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     // Phần khung: drawer, thanh trên cùng, tìm kiếm, số kết quả và các cột Kanban.
     return Scaffold(
       drawer: const CategoryProjectDrawer(),
+      floatingActionButton: selectionMode
+          ? null
+          : ContextualFab(
+              contextType: FabContextType.board,
+              onPressed: () => TaskFormBottomSheet.show(context),
+            ),
       appBar: AppBar(
         title: Text(
           selectionMode ? 'Đã chọn ${selectedIds.length}' : 'Task Board',
@@ -72,23 +81,23 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
             IconButton(
               tooltip: 'Đánh dấu hoàn thành',
               onPressed: _completeSelectedTasks,
-              icon: const Icon(Icons.done_all),
+              icon: const Icon(IconsaxPlusLinear.tick_circle),
             ),
             IconButton(
               tooltip: 'Bỏ chọn',
               onPressed: () => ref.read(multiSelectProvider.notifier).clear(),
-              icon: const Icon(Icons.close),
+              icon: const Icon(IconsaxPlusLinear.close_circle),
             ),
           ] else
             IconButton(
               tooltip: 'Đồng bộ',
               onPressed: _refreshTasks,
-              icon: const Icon(Icons.sync),
+              icon: const Icon(IconsaxPlusLinear.refresh),
             ),
           IconButton(
             tooltip: 'Trang chủ',
             onPressed: () => context.go('/dashboard'),
-            icon: const Icon(Icons.home_outlined),
+            icon: const Icon(IconsaxPlusLinear.home_2),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../core/models/task_model.dart';
 import '../../../core/providers/core_tasks_provider.dart';
@@ -58,7 +59,7 @@ class _SearchFilterBarState extends ConsumerState<SearchFilterBar> {
               controller: _controller,
               decoration: InputDecoration(
                 hintText: 'Tìm công việc...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(IconsaxPlusLinear.search_normal_1),
                 suffixIcon: _controller.text.isEmpty
                     ? null
                     : IconButton(
@@ -70,7 +71,7 @@ class _SearchFilterBarState extends ConsumerState<SearchFilterBar> {
                               .read(taskFilterSortProvider.notifier)
                               .setQuery('');
                         },
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(IconsaxPlusLinear.close_circle),
                       ),
               ),
               onChanged: (value) {
@@ -103,7 +104,7 @@ class _SearchFilterBarState extends ConsumerState<SearchFilterBar> {
             },
             icon: Badge(
               isLabelVisible: filters.hasFilters,
-              child: const Icon(Icons.tune),
+              child: const Icon(IconsaxPlusLinear.setting_4),
             ),
           ),
         ],

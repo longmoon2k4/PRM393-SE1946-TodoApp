@@ -1,12 +1,15 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
+
 import '../../../core/models/task_model.dart';
 import '../../../core/providers/core_tasks_provider.dart';
+import '../../../core/services/notification_service.dart';
 import '../../auth_and_dashboard/providers/auth_provider.dart';
 
 final reminderSyncProvider = Provider<void>((ref) {
@@ -57,7 +60,8 @@ List<ScheduledReminder> buildReminderPlan({
   final plan = <ScheduledReminder>[];
 
   for (final task in tasks) {
-    final isActive = task.deletedAt == null &&
+    final isActive =
+        task.deletedAt == null &&
         task.status != TaskStatus.done &&
         task.status != TaskStatus.cancelled;
     if (!isActive) continue;
@@ -102,8 +106,8 @@ List<ScheduledReminder> buildReminderPlan({
 class ReminderNotificationService {
   ReminderNotificationService._();
 
-  static final FlutterLocalNotificationsPlugin _plugin =
-      FlutterLocalNotificationsPlugin();
+  static FlutterLocalNotificationsPlugin get _plugin =>
+      NotificationService.plugin;
 
   static const String payloadPrefix = 'reminder';
   static const Duration deadlineLeadTime = Duration(hours: 1);
@@ -138,7 +142,9 @@ class ReminderNotificationService {
       final timezone = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(timezone.identifier));
     } catch (e) {
-      debugPrint('Không đọc được múi giờ thiết bị, dùng $_fallbackTimezone: $e');
+      debugPrint(
+        'Không đọc được múi giờ thiết bị, dùng $_fallbackTimezone: $e',
+      );
       tz.setLocalLocation(tz.getLocation(_fallbackTimezone));
     }
     _isTimezoneReady = true;
@@ -150,8 +156,10 @@ class ReminderNotificationService {
 
     try {
       if (defaultTargetPlatform == TargetPlatform.iOS) {
-        final ios = _plugin.resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>();
+        final ios = _plugin
+            .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin
+            >();
         return await ios?.requestPermissions(
               alert: true,
               badge: true,
@@ -160,12 +168,16 @@ class ReminderNotificationService {
             false;
       }
 
-      final android = _plugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
-      final isGranted = await android?.requestNotificationsPermission() ?? false;
+      final android = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      final isGranted =
+          await android?.requestNotificationsPermission() ?? false;
       if (!isGranted) return false;
 
-      final canScheduleExact = await android?.canScheduleExactNotifications() ?? false;
+      final canScheduleExact =
+          await android?.canScheduleExactNotifications() ?? false;
       if (!canScheduleExact) {
         await android?.requestExactAlarmsPermission();
       }
@@ -207,8 +219,9 @@ class ReminderNotificationService {
           : const <ScheduledReminder>[];
       final planById = {for (final item in plan) item.id: item};
 
-      final pending = (await _plugin.pendingNotificationRequests())
-          .where((p) => p.payload?.startsWith('$payloadPrefix|') ?? false);
+      final pending = (await _plugin.pendingNotificationRequests()).where(
+        (p) => p.payload?.startsWith('$payloadPrefix|') ?? false,
+      );
       final upToDateIds = <int>{};
 
       for (final request in pending) {
@@ -235,7 +248,8 @@ class ReminderNotificationService {
       android: AndroidNotificationDetails(
         _channelId,
         _channelName,
-        channelDescription: 'Thông báo đúng giờ đã hẹn và khi công việc sắp đến hạn',
+        channelDescription:
+            'Thông báo đúng giờ đã hẹn và khi công việc sắp đến hạn',
         importance: Importance.max,
         priority: Priority.high,
         playSound: true,
@@ -249,9 +263,12 @@ class ReminderNotificationService {
       ),
     );
 
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    final canScheduleExact = await android?.canScheduleExactNotifications() ?? true;
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final canScheduleExact =
+        await android?.canScheduleExactNotifications() ?? true;
 
     await _plugin.zonedSchedule(
       id: item.id,

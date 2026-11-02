@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/task_model.dart';
+import '../../../core/theme/app_colors.dart';
 import '../providers/task_filter_sort_provider.dart';
 
 class SlidableTaskCard extends StatelessWidget {
@@ -64,11 +67,17 @@ class SlidableTaskCard extends StatelessWidget {
                 index: reorderIndex,
                 child: const Padding(
                   padding: EdgeInsets.all(8),
-                  child: Icon(Icons.drag_handle),
+                  child: Icon(IconsaxPlusLinear.menu_1),
                 ),
               )
             : null,
-        onTap: selectionMode ? onToggleSelection : null,
+        onTap: selectionMode
+            ? onToggleSelection
+            : () {
+                if (task.id.isNotEmpty) {
+                  context.push('/task-detail/${task.id}');
+                }
+              },
         onLongPress: onToggleSelection,
       ),
     );
@@ -88,9 +97,9 @@ class SlidableTaskCard extends StatelessWidget {
               HapticFeedback.lightImpact();
               onStatusChanged(_nextStatus(task.status));
             },
-            backgroundColor: const Color(0xFF2563EB),
+            backgroundColor: AppColors.statusInProgress,
             foregroundColor: Colors.white,
-            icon: Icons.swap_horiz,
+            icon: IconsaxPlusLinear.arrow_swap_horizontal,
             label: taskStatusLabel(_nextStatus(task.status)),
           ),
         ],
@@ -104,9 +113,9 @@ class SlidableTaskCard extends StatelessWidget {
               HapticFeedback.lightImpact();
               onChoosePriority();
             },
-            backgroundColor: const Color(0xFF7C3AED),
+            backgroundColor: AppColors.priorityHigh,
             foregroundColor: Colors.white,
-            icon: Icons.flag_outlined,
+            icon: IconsaxPlusLinear.flag,
             label: 'Ưu tiên',
           ),
           SlidableAction(
@@ -114,9 +123,9 @@ class SlidableTaskCard extends StatelessWidget {
               HapticFeedback.lightImpact();
               onReschedule();
             },
-            backgroundColor: const Color(0xFF0891B2),
+            backgroundColor: AppColors.calmPrimary,
             foregroundColor: Colors.white,
-            icon: Icons.calendar_month_outlined,
+            icon: IconsaxPlusLinear.calendar_1,
             label: 'Dời hạn',
           ),
           SlidableAction(
@@ -124,9 +133,9 @@ class SlidableTaskCard extends StatelessWidget {
               HapticFeedback.lightImpact();
               onAssign();
             },
-            backgroundColor: const Color(0xFF475569),
+            backgroundColor: AppColors.statusTodo,
             foregroundColor: Colors.white,
-            icon: Icons.person_add_alt_1,
+            icon: IconsaxPlusLinear.user_add,
             label: 'Giao việc',
           ),
         ],
@@ -226,26 +235,26 @@ class SlidableTaskCard extends StatelessWidget {
   Color _statusColor(TaskStatus status) {
     switch (status) {
       case TaskStatus.todo:
-        return Colors.blueGrey;
+        return AppColors.statusTodo;
       case TaskStatus.inProgress:
-        return Colors.blue;
+        return AppColors.statusInProgress;
       case TaskStatus.done:
-        return Colors.green;
+        return AppColors.statusDone;
       case TaskStatus.cancelled:
-        return Colors.grey;
+        return AppColors.statusCancelled;
     }
   }
 
   Color _priorityColor(TaskPriority priority) {
     switch (priority) {
       case TaskPriority.low:
-        return Colors.blueGrey;
+        return AppColors.priorityLow;
       case TaskPriority.medium:
-        return Colors.blue;
+        return AppColors.priorityMedium;
       case TaskPriority.high:
-        return Colors.orange;
+        return AppColors.priorityHigh;
       case TaskPriority.urgent:
-        return Colors.red;
+        return AppColors.priorityUrgent;
     }
   }
 }

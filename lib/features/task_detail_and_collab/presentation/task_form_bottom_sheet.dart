@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:intl/intl.dart';
+
 import '../../../core/models/task_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_sizes.dart';
@@ -91,7 +92,10 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
     super.dispose();
   }
 
-  Future<DateTime?> _pickDateTime(DateTime? current, {bool allowPast = false}) async {
+  Future<DateTime?> _pickDateTime(
+    DateTime? current, {
+    bool allowPast = false,
+  }) async {
     final now = DateTime.now();
     final initial = current != null && (allowPast || current.isAfter(now))
         ? current
@@ -100,7 +104,9 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
     final date = await showDatePicker(
       context: context,
       initialDate: initial,
-      firstDate: allowPast ? DateTime(now.year - 5) : DateTime(now.year, now.month, now.day),
+      firstDate: allowPast
+          ? DateTime(now.year - 5)
+          : DateTime(now.year, now.month, now.day),
       lastDate: DateTime(now.year + 5),
     );
     if (date == null || !mounted) return null;
@@ -134,7 +140,9 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
     if (!isGranted) {
       messenger.showSnackBar(
         const SnackBar(
-          content: Text('Chưa có quyền thông báo nên nhắc nhở sẽ không hiện trên thiết bị này.'),
+          content: Text(
+            'Chưa có quyền thông báo nên nhắc nhở sẽ không hiện trên thiết bị này.',
+          ),
         ),
       );
     }
@@ -241,7 +249,7 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
                   icon: IconsaxPlusLinear.play,
                   emptyLabel: 'Chọn ngày bắt đầu',
                   value: _startDate,
-                  canClear: widget.task?.startDate == null,
+                  canClear: _startDate != null,
                   onPick: _pickStartDate,
                   onClear: () => setState(() => _startDate = null),
                 ),
@@ -249,7 +257,7 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
                 icon: IconsaxPlusLinear.calendar_1,
                 emptyLabel: 'Chọn deadline',
                 value: _deadline,
-                canClear: widget.task?.deadline == null,
+                canClear: _deadline != null,
                 onPick: _pickDeadline,
                 onClear: () => setState(() => _deadline = null),
               ),
@@ -257,7 +265,7 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
                 icon: IconsaxPlusLinear.notification,
                 emptyLabel: 'Đặt giờ nhắc',
                 value: _reminderAt,
-                canClear: widget.task?.reminderAt == null,
+                canClear: _reminderAt != null,
                 onPick: _pickReminder,
                 onClear: () => setState(() => _reminderAt = null),
               ),
@@ -278,7 +286,10 @@ class _TaskFormBottomSheetState extends ConsumerState<TaskFormBottomSheet> {
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.check_box_outline_blank, size: 20),
+                    leading: const Icon(
+                      Icons.check_box_outline_blank,
+                      size: 20,
+                    ),
                     title: Text(_checklistTitles[i]),
                     trailing: IconButton(
                       tooltip: 'Xóa mục con',

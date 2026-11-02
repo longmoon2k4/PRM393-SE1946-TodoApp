@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../core/providers/core_tasks_provider.dart';
+import '../../task_detail_and_collab/providers/task_crud_provider.dart';
 import '../providers/task_filter_sort_provider.dart';
 
 class CategoryProjectDrawer extends ConsumerWidget {
@@ -9,28 +11,29 @@ class CategoryProjectDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Project/category hiện được rút ra từ task chưa xóa, chưa gọi API riêng.
+    // Project/category lấy từ API và danh sách task.
     final tasks = ref
         .watch(coreTasksProvider)
         .where((task) => task.deletedAt == null)
         .toList();
     final filters = ref.watch(taskFilterSortProvider);
-    final projectIds =
-        tasks
-            .map((task) => task.projectId)
-            .whereType<String>()
-            .where((id) => id.isNotEmpty)
-            .toSet()
-            .toList()
-          ..sort();
-    final categoryIds =
-        tasks
-            .map((task) => task.categoryId)
-            .whereType<String>()
-            .where((id) => id.isNotEmpty)
-            .toSet()
-            .toList()
-          ..sort();
+    final projectOptions =
+        ref.watch(projectOptionsProvider).asData?.value ?? const [];
+    final categoryOptions =
+        ref.watch(categoryOptionsProvider).asData?.value ?? const [];
+
+    final projectNames = {for (final p in projectOptions) p.id: p.name};
+    final categoryNames = {for (final c in categoryOptions) c.id: c.name};
+
+    final projectIds = {
+      ...projectOptions.map((p) => p.id),
+      ...tasks.map((task) => task.projectId).whereType<String>(),
+    }.where((id) => id.isNotEmpty).toList()..sort();
+
+    final categoryIds = {
+      ...categoryOptions.map((c) => c.id),
+      ...tasks.map((task) => task.categoryId).whereType<String>(),
+    }.where((id) => id.isNotEmpty).toList()..sort();
 
     // Chọn một ID sẽ cập nhật provider lọc; nếu chưa có ID thì báo trạng thái trống.
     return Drawer(
@@ -39,11 +42,11 @@ class CategoryProjectDrawer extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 16),
           children: [
             const ListTile(
-              leading: Icon(Icons.folder_open),
+              leading: Icon(IconsaxPlusLinear.folder_open),
               title: Text('Lọc theo project/category'),
             ),
             ListTile(
-              leading: const Icon(Icons.list_alt),
+              leading: const Icon(IconsaxPlusLinear.element_3),
               title: const Text('Mọi project/category'),
               selected: filters.projectId == null && filters.categoryId == null,
               onTap: () {
@@ -55,7 +58,7 @@ class CategoryProjectDrawer extends ConsumerWidget {
             ),
             if (projectIds.isEmpty && categoryIds.isEmpty)
               const ListTile(
-                leading: Icon(Icons.info_outline),
+                leading: Icon(IconsaxPlusLinear.info_circle),
                 title: Text('Chưa có mục để lọc'),
                 subtitle: Text(
                   'Hãy gán project hoặc category cho công việc trước.',
@@ -69,8 +72,8 @@ class CategoryProjectDrawer extends ConsumerWidget {
               ),
               for (final id in projectIds)
                 ListTile(
-                  leading: const Icon(Icons.folder_outlined),
-                  title: Text('Project ${_shortId(id)}'),
+                  leading: const Icon(IconsaxPlusLinear.folder),
+                  title: Text(projectNames[id] ?? 'Project ${_shortId(id)}'),
                   subtitle: Text(
                     id,
                     maxLines: 1,
@@ -91,8 +94,8 @@ class CategoryProjectDrawer extends ConsumerWidget {
               ),
               for (final id in categoryIds)
                 ListTile(
-                  leading: const Icon(Icons.label_outline),
-                  title: Text('Category ${_shortId(id)}'),
+                  leading: const Icon(IconsaxPlusLinear.tag),
+                  title: Text(categoryNames[id] ?? 'Category ${_shortId(id)}'),
                   subtitle: Text(
                     id,
                     maxLines: 1,

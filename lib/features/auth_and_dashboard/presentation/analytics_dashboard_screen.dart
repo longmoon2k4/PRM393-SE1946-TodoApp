@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+
 import '../../../core/models/task_model.dart';
 import '../../../core/providers/core_tasks_provider.dart';
 import '../../../core/theme/adaptive_theme_provider.dart';
@@ -44,8 +45,9 @@ class _AnalyticsDashboardScreenState
         final modeColor = _getModeColor(adaptive.mode);
         final bgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
         final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-        final subtextColor =
-            isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+        final subtextColor = isDark
+            ? const Color(0xFF94A3B8)
+            : const Color(0xFF64748B);
 
         return AlertDialog(
           backgroundColor: bgColor,
@@ -113,7 +115,8 @@ class _AnalyticsDashboardScreenState
                   const SizedBox(height: 10),
                   _buildAdaptiveRuleItem(
                     title: '🚨 Chế độ Quá tải (Overload)',
-                    desc: 'Khối lượng vượt ngưỡng an toàn (${adaptive.backlogThreshold} việc). Kích hoạt cảnh báo và tự động tinh gọn danh sách việc.',
+                    desc:
+                        'Khối lượng vượt ngưỡng an toàn (${adaptive.backlogThreshold} việc). Kích hoạt cảnh báo và tự động tinh gọn danh sách việc.',
                     color: AppColors.overloadPrimary,
                     isActive: adaptive.mode == AdaptiveMode.overload,
                     isDark: isDark,
@@ -154,7 +157,9 @@ class _AnalyticsDashboardScreenState
             : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isActive ? color : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+          color: isActive
+              ? color
+              : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
           width: isActive ? 1.5 : 1,
         ),
       ),
@@ -179,7 +184,10 @@ class _AnalyticsDashboardScreenState
               if (isActive) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: color,
                     borderRadius: BorderRadius.circular(10),
@@ -223,18 +231,21 @@ class _AnalyticsDashboardScreenState
     Color? customBorderColor,
     AdaptiveMode? mode,
   }) {
-    final effectiveBorder = customBorderColor ??
+    final effectiveBorder =
+        customBorderColor ??
         (mode == AdaptiveMode.overload
             ? (isDark ? const Color(0xFF9F1239) : const Color(0xFFFECDD3))
             : (mode == AdaptiveMode.focus
-                ? (isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A))
-                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))));
+                  ? (isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A))
+                  : (isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0))));
 
     final shadowTint = mode == AdaptiveMode.overload
         ? const Color(0xFFE11D48)
         : (mode == AdaptiveMode.focus
-            ? const Color(0xFFD97706)
-            : const Color(0xFF0F172A));
+              ? const Color(0xFFD97706)
+              : const Color(0xFF0F172A));
 
     return BoxDecoration(
       color: cardBg,
@@ -245,9 +256,11 @@ class _AnalyticsDashboardScreenState
       ),
       boxShadow: [
         BoxShadow(
-          color: shadowTint.withAlpha(isDark
-              ? (mode == AdaptiveMode.overload ? 60 : 35)
-              : (mode == AdaptiveMode.overload ? 25 : 12)),
+          color: shadowTint.withAlpha(
+            isDark
+                ? (mode == AdaptiveMode.overload ? 60 : 35)
+                : (mode == AdaptiveMode.overload ? 25 : 12),
+          ),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
@@ -273,14 +286,15 @@ class _AnalyticsDashboardScreenState
     final cardBg = Theme.of(context).cardColor;
     final borderColor = isDark
         ? (isOverload
-            ? const Color(0xFF9F1239)
-            : (isFocus ? const Color(0xFF78350F) : const Color(0xFF334155)))
+              ? const Color(0xFF9F1239)
+              : (isFocus ? const Color(0xFF78350F) : const Color(0xFF334155)))
         : (isOverload
-            ? const Color(0xFFFECDD3)
-            : (isFocus ? const Color(0xFFFDE68A) : const Color(0xFFE2E8F0)));
+              ? const Color(0xFFFECDD3)
+              : (isFocus ? const Color(0xFFFDE68A) : const Color(0xFFE2E8F0)));
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subtextColor =
-        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final subtextColor = isDark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -429,8 +443,9 @@ class _AnalyticsDashboardScreenState
     bool isDark,
   ) {
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subtextColor =
-        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final subtextColor = isDark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
     final modeColor = _getModeColor(adaptive.mode);
 
     return AppBar(
@@ -448,10 +463,7 @@ class _AnalyticsDashboardScreenState
               height: 38,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: modeColor,
-                  width: 2.0,
-                ),
+                border: Border.all(color: modeColor, width: 2.0),
                 boxShadow: [
                   BoxShadow(
                     color: modeColor.withAlpha(isDark ? 60 : 35),
@@ -525,11 +537,7 @@ class _AnalyticsDashboardScreenState
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  _getModeIcon(adaptive.mode),
-                  size: 12,
-                  color: modeColor,
-                ),
+                Icon(_getModeIcon(adaptive.mode), size: 12, color: modeColor),
                 const SizedBox(width: 4),
                 Text(
                   adaptive.modeName,
@@ -608,7 +616,11 @@ class _AnalyticsDashboardScreenState
       ),
       child: Row(
         children: [
-          const Icon(IconsaxPlusLinear.cloud_cross, size: 16, color: Color(0xFF3B82F6)),
+          const Icon(
+            IconsaxPlusLinear.cloud_cross,
+            size: 16,
+            color: Color(0xFF3B82F6),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -645,10 +657,7 @@ class _AnalyticsDashboardScreenState
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFE11D48),
-          width: 1.8,
-        ),
+        border: Border.all(color: const Color(0xFFE11D48), width: 1.8),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFE11D48).withAlpha(isDark ? 80 : 30),
@@ -665,7 +674,10 @@ class _AnalyticsDashboardScreenState
             children: [
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE11D48),
                     borderRadius: BorderRadius.circular(10),
@@ -673,7 +685,11 @@ class _AnalyticsDashboardScreenState
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(IconsaxPlusBold.danger, size: 13, color: Colors.white),
+                      const Icon(
+                        IconsaxPlusBold.danger,
+                        size: 13,
+                        color: Colors.white,
+                      ),
                       const SizedBox(width: 5),
                       Flexible(
                         child: Text(
@@ -747,7 +763,10 @@ class _AnalyticsDashboardScreenState
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE11D48),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 8,
+                    ),
                     textStyle: GoogleFonts.plusJakartaSans(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
@@ -766,7 +785,10 @@ class _AnalyticsDashboardScreenState
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFE11D48),
                   side: const BorderSide(color: Color(0xFFE11D48)),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 10,
+                  ),
                   textStyle: GoogleFonts.plusJakartaSans(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
@@ -792,14 +814,9 @@ class _AnalyticsDashboardScreenState
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isDark
-            ? const Color(0xFF281C0C)
-            : const Color(0xFFFFFBEB),
+        color: isDark ? const Color(0xFF281C0C) : const Color(0xFFFFFBEB),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFD97706),
-          width: 1.4,
-        ),
+        border: Border.all(color: const Color(0xFFD97706), width: 1.4),
       ),
       child: Row(
         children: [
@@ -832,7 +849,9 @@ class _AnalyticsDashboardScreenState
                   'Có $overdueCount công việc quá hạn cần ưu tiên xử lý dứt điểm.',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11.5,
-                    color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
+                    color: isDark
+                        ? const Color(0xFFFDE68A)
+                        : const Color(0xFF92400E),
                   ),
                 ),
               ],
@@ -871,8 +890,8 @@ class _AnalyticsDashboardScreenState
     final hubLabel = isOverload
         ? '🚨 Quá tải (${adaptive.activeTaskCount}/${adaptive.backlogThreshold} việc)'
         : (isFocus && stats.overdueCount > 0
-            ? '⚡ Cần tập trung việc gấp'
-            : stats.productivityLabel);
+              ? '⚡ Cần tập trung việc gấp'
+              : stats.productivityLabel);
 
     final hubAdvice = isOverload
         ? 'Cảnh báo: Số lượng công việc chưa hoàn tất (${adaptive.activeTaskCount} việc) đã vượt ngưỡng an toàn (${adaptive.backlogThreshold} việc). Đã kích hoạt chế độ tinh gọn để bạn ưu tiên xử lý việc gấp.'
@@ -971,7 +990,9 @@ class _AnalyticsDashboardScreenState
                         fontSize: 12.5,
                         height: 1.4,
                         color: isOverload
-                            ? (isDark ? const Color(0xFFFECDD3) : const Color(0xFF881337))
+                            ? (isDark
+                                  ? const Color(0xFFFECDD3)
+                                  : const Color(0xFF881337))
                             : subtextColor,
                       ),
                     ),
@@ -1003,7 +1024,9 @@ class _AnalyticsDashboardScreenState
                   label: 'Cần giải quyết',
                   value: '${stats.todoCount + stats.inProgressCount} việc',
                   icon: IconsaxPlusLinear.clock,
-                  iconColor: isOverload ? const Color(0xFFE11D48) : const Color(0xFF3B82F6),
+                  iconColor: isOverload
+                      ? const Color(0xFFE11D48)
+                      : const Color(0xFF3B82F6),
                   textColor: textColor,
                   subtextColor: subtextColor,
                 ),
@@ -1112,7 +1135,9 @@ class _AnalyticsDashboardScreenState
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        isOverload ? IconsaxPlusBold.danger : IconsaxPlusLinear.activity,
+                        isOverload
+                            ? IconsaxPlusBold.danger
+                            : IconsaxPlusLinear.activity,
                         size: 16,
                         color: modeColor,
                       ),
@@ -1128,7 +1153,9 @@ class _AnalyticsDashboardScreenState
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14.5,
                           fontWeight: FontWeight.w700,
-                          color: isOverload ? const Color(0xFFE11D48) : textColor,
+                          color: isOverload
+                              ? const Color(0xFFE11D48)
+                              : textColor,
                         ),
                       ),
                     ),
@@ -1137,7 +1164,10 @@ class _AnalyticsDashboardScreenState
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: modeColor.withAlpha(isDark ? 40 : 20),
                   borderRadius: BorderRadius.circular(8),
@@ -1253,12 +1283,17 @@ class _AnalyticsDashboardScreenState
                 onTap: () => context.push('/profile'),
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withAlpha(isDark ? 35 : 15),
+                    color: Theme.of(context).primaryColor
+                        .withAlpha(isDark ? 35 : 15),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: Theme.of(context).primaryColor.withAlpha(isDark ? 80 : 50),
+                      color: Theme.of(context).primaryColor
+                          .withAlpha(isDark ? 80 : 50),
                     ),
                   ),
                   child: Row(
@@ -1303,7 +1338,9 @@ class _AnalyticsDashboardScreenState
       decoration: BoxDecoration(
         color: isActive
             ? color.withAlpha(isDark ? 40 : 20)
-            : (isDark ? const Color(0xFF0F172A).withAlpha(50) : const Color(0xFFF8FAFC)),
+            : (isDark
+                  ? const Color(0xFF0F172A).withAlpha(50)
+                  : const Color(0xFFF8FAFC)),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isActive
@@ -1422,7 +1459,9 @@ class _AnalyticsDashboardScreenState
               child: _buildMetricTile(
                 title: 'Quá hạn',
                 value: '${stats.overdueCount}',
-                subtitle: stats.overdueCount > 0 ? 'Cần xử lý gấp' : 'Không có việc trễ',
+                subtitle: stats.overdueCount > 0
+                    ? 'Cần xử lý gấp'
+                    : 'Không có việc trễ',
                 icon: IconsaxPlusLinear.danger,
                 color: AppColors.priorityUrgent,
                 cardBg: cardBg,
@@ -1452,7 +1491,8 @@ class _AnalyticsDashboardScreenState
     required bool isDark,
     AdaptiveMode? mode,
   }) {
-    final isOverloadHighlight = mode == AdaptiveMode.overload && title == 'Quá hạn';
+    final isOverloadHighlight =
+        mode == AdaptiveMode.overload && title == 'Quá hạn';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1489,9 +1529,7 @@ class _AnalyticsDashboardScreenState
                   color: color.withAlpha(isDark ? 40 : 25),
                   shape: BoxShape.circle,
                 ),
-                child: Center(
-                  child: Icon(icon, size: 14, color: color),
-                ),
+                child: Center(child: Icon(icon, size: 14, color: color)),
               ),
             ],
           ),
@@ -1537,7 +1575,14 @@ class _AnalyticsDashboardScreenState
     final isFocus = adaptive.mode == AdaptiveMode.focus;
 
     final displayedTasks = isOverload
-        ? tasks.where((t) => t.isOverdue || t.priority == TaskPriority.urgent || t.priority == TaskPriority.high).toList()
+        ? tasks
+              .where(
+                (t) =>
+                    t.isOverdue ||
+                    t.priority == TaskPriority.urgent ||
+                    t.priority == TaskPriority.high,
+              )
+              .toList()
         : tasks;
 
     final hiddenLowPriorityCount = tasks.length - displayedTasks.length;
@@ -1562,25 +1607,33 @@ class _AnalyticsDashboardScreenState
                     Icon(
                       isOverload
                           ? IconsaxPlusBold.danger
-                          : (isFocus ? IconsaxPlusBold.flash_1 : IconsaxPlusLinear.task_square),
+                          : (isFocus
+                                ? IconsaxPlusBold.flash_1
+                                : IconsaxPlusLinear.task_square),
                       size: 16,
                       color: isOverload
                           ? AppColors.overloadPrimary
-                          : (isFocus ? AppColors.focusPrimary : AppColors.calmPrimary),
+                          : (isFocus
+                                ? AppColors.focusPrimary
+                                : AppColors.calmPrimary),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         isOverload
                             ? 'Công việc cần ưu tiên xử lý ngay'
-                            : (isFocus ? 'Cần xử lý ngay (Ưu tiên cao)' : 'Cần xử lý ngay'),
+                            : (isFocus
+                                  ? 'Cần xử lý ngay (Ưu tiên cao)'
+                                  : 'Cần xử lý ngay'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: isOverload
-                              ? (isDark ? const Color(0xFFFDA4AF) : const Color(0xFFBE123C))
+                              ? (isDark
+                                    ? const Color(0xFFFDA4AF)
+                                    : const Color(0xFFBE123C))
                               : textColor,
                         ),
                       ),
@@ -1592,10 +1645,13 @@ class _AnalyticsDashboardScreenState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: (isOverload
-                          ? AppColors.overloadPrimary
-                          : (isFocus ? AppColors.focusPrimary : AppColors.calmPrimary))
-                      .withAlpha(isDark ? 40 : 20),
+                  color:
+                      (isOverload
+                              ? AppColors.overloadPrimary
+                              : (isFocus
+                                    ? AppColors.focusPrimary
+                                    : AppColors.calmPrimary))
+                          .withAlpha(isDark ? 40 : 20),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -1603,7 +1659,9 @@ class _AnalyticsDashboardScreenState
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
-                    color: isOverload ? AppColors.overloadPrimary : subtextColor,
+                    color: isOverload
+                        ? AppColors.overloadPrimary
+                        : subtextColor,
                   ),
                 ),
               ),
@@ -1624,24 +1682,32 @@ class _AnalyticsDashboardScreenState
               ),
             )
           else
-            ...displayedTasks.map((task) => _buildActionableTaskTile(
-                  task,
-                  textColor,
-                  subtextColor,
-                  borderColor,
-                  isDark,
-                )),
+            ...displayedTasks.map(
+              (task) => _buildActionableTaskTile(
+                task,
+                textColor,
+                subtextColor,
+                borderColor,
+                isDark,
+              ),
+            ),
           if (isOverload && hiddenLowPriorityCount > 0) ...[
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                color: isDark
+                    ? const Color(0xFF1E293B)
+                    : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  const Icon(IconsaxPlusLinear.shield_tick, size: 14, color: Color(0xFF64748B)),
+                  const Icon(
+                    IconsaxPlusLinear.shield_tick,
+                    size: 14,
+                    color: Color(0xFF64748B),
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -1719,7 +1785,9 @@ class _AnalyticsDashboardScreenState
                 border: Border.all(
                   color: isOverdue
                       ? const Color(0xFFEF4444)
-                      : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                      : (isDark
+                            ? const Color(0xFF64748B)
+                            : const Color(0xFF94A3B8)),
                   width: 1.5,
                 ),
               ),
@@ -1727,28 +1795,38 @@ class _AnalyticsDashboardScreenState
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-                if (task.deadline != null)
+            child: InkWell(
+              onTap: () {
+                if (task.id.isNotEmpty) {
+                  context.push('/task-detail/${task.id}');
+                }
+              },
+              borderRadius: BorderRadius.circular(6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Hạn chót: ${DateFormat('dd/MM/yyyy HH:mm').format(task.deadline!)}',
+                    task.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      color: isOverdue ? const Color(0xFFEF4444) : subtextColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
                     ),
                   ),
-              ],
+                  if (task.deadline != null)
+                    Text(
+                      'Hạn chót: ${DateFormat('dd/MM/yyyy HH:mm').format(task.deadline!)}',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: isOverdue
+                            ? const Color(0xFFEF4444)
+                            : subtextColor,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -1783,7 +1861,13 @@ class _AnalyticsDashboardScreenState
     bool isDark,
   ) {
     if (stats.totalTasks == 0) {
-      return _buildEmptyTaskCard(cardBg, borderColor, textColor, subtextColor, isDark);
+      return _buildEmptyTaskCard(
+        cardBg,
+        borderColor,
+        textColor,
+        subtextColor,
+        isDark,
+      );
     }
 
     return Container(
@@ -1845,7 +1929,8 @@ class _AnalyticsDashboardScreenState
                                   return;
                                 }
                                 _touchedPieIndex = pieTouchResponse
-                                    .touchedSection!.touchedSectionIndex;
+                                    .touchedSection!
+                                    .touchedSectionIndex;
                               });
                             },
                           ),
@@ -2057,7 +2142,8 @@ class _AnalyticsDashboardScreenState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withAlpha(isDark ? 40 : 20),
+                  color: Theme.of(context).primaryColor
+                      .withAlpha(isDark ? 40 : 20),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -2081,8 +2167,9 @@ class _AnalyticsDashboardScreenState
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (group) =>
-                        isDark ? const Color(0xFF334155) : const Color(0xFF0F172A),
+                    getTooltipColor: (group) => isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFF0F172A),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final val = stats.weeklyCompletedCounts[group.x.toInt()];
                       return BarTooltipItem(
@@ -2099,9 +2186,11 @@ class _AnalyticsDashboardScreenState
                 titlesData: FlTitlesData(
                   show: true,
                   topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -2125,8 +2214,9 @@ class _AnalyticsDashboardScreenState
                               days[index],
                               style: TextStyle(
                                 fontSize: 11,
-                                fontWeight:
-                                    isToday ? FontWeight.w800 : FontWeight.w600,
+                                fontWeight: isToday
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
                                 color: isToday
                                     ? Theme.of(context).primaryColor
                                     : subtextColor,
@@ -2161,11 +2251,12 @@ class _AnalyticsDashboardScreenState
                         toY: val == 0 ? 0.2 : val,
                         color: val > 0
                             ? (isToday
-                                ? Theme.of(context).primaryColor
-                                : Theme.of(context).primaryColor.withAlpha(isDark ? 200 : 160))
+                                  ? Theme.of(context).primaryColor
+                                  : Theme.of(context).primaryColor
+                                        .withAlpha(isDark ? 200 : 160))
                             : (isDark
-                                ? const Color(0xFF334155)
-                                : const Color(0xFFE2E8F0)),
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFE2E8F0)),
                         width: 14,
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -2210,17 +2301,45 @@ class _AnalyticsDashboardScreenState
             ),
           ),
           const SizedBox(height: 16),
-          _buildPriorityRow('Khẩn cấp (Urgent)', stats.urgentCount, stats.totalTasks,
-              AppColors.priorityUrgent, textColor, subtextColor, isDark),
+          _buildPriorityRow(
+            'Khẩn cấp (Urgent)',
+            stats.urgentCount,
+            stats.totalTasks,
+            AppColors.priorityUrgent,
+            textColor,
+            subtextColor,
+            isDark,
+          ),
           const SizedBox(height: 12),
-          _buildPriorityRow('Ưu tiên cao (High)', stats.highCount, stats.totalTasks,
-              AppColors.priorityHigh, textColor, subtextColor, isDark),
+          _buildPriorityRow(
+            'Ưu tiên cao (High)',
+            stats.highCount,
+            stats.totalTasks,
+            AppColors.priorityHigh,
+            textColor,
+            subtextColor,
+            isDark,
+          ),
           const SizedBox(height: 12),
-          _buildPriorityRow('Trung bình (Medium)', stats.mediumCount, stats.totalTasks,
-              AppColors.priorityMedium, textColor, subtextColor, isDark),
+          _buildPriorityRow(
+            'Trung bình (Medium)',
+            stats.mediumCount,
+            stats.totalTasks,
+            AppColors.priorityMedium,
+            textColor,
+            subtextColor,
+            isDark,
+          ),
           const SizedBox(height: 12),
-          _buildPriorityRow('Thấp (Low)', stats.lowCount, stats.totalTasks,
-              AppColors.priorityLow, textColor, subtextColor, isDark),
+          _buildPriorityRow(
+            'Thấp (Low)',
+            stats.lowCount,
+            stats.totalTasks,
+            AppColors.priorityLow,
+            textColor,
+            subtextColor,
+            isDark,
+          ),
         ],
       ),
     );
@@ -2249,7 +2368,10 @@ class _AnalyticsDashboardScreenState
                   Container(
                     width: 8,
                     height: 8,
-                    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -2303,18 +2425,19 @@ class _AnalyticsDashboardScreenState
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
-      decoration: _enterpriseCardDecoration(cardBg: cardBg, isDark: isDark, radius: 20),
+      decoration: _enterpriseCardDecoration(
+        cardBg: cardBg,
+        isDark: isDark,
+        radius: 20,
+      ),
       child: Column(
         children: [
           Image.asset(
             'assets/images/empty_tasks.png',
             height: 100,
             fit: BoxFit.contain,
-            errorBuilder: (ctx, err, stack) => Icon(
-              IconsaxPlusLinear.archive,
-              size: 48,
-              color: subtextColor,
-            ),
+            errorBuilder: (ctx, err, stack) =>
+                Icon(IconsaxPlusLinear.archive, size: 48, color: subtextColor),
           ),
           const SizedBox(height: 14),
           Text(
@@ -2382,7 +2505,9 @@ class _AnalyticsDashboardScreenState
   }
 
   Widget _buildSkeletonLoading(bool isDark) {
-    final shimmerColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final shimmerColor = isDark
+        ? const Color(0xFF1E293B)
+        : const Color(0xFFE2E8F0);
 
     return Padding(
       padding: const EdgeInsets.all(20),
