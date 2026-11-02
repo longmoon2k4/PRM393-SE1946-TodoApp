@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/models/comment_model.dart';
 import '../../../core/models/subtask_model.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/models/user_model.dart';
@@ -205,16 +206,99 @@ class TaskCrudController {
     }
   }
 
+  /// Trả về `false` khi bình luận mới chỉ được lưu trên máy.
+  Future<bool> addComment(
+    String taskId, {
+    required String authorId,
+    required String authorName,
+    required String content,
+  }) async {
+    final task = _findTask(taskId);
+    if (task == null) return false;
+
+    final draft = TaskComment(
+      id: _newLocalId(),
+      authorId: authorId,
+      authorName: authorName,
+      content: content,
+      createdAt: DateTime.now(),
+    );
+    await _core.upsertLocalTask(
+      task.copyWith(comments: [...task.comments, draft]),
+    );
+
+    try {
+      final saved = await TaskApiService.instance.addComment(
+        taskId,
+        authorId: authorId,
+        content: content,
+      );
+      final latest = _findTask(taskId);
+      if (latest != null) {
+        await _core.upsertLocalTask(
+          latest.copyWith(
+            comments: [
+              for (final c in latest.comments)
+                if (c.id != draft.id && c.id != saved.id) c,
+              saved,
+            ],
+          ),
+        );
+      }
+      return true;
+    } catch (e) {
+      debugPrint('Lỗi gửi bình luận lên server (đã lưu offline): $e');
+      return false;
+    }
+  }
+
+  /// Chỉ tải lại bình luận để không ghi đè các thay đổi checklist đang gửi.
+  Future<void> refreshComments(String taskId) async {
+    if (_isLocalId(taskId)) return;
+
+    try {
+      final fetched = await TaskApiService.instance.getTask(taskId);
+      final latest = _findTask(taskId);
+      if (fetched == null || latest == null) return;
+
+      final merged = _mergeComments(fetched.comments, latest.comments);
+      final hasChanged = merged.length != latest.comments.length ||
+          !merged.every((c) => latest.comments.any((old) => old.id == c.id));
+      if (hasChanged) {
+        await _core.upsertLocalTask(latest.copyWith(comments: merged));
+      }
+    } catch (e) {
+      debugPrint('Không tải lại được bình luận: $e');
+    }
+  }
+
   /// Kéo để làm mới: lấy toàn bộ Task mới nhất từ server.
   Future<void> refreshTask(String taskId) async {
     if (_isLocalId(taskId)) return;
 
     try {
       final fetched = await TaskApiService.instance.getTask(taskId);
-      if (fetched != null) await _core.upsertLocalTask(fetched);
+      final latest = _findTask(taskId);
+      if (fetched == null || latest == null) return;
+
+      await _core.upsertLocalTask(
+        fetched.copyWith(
+          comments: _mergeComments(fetched.comments, latest.comments),
+        ),
+      );
     } catch (e) {
       debugPrint('Không tải lại được Task: $e');
     }
+  }
+
+  List<TaskComment> _mergeComments(
+    List<TaskComment> fromServer,
+    List<TaskComment> local,
+  ) {
+    return [
+      ...fromServer,
+      ...local.where((c) => _isLocalId(c.id)),
+    ];
   }
 
   Future<void> _replaceSubtask(

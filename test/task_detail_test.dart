@@ -7,6 +7,7 @@ import 'package:todo_app/core/models/subtask_model.dart';
 import 'package:todo_app/core/models/task_model.dart';
 import 'package:todo_app/core/providers/core_tasks_provider.dart';
 import 'package:todo_app/core/services/local_storage_service.dart';
+import 'package:todo_app/features/task_detail_and_collab/presentation/comment_timeline_widget.dart';
 import 'package:todo_app/features/task_detail_and_collab/presentation/task_detail_screen.dart';
 import 'package:todo_app/features/task_detail_and_collab/presentation/task_form_bottom_sheet.dart';
 import 'package:todo_app/features/task_detail_and_collab/providers/task_crud_provider.dart';
@@ -154,6 +155,96 @@ void main() {
         ),
       );
       await tester.pump(const Duration(seconds: 5));
+    });
+  });
+
+  group('formatCommentTime', () {
+    final now = DateTime(2026, 11, 2, 12);
+
+    test('hiển thị đúng từng mốc', () {
+      String format(Duration ago) =>
+          formatCommentTime(now.subtract(ago), now: now);
+
+      expect(format(const Duration(seconds: 20)), 'Vừa xong');
+      expect(format(const Duration(minutes: 5)), '5 phút trước');
+      expect(format(const Duration(hours: 2)), '2 giờ trước');
+      expect(format(const Duration(days: 3)), '3 ngày trước');
+      expect(format(const Duration(days: 30)), '03/10/2026');
+    });
+
+    test('giờ máy chủ lệch nhẹ về tương lai vẫn là Vừa xong', () {
+      expect(
+        formatCommentTime(now.add(const Duration(minutes: 1)), now: now),
+        'Vừa xong',
+      );
+    });
+  });
+
+  group('CommentTimelineWidget', () {
+    final comments = [
+      TaskComment(
+        id: 'c2',
+        authorId: 'me',
+        authorName: 'Đăng',
+        content: 'Của mình',
+        createdAt: DateTime.now(),
+      ),
+      TaskComment(
+        id: 'c1',
+        authorId: 'other',
+        authorName: 'Phúc',
+        content: 'Của người khác',
+        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+      ),
+    ];
+
+    Future<List<String>> pump(WidgetTester tester, {String? userId = 'me'}) async {
+      final sent = <String>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CommentTimelineWidget(
+              comments: comments,
+              currentUserId: userId,
+              onSend: sent.add,
+            ),
+          ),
+        ),
+      );
+      return sent;
+    }
+
+    testWidgets('của mình bên phải, người khác bên trái, cũ ở trên', (tester) async {
+      await pump(tester);
+
+      final mine = tester.getCenter(find.text('Của mình'));
+      final other = tester.getCenter(find.text('Của người khác'));
+      final center = tester.getCenter(find.byType(Scaffold));
+
+      expect(mine.dx, greaterThan(center.dx));
+      expect(other.dx, lessThan(center.dx));
+      expect(other.dy, lessThan(mine.dy));
+      expect(find.text('2 giờ trước'), findsOneWidget);
+      expect(find.text('Phúc'), findsOneWidget);
+      expect(find.text('Đăng'), findsNothing);
+    });
+
+    testWidgets('gửi bình luận đã bỏ khoảng trắng và xóa ô nhập', (tester) async {
+      final sent = await pump(tester);
+
+      await tester.enterText(find.byType(TextField), '  Xin chào  ');
+      await tester.tap(find.byTooltip('Gửi bình luận'));
+      await tester.pump();
+
+      expect(sent, ['Xin chào']);
+      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, '');
+    });
+
+    testWidgets('chưa đăng nhập thì không gửi được', (tester) async {
+      await pump(tester, userId: null);
+
+      expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
+      expect(find.text('Đăng nhập để bình luận'), findsOneWidget);
     });
   });
 
