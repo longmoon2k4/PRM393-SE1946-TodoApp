@@ -78,11 +78,11 @@ final appRouter = GoRouter(
       ),
     ),
     GoRoute(
-      path: '/task-detail',
+      path: '/task-detail/:id',
       pageBuilder: (context, state) => _buildPageWithTransition(
         context: context,
         state: state,
-        child: const TaskDetailScreen(),
+        child: TaskDetailScreen(taskId: state.pathParameters['id']!),
       ),
     ),
   ],
