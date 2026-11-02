@@ -1,7 +1,23 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import '../models/comment_model.dart';
+import '../models/subtask_model.dart';
 import '../models/task_model.dart';
+
+class NamedOption {
+  final String id;
+  final String name;
+
+  const NamedOption({required this.id, required this.name});
+
+  factory NamedOption.fromJson(Map<String, dynamic> json) {
+    return NamedOption(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+    );
+  }
+}
 
 class TaskApiService {
   TaskApiService._();
@@ -133,6 +149,77 @@ class TaskApiService {
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Không thể xóa Task trên server: ${response.statusCode}');
     }
+  }
+
+  Future<SubTask> addSubtask(
+    String taskId, {
+    required String title,
+    required double orderIndex,
+  }) async {
+    final response = await _dio.post(
+      '/api/v1/tasks/$taskId/subtasks',
+      data: {'title': title, 'orderIndex': orderIndex},
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return SubTask.fromJson(response.data as Map<String, dynamic>);
+    }
+    throw Exception('Không thể thêm mục con trên server: ${response.statusCode}');
+  }
+
+  Future<SubTask> toggleSubtask(String subtaskId) async {
+    final response = await _dio.patch('/api/v1/subtasks/$subtaskId/toggle');
+    if (response.statusCode == 200) {
+      return SubTask.fromJson(response.data as Map<String, dynamic>);
+    }
+    throw Exception('Không thể cập nhật mục con trên server: ${response.statusCode}');
+  }
+
+  Future<SubTask> updateSubtaskOrder(String subtaskId, double newOrderIndex) async {
+    final response = await _dio.patch(
+      '/api/v1/subtasks/$subtaskId/order',
+      data: {'newOrderIndex': newOrderIndex},
+    );
+    if (response.statusCode == 200) {
+      return SubTask.fromJson(response.data as Map<String, dynamic>);
+    }
+    throw Exception('Không thể đổi thứ tự mục con trên server: ${response.statusCode}');
+  }
+
+  Future<void> deleteSubtask(String subtaskId) async {
+    final response = await _dio.delete('/api/v1/subtasks/$subtaskId');
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Không thể xóa mục con trên server: ${response.statusCode}');
+    }
+  }
+
+  Future<TaskComment> addComment(
+    String taskId, {
+    required String authorId,
+    required String content,
+  }) async {
+    final response = await _dio.post(
+      '/api/v1/tasks/$taskId/comments',
+      data: {'authorId': authorId, 'content': content},
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return TaskComment.fromJson(response.data as Map<String, dynamic>);
+    }
+    throw Exception('Không thể gửi bình luận lên server: ${response.statusCode}');
+  }
+
+  Future<List<NamedOption>> fetchProjects() => _fetchOptions('/api/v1/projects');
+
+  Future<List<NamedOption>> fetchCategories() =>
+      _fetchOptions('/api/v1/categories');
+
+  Future<List<NamedOption>> _fetchOptions(String path) async {
+    final response = await _dio.get(path);
+    if (response.statusCode == 200 && response.data is List) {
+      return (response.data as List)
+          .map((item) => NamedOption.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
   }
 
   Future<bool> isServerAvailable() async {

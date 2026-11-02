@@ -11,6 +11,20 @@ class SubTask {
     this.orderIndex = 0.0,
   });
 
+  SubTask copyWith({
+    String? id,
+    String? title,
+    bool? isCompleted,
+    double? orderIndex,
+  }) {
+    return SubTask(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      isCompleted: isCompleted ?? this.isCompleted,
+      orderIndex: orderIndex ?? this.orderIndex,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

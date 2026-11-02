@@ -24,10 +24,13 @@ class TaskComment {
   }
 
   factory TaskComment.fromJson(Map<String, dynamic> json) {
+    final author = json['author'] as Map<String, dynamic>?;
+
     return TaskComment(
       id: json['id'] as String? ?? '',
-      authorId: json['authorId'] as String? ?? '',
-      authorName: json['authorName'] as String? ?? '',
+      authorId: json['authorId'] as String? ?? author?['id'] as String? ?? '',
+      authorName:
+          json['authorName'] as String? ?? author?['name'] as String? ?? '',
       content: json['content'] as String? ?? '',
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()

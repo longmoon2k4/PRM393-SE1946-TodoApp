@@ -58,7 +58,7 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
     }
   }
 
-  Future<void> addTask(TaskItem newTask) async {
+  Future<TaskItem> addTask(TaskItem newTask) async {
     state = [...state, newTask];
     await LocalStorageService.saveTasks(state);
 
@@ -72,9 +72,22 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
             t
       ];
       await LocalStorageService.saveTasks(state);
+      return savedTask;
     } catch (e) {
       debugPrint('Lỗi ghi Task lên server (đã lưu offline): $e');
+      return newTask;
     }
+  }
+
+  Future<void> upsertLocalTask(TaskItem task) async {
+    final exists = state.any((t) => t.id == task.id);
+    state = exists
+        ? [
+            for (final t in state)
+              if (t.id == task.id) task else t
+          ]
+        : [...state, task];
+    await LocalStorageService.saveTasks(state);
   }
 
   Future<void> updateTask(TaskItem updatedTask) async {
