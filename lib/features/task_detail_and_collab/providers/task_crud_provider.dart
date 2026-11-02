@@ -55,6 +55,7 @@ class TaskCrudController {
     required String title,
     required TaskPriority priority,
     DateTime? deadline,
+    DateTime? reminderAt,
     List<String> checklistTitles = const [],
   }) async {
     final draft = TaskItem(
@@ -62,6 +63,7 @@ class TaskCrudController {
       title: title,
       priority: priority,
       deadline: deadline,
+      reminderAt: reminderAt,
       createdAt: DateTime.now(),
       subtasks: [
         for (var i = 0; i < checklistTitles.length; i++)

@@ -182,6 +182,12 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               subtitle: task.isOverdue ? 'Đã quá hạn' : null,
               color: task.isOverdue ? AppColors.priorityUrgent : null,
             ),
+            _InfoRow(
+              icon: IconsaxPlusLinear.notification,
+              label: task.reminderAt == null
+                  ? 'Chưa đặt giờ nhắc'
+                  : 'Nhắc lúc ${dateFormat.format(task.reminderAt!)}',
+            ),
             _AssigneeRow(task: task),
             _OptionRow(
               icon: IconsaxPlusLinear.folder,
