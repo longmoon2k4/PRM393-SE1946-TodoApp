@@ -15,6 +15,7 @@ final coreTasksProvider =
 class CoreTasksNotifier extends Notifier<List<TaskItem>> {
   @override
   List<TaskItem> build() {
+    // Hiển thị cache trước, rồi đồng bộ server sau khi provider được khởi tạo.
     final cachedTasks = LocalStorageService.getCachedTasks();
 
     Future.microtask(() => syncFromBackend());
@@ -28,6 +29,7 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
 
   Future<bool> syncFromBackend() async {
     try {
+      // Nếu server chưa có task thì nạp dữ liệu mẫu; response thành công sẽ thay cache.
       var serverTasks = await TaskApiService.instance.fetchTasks();
 
       if (serverTasks.isEmpty) {
@@ -39,6 +41,7 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
         await LocalStorageService.saveTasks(serverTasks);
         await LocalStorageService.updateLastSyncTime();
 
+        // Chỉ kiểm tra thông báo deadline sau khi nhận danh sách mới từ server.
         final auth = ref.read(authProvider);
         final notifyDeadline = auth.user?.notifyOnDeadline ?? true;
         unawaited(NotificationService.checkAndNotifyApproachingDeadlines(
@@ -59,6 +62,7 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
   }
 
   Future<void> addTask(TaskItem newTask) async {
+    // Cập nhật UI/cache trước request để thao tác hiện ngay; lỗi hiện chỉ ghi log.
     state = [...state, newTask];
     await LocalStorageService.saveTasks(state);
 
@@ -78,6 +82,7 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
   }
 
   Future<void> updateTask(TaskItem updatedTask) async {
+    // Cùng cách optimistic update: lưu thay đổi local rồi gửi toàn bộ task lên API.
     state = [
       for (final task in state)
         if (task.id == updatedTask.id) updatedTask else task
@@ -92,6 +97,7 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
   }
 
   Future<void> toggleTaskStatus(String taskId) async {
+    // Tìm task theo ID, đổi qua lại giữa done và todo rồi gửi PATCH trạng thái.
     final index = state.indexWhere((t) => t.id == taskId);
     if (index == -1) return;
 
@@ -116,6 +122,7 @@ class CoreTasksNotifier extends Notifier<List<TaskItem>> {
   }
 
   Future<void> deleteTask(String taskId) async {
+    // Ẩn task bằng deletedAt trước; API DELETE cũng đánh dấu xóa mềm ở backend.
     state = [
       for (final task in state)
         if (task.id == taskId)

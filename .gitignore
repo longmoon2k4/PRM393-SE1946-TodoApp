@@ -48,3 +48,10 @@ app.*.map.json
 .widget_preview/
 backend/target/
 devtools_options.yaml
+
+# Firebase configuration belongs to each developer's local project.
+firebase.json
+.firebaserc
+lib/firebase_options.dart
+**/google-services.json
+**/GoogleService-Info.plist

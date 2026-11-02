@@ -1,9 +1,11 @@
 import 'subtask_model.dart';
 import 'comment_model.dart';
 
+// Các giá trị này được dùng chung ở giao diện, bộ lọc và lúc đổi JSON với API.
 enum TaskStatus { todo, inProgress, done, cancelled }
 enum TaskPriority { low, medium, high, urgent }
 
+// Một task gói các thông tin hiển thị, lọc, sắp xếp và liên kết checklist/comment.
 class TaskItem {
   final String id;
   final String title;
@@ -43,6 +45,7 @@ class TaskItem {
     this.comments = const [],
   });
 
+  // Các getter này tính trạng thái theo thời điểm hiện tại, không lưu vào DB.
   bool get isOverdue =>
       deadline != null &&
       status != TaskStatus.done &&
@@ -59,6 +62,7 @@ class TaskItem {
       ? 0.0
       : subtasks.where((s) => s.isCompleted).length / subtasks.length;
 
+  // Tạo bản sao bất biến khi chỉ cần thay một vài trường của task.
   TaskItem copyWith({
     String? id,
     String? title,
@@ -99,6 +103,7 @@ class TaskItem {
     );
   }
 
+  // JSON đầy đủ dùng cho cache local, gồm cả ID và dữ liệu con.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -121,6 +126,7 @@ class TaskItem {
     };
   }
 
+  // Payload gửi API; tên trạng thái được đổi sang dạng backend và bỏ metadata local.
   Map<String, dynamic> toBackendJson() {
     String statusStr;
     switch (status) {
@@ -154,6 +160,7 @@ class TaskItem {
     };
   }
 
+  // Đọc cả JSON cache lẫn response API, chuẩn hóa giá trị về enum/model Dart.
   factory TaskItem.fromJson(Map<String, dynamic> json) {
     TaskStatus parseStatus(String? val) {
       if (val == null) return TaskStatus.todo;
