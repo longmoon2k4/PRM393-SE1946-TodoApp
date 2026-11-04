@@ -51,7 +51,7 @@ class _SearchFilterBarState extends ConsumerState<SearchFilterBar> {
     });
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 2),
       child: Row(
         children: [
           Expanded(
@@ -59,6 +59,8 @@ class _SearchFilterBarState extends ConsumerState<SearchFilterBar> {
               controller: _controller,
               decoration: InputDecoration(
                 hintText: 'Tìm công việc...',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 prefixIcon: const Icon(IconsaxPlusLinear.search_normal_1),
                 suffixIcon: _controller.text.isEmpty
                     ? null

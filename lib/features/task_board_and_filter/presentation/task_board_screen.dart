@@ -8,7 +8,7 @@ import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../core/models/task_model.dart';
 import '../../../core/providers/core_tasks_provider.dart';
-import '../../../core/widgets/contextual_fab.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../task_detail_and_collab/presentation/task_form_bottom_sheet.dart';
 import '../providers/multi_select_provider.dart';
 import '../providers/task_filter_sort_provider.dart';
@@ -24,6 +24,9 @@ class TaskBoardScreen extends ConsumerStatefulWidget {
 }
 
 class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
+  final _boardController = PageController();
+  int _currentColumn = 0;
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +36,12 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
       ref.read(multiSelectProvider.notifier).clear();
       ref.read(taskFilterSortProvider.notifier).clearFilters();
     });
+  }
+
+  @override
+  void dispose() {
+    _boardController.dispose();
+    super.dispose();
   }
 
   @override
@@ -61,6 +70,12 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
       if (previous != null && _filtersChanged(previous, next)) {
         ref.read(multiSelectProvider.notifier).clear();
       }
+      // Khi lọc trạng thái, mở đúng cột chứa kết quả.
+      if (previous?.status != next.status &&
+          next.status != null &&
+          _boardController.hasClients) {
+        _boardController.jumpToPage(TaskStatus.values.indexOf(next.status!));
+      }
     });
 
     // Phần khung: drawer, thanh trên cùng, tìm kiếm, số kết quả và các cột Kanban.
@@ -68,9 +83,14 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
       drawer: const CategoryProjectDrawer(),
       floatingActionButton: selectionMode
           ? null
-          : ContextualFab(
-              contextType: FabContextType.board,
-              onPressed: () => TaskFormBottomSheet.show(context),
+          : Transform.translate(
+              offset: const Offset(0, 10),
+              child: FloatingActionButton.small(
+                tooltip: 'Tạo công việc',
+                backgroundColor: AppColors.priorityMedium,
+                onPressed: () => TaskFormBottomSheet.show(context),
+                child: const Icon(IconsaxPlusLinear.add, color: Colors.white),
+              ),
             ),
       appBar: AppBar(
         title: Text(
@@ -78,10 +98,9 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
         ),
         actions: [
           if (selectionMode) ...[
-            IconButton(
-              tooltip: 'Đánh dấu hoàn thành',
-              onPressed: _completeSelectedTasks,
-              icon: const Icon(IconsaxPlusLinear.tick_circle),
+            TextButton(
+              onPressed: _cancelSelectedTasks,
+              child: const Text('Chuyển Đã hủy'),
             ),
             IconButton(
               tooltip: 'Bỏ chọn',
@@ -94,11 +113,12 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
               onPressed: _refreshTasks,
               icon: const Icon(IconsaxPlusLinear.refresh),
             ),
-          IconButton(
-            tooltip: 'Trang chủ',
-            onPressed: () => context.go('/dashboard'),
-            icon: const Icon(IconsaxPlusLinear.home_2),
-          ),
+          if (!selectionMode)
+            IconButton(
+              tooltip: 'Trang chủ',
+              onPressed: () => context.go('/dashboard'),
+              icon: const Icon(IconsaxPlusLinear.home_2),
+            ),
         ],
       ),
       body: Column(
@@ -126,13 +146,37 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
               ),
             ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '${visibleTasks.length} công việc',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+            padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${visibleTasks.length} công việc',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                // Dấu sáng chỉ vị trí cột đang xem.
+                Semantics(
+                  label: 'Cột ${_currentColumn + 1} trên ${TaskStatus.values.length}',
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (final status in TaskStatus.values)
+                        Container(
+                          width: 7,
+                          height: 7,
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: status.index == _currentColumn
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.outlineVariant,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -154,38 +198,23 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     bool selectionMode,
     bool canReorder,
   ) {
-    // Mỗi giá trị TaskStatus tạo một cột; cuộn ngang để xem đủ các cột.
-    return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          height: constraints.maxHeight,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final status in TaskStatus.values)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  child: SizedBox(
-                    width: 300,
-                    child: _statusColumn(
-                      status: status,
-                      tasks: tasks
-                          .where((task) => task.status == status)
-                          .toList(),
-                      selectedIds: selectedIds,
-                      selectionMode: selectionMode,
-                      canReorder: canReorder,
-                    ),
-                  ),
-                ),
-            ],
+    // Mỗi trang là một cột rộng theo màn hình; vuốt ngang để chuyển cột.
+    return PageView(
+      controller: _boardController,
+      onPageChanged: (index) => setState(() => _currentColumn = index),
+      children: [
+        for (final status in TaskStatus.values)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: _statusColumn(
+              status: status,
+              tasks: tasks.where((task) => task.status == status).toList(),
+              selectedIds: selectedIds,
+              selectionMode: selectionMode,
+              canReorder: canReorder,
+            ),
           ),
-        ),
-      ),
+      ],
     );
   }
 
@@ -288,7 +317,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
         key: PageStorageKey('tasks-${status.name}'),
         primary: false,
         buildDefaultDragHandles: false,
-        padding: const EdgeInsets.only(top: 4, bottom: 24),
+        padding: const EdgeInsets.only(top: 4, bottom: 72),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: tasks.length,
         onReorderItem: (oldIndex, newIndex) {
@@ -307,7 +336,7 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     return ListView.builder(
       key: PageStorageKey('tasks-${status.name}'),
       primary: false,
-      padding: const EdgeInsets.only(top: 4, bottom: 24),
+      padding: const EdgeInsets.only(top: 4, bottom: 72),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: tasks.length,
       itemBuilder: (context, index) => _taskCard(
@@ -340,13 +369,6 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
       selected: selectedIds.contains(_selectionId(task)),
       canReorder: canReorder,
       onToggleSelection: () => _toggleSelection(task),
-      onToggleDone: () => _saveTask(
-        task.copyWith(
-          status: task.status == TaskStatus.done
-              ? TaskStatus.todo
-              : TaskStatus.done,
-        ),
-      ),
       onStatusChanged: (status) => _saveTask(task.copyWith(status: status)),
       onChoosePriority: () => _choosePriority(task),
       onReschedule: () => _rescheduleTask(task),
@@ -365,24 +387,35 @@ class _TaskBoardScreenState extends ConsumerState<TaskBoardScreen> {
     }
   }
 
-  Future<void> _completeSelectedTasks() async {
-    // Hoàn thành từng task đang chọn rồi xóa chế độ chọn sau khi cập nhật xong.
+  Future<void> _cancelSelectedTasks() async {
+    // Chuyển các task đang chọn sang Đã hủy rồi thoát chế độ chọn.
     final selectedIds = ref.read(multiSelectProvider);
-    final tasks = ref.read(coreTasksProvider);
+    final container = ProviderScope.containerOf(context, listen: false);
     final notifier = ref.read(coreTasksProvider.notifier);
+    ref.read(multiSelectProvider.notifier).clear();
+    var changedCount = 0;
 
-    for (final task in tasks) {
-      if (selectedIds.contains(_selectionId(task)) &&
-          task.status != TaskStatus.done &&
-          task.deletedAt == null) {
-        await notifier.updateTask(task.copyWith(status: TaskStatus.done));
+    for (final id in selectedIds) {
+      // Lấy lại task trước mỗi lần lưu để giữ các thay đổi vừa thực hiện.
+      final matches = container.read(coreTasksProvider).where(
+        (task) => _selectionId(task) == id,
+      );
+      if (matches.isEmpty) continue;
+      final task = matches.first;
+      if (task.status != TaskStatus.cancelled && task.deletedAt == null) {
+        await notifier.updateTask(task.copyWith(status: TaskStatus.cancelled));
+        changedCount++;
       }
     }
 
     if (!mounted) return;
-    ref.read(multiSelectProvider.notifier).clear();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Đã hoàn thành ${selectedIds.length} công việc.')),
+      SnackBar(
+        content: Text(
+          'Đã cập nhật $changedCount công việc trên màn hình. '
+          'Hãy kiểm tra lại sau khi đồng bộ.',
+        ),
+      ),
     );
   }
 

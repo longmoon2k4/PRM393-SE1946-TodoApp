@@ -16,7 +16,6 @@ class SlidableTaskCard extends StatelessWidget {
   final bool selected;
   final bool canReorder;
   final VoidCallback onToggleSelection;
-  final VoidCallback onToggleDone;
   final ValueChanged<TaskStatus> onStatusChanged;
   final VoidCallback onChoosePriority;
   final VoidCallback onReschedule;
@@ -29,7 +28,6 @@ class SlidableTaskCard extends StatelessWidget {
     required this.selected,
     required this.canReorder,
     required this.onToggleSelection,
-    required this.onToggleDone,
     required this.onStatusChanged,
     required this.onChoosePriority,
     required this.onReschedule,
@@ -39,17 +37,17 @@ class SlidableTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Checkbox dùng để chọn nhiều khi selectionMode bật, còn bình thường là hoàn thành.
+    // Chỉ hiện dấu chọn khi đang chọn nhiều; bình thường dành chỗ cho nội dung.
     final card = Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         leading: selectionMode
-            ? Checkbox(value: selected, onChanged: (_) => onToggleSelection())
-            : Checkbox(
-                value: task.status == TaskStatus.done,
-                onChanged: (_) => onToggleDone(),
-              ),
+            ? Icon(
+                selected ? Icons.check_circle : Icons.circle_outlined,
+                color: selected ? Theme.of(context).colorScheme.primary : null,
+              )
+            : null,
         title: Text(
           task.title,
           maxLines: 2,
