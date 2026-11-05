@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:intl/intl.dart';
+
 import '../../../core/models/comment_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_sizes.dart';
@@ -116,9 +117,19 @@ class _CommentBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).primaryColor;
-    final initial = comment.authorName.trim().isEmpty
-        ? '?'
-        : comment.authorName.trim().characters.first.toUpperCase();
+    final name = comment.authorName.trim().isEmpty
+        ? 'Người dùng'
+        : comment.authorName.trim();
+    final displayName = isMine ? 'Bạn' : name;
+
+    final avatar = CircleAvatar(
+      radius: 16,
+      backgroundColor: primary.withAlpha(30),
+      child: Text(
+        name.characters.first.toUpperCase(),
+        style: TextStyle(color: primary, fontWeight: FontWeight.bold),
+      ),
+    );
 
     final bubble = Container(
       constraints: BoxConstraints(
@@ -150,36 +161,27 @@ class _CommentBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSizes.p4),
       child: Row(
-        mainAxisAlignment:
-            isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMine
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!isMine) ...[
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: primary.withAlpha(30),
-              child: Text(
-                initial,
-                style: TextStyle(color: primary, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(width: AppSizes.p8),
-          ],
+          if (!isMine) ...[avatar, const SizedBox(width: AppSizes.p8)],
           Column(
-            crossAxisAlignment:
-                isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment: isMine
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
             children: [
-              if (!isMine)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSizes.p4),
-                  child: Text(
-                    comment.authorName,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSizes.p4),
+                child: Text(
+                  displayName,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
               bubble,
               Padding(
                 padding: const EdgeInsets.only(top: AppSizes.p4),
@@ -193,6 +195,7 @@ class _CommentBubble extends StatelessWidget {
               ),
             ],
           ),
+          if (isMine) ...[const SizedBox(width: AppSizes.p8), avatar],
         ],
       ),
     );
