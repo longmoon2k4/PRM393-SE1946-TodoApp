@@ -95,7 +95,10 @@ void main() {
       );
       expect(task.id, startsWith('local_'));
       expect(task.subtasks.map((s) => s.title), ['X', 'Y']);
-      expect(container.read(coreTasksProvider).any((t) => t.id == task.id), isTrue);
+      expect(
+        container.read(coreTasksProvider).any((t) => t.id == task.id),
+        isTrue,
+      );
     });
   });
 
@@ -199,7 +202,10 @@ void main() {
       ),
     ];
 
-    Future<List<String>> pump(WidgetTester tester, {String? userId = 'me'}) async {
+    Future<List<String>> pump(
+      WidgetTester tester, {
+      String? userId = 'me',
+    }) async {
       final sent = <String>[];
       await tester.pumpWidget(
         MaterialApp(
@@ -215,7 +221,9 @@ void main() {
       return sent;
     }
 
-    testWidgets('của mình bên phải, người khác bên trái, cũ ở trên', (tester) async {
+    testWidgets('của mình bên phải, người khác bên trái, cũ ở trên', (
+      tester,
+    ) async {
       await pump(tester);
 
       final mine = tester.getCenter(find.text('Của mình'));
@@ -227,10 +235,38 @@ void main() {
       expect(other.dy, lessThan(mine.dy));
       expect(find.text('2 giờ trước'), findsOneWidget);
       expect(find.text('Phúc'), findsOneWidget);
+      expect(find.text('Bạn'), findsOneWidget);
       expect(find.text('Đăng'), findsNothing);
     });
 
-    testWidgets('gửi bình luận đã bỏ khoảng trắng và xóa ô nhập', (tester) async {
+    testWidgets('bình luận thiếu tên vẫn hiện người viết', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CommentTimelineWidget(
+              comments: [
+                TaskComment(
+                  id: 'c3',
+                  authorId: 'other',
+                  authorName: '  ',
+                  content: 'Không rõ tên',
+                  createdAt: DateTime.now(),
+                ),
+              ],
+              currentUserId: 'me',
+              onSend: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Người dùng'), findsOneWidget);
+      expect(find.text('N'), findsOneWidget);
+    });
+
+    testWidgets('gửi bình luận đã bỏ khoảng trắng và xóa ô nhập', (
+      tester,
+    ) async {
       final sent = await pump(tester);
 
       await tester.enterText(find.byType(TextField), '  Xin chào  ');
@@ -238,7 +274,10 @@ void main() {
       await tester.pump();
 
       expect(sent, ['Xin chào']);
-      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, '');
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        '',
+      );
     });
 
     testWidgets('chưa đăng nhập thì không gửi được', (tester) async {
@@ -303,8 +342,14 @@ void main() {
     test('bỏ qua task đã xong, đã hủy hoặc đã xóa', () {
       final reminderAt = now.add(const Duration(hours: 1));
 
-      expect(plan(task(status: TaskStatus.done, reminderAt: reminderAt)), isEmpty);
-      expect(plan(task(status: TaskStatus.cancelled, reminderAt: reminderAt)), isEmpty);
+      expect(
+        plan(task(status: TaskStatus.done, reminderAt: reminderAt)),
+        isEmpty,
+      );
+      expect(
+        plan(task(status: TaskStatus.cancelled, reminderAt: reminderAt)),
+        isEmpty,
+      );
       expect(plan(task(deletedAt: now, reminderAt: reminderAt)), isEmpty);
     });
 
@@ -320,7 +365,9 @@ void main() {
         includeDeadlines: false,
       );
 
-      expect(items.map((r) => r.scheduledAt), [now.add(const Duration(hours: 1))]);
+      expect(items.map((r) => r.scheduledAt), [
+        now.add(const Duration(hours: 1)),
+      ]);
     });
 
     test('id thông báo ổn định, dương và không trùng id có sẵn', () {
@@ -341,7 +388,10 @@ void main() {
 
     test('hợp lệ khi không có mốc nào hoặc mốc ở tương lai', () {
       expect(validateTaskDates(now: now), isNull);
-      expect(validateTaskDates(now: now, deadline: later, reminderAt: future), isNull);
+      expect(
+        validateTaskDates(now: now, deadline: later, reminderAt: future),
+        isNull,
+      );
     });
 
     test('chặn deadline và giờ nhắc trong quá khứ', () {
@@ -363,7 +413,10 @@ void main() {
         deadline: past,
       );
 
-      expect(validateTaskDates(now: now, deadline: past, original: overdue), isNull);
+      expect(
+        validateTaskDates(now: now, deadline: past, original: overdue),
+        isNull,
+      );
     });
 
     test('giờ nhắc và ngày bắt đầu phải trước deadline', () {
