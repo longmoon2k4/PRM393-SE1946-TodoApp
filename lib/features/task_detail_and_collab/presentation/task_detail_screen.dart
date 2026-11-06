@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,8 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:intl/intl.dart';
+
 import '../../../core/data/mock_repository.dart';
 import '../../../core/models/task_model.dart';
+import '../../../core/models/user_model.dart';
 import '../../../core/providers/core_tasks_provider.dart';
 import '../../../core/services/task_api_service.dart';
 import '../../../core/theme/app_colors.dart';
@@ -15,7 +18,9 @@ import '../../../core/theme/app_sizes.dart';
 import '../../../core/widgets/contextual_fab.dart';
 import '../../../core/widgets/priority_badge.dart';
 import '../../../core/widgets/status_chip.dart';
+import '../providers/comment_author_provider.dart';
 import '../providers/task_crud_provider.dart';
+import '../providers/task_permission_provider.dart';
 import 'checklist_section_widget.dart';
 import 'comment_timeline_widget.dart';
 import 'task_form_bottom_sheet.dart';
@@ -31,7 +36,6 @@ class TaskDetailScreen extends ConsumerStatefulWidget {
 
 class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
   static const Duration _commentPollInterval = Duration(seconds: 15);
-  static const String _debugAuthorId = 'debug-user';
 
   Timer? _commentPollTimer;
 
@@ -53,7 +57,14 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
 
   void _refreshComments() {
     if (!mounted) return;
-    ref.read(taskCrudProvider).refreshComments(widget.taskId);
+    // Bình luận chờ gửi chỉ có khi Task đã nằm trên máy.
+    final hasTask = ref.read(taskByIdProvider(widget.taskId)) != null;
+    ref
+        .read(taskCrudProvider)
+        .refreshComments(
+          widget.taskId,
+          author: hasTask ? ref.read(commentAuthorProvider) : null,
+        );
   }
 
   void _close(BuildContext context) {
@@ -71,8 +82,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
 
     if (task == null) {
       // Chỉ dùng khi chạy debug để mở màn hình mà chưa có Backend.
-      final existsLocally =
-          ref.read(coreTasksProvider).any((t) => t.id == taskId);
+      final existsLocally = ref
+          .read(coreTasksProvider)
+          .any((t) => t.id == taskId);
       final mockTask = kDebugMode && !existsLocally
           ? MockRepository.mockTasks.where((t) => t.id == taskId).firstOrNull
           : null;
@@ -82,9 +94,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
         });
       }
       return Scaffold(
-        appBar: AppBar(
-          leading: BackButton(onPressed: () => _close(context)),
-        ),
+        appBar: AppBar(leading: BackButton(onPressed: () => _close(context))),
         body: Center(
           child: mockTask != null
               ? const CircularProgressIndicator()
@@ -93,10 +103,14 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
       );
     }
 
-    final currentUser = ref.watch(currentUserProvider);
-    final commentAuthorId =
-        currentUser?.id ?? (kDebugMode ? _debugAuthorId : null);
+    final commentAuthor = ref.watch(commentAuthorProvider);
+    final backendAuthorId = commentAuthor == null
+        ? null
+        : ref.watch(commentAuthorIdsProvider)[commentAuthor.id];
+    final permissions = ref.watch(taskPermissionsProvider(taskId));
     final dateFormat = DateFormat('HH:mm, dd/MM/yyyy');
+    // Khi bàn phím mở, FAB nổi lên và che nút gửi bình luận.
+    final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -110,37 +124,44 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            tooltip: 'Chỉnh sửa',
-            icon: const Icon(IconsaxPlusLinear.edit_2),
-            onPressed: () => TaskFormBottomSheet.show(context, task: task),
-          ),
-          PopupMenuButton<VoidCallback>(
-            tooltip: 'Thao tác khác',
-            onSelected: (action) => action(),
-            itemBuilder: (_) => [
-              if (task.status != TaskStatus.cancelled)
+          if (kDebugMode) const _ViewAsButton(),
+          if (permissions.canManage) ...[
+            IconButton(
+              tooltip: 'Chỉnh sửa',
+              icon: const Icon(IconsaxPlusLinear.edit_2),
+              onPressed: () => TaskFormBottomSheet.show(context, task: task),
+            ),
+            PopupMenuButton<VoidCallback>(
+              tooltip: 'Thao tác khác',
+              onSelected: (action) => action(),
+              itemBuilder: (_) => [
+                if (task.status != TaskStatus.cancelled)
+                  PopupMenuItem(
+                    value: () => ref
+                        .read(taskCrudProvider)
+                        .updateTask(
+                          task.copyWith(status: TaskStatus.cancelled),
+                        ),
+                    child: const Text('Hủy công việc'),
+                  ),
                 PopupMenuItem(
-                  value: () => ref.read(taskCrudProvider).updateTask(
-                        task.copyWith(status: TaskStatus.cancelled),
-                      ),
-                  child: const Text('Hủy công việc'),
+                  value: () => _confirmDelete(context, task),
+                  child: const Text('Xóa công việc'),
                 ),
-              PopupMenuItem(
-                value: () => _confirmDelete(context, task),
-                child: const Text('Xóa công việc'),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
-      floatingActionButton: ContextualFab(
-        contextType: FabContextType.taskDetail,
-        currentTask: task,
-        onPressed: () => ref
-            .read(taskCrudProvider)
-            .updateTask(task.copyWith(status: _nextStatus(task.status))),
-      ),
+      floatingActionButton: permissions.canProgress && !isKeyboardOpen
+          ? ContextualFab(
+              contextType: FabContextType.taskDetail,
+              currentTask: task,
+              onPressed: () => ref
+                  .read(taskCrudProvider)
+                  .updateTask(task.copyWith(status: _nextStatus(task.status))),
+            )
+          : null,
       body: RefreshIndicator(
         onRefresh: () => ref.read(taskCrudProvider).refreshTask(taskId),
         child: ListView(
@@ -168,6 +189,14 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                 PriorityBadge(priority: task.priority),
               ],
             ),
+            if (kDebugMode && ref.watch(debugViewAsProvider) != null) ...[
+              const SizedBox(height: AppSizes.p12),
+              _ViewAsBanner(user: ref.watch(debugViewAsProvider)!),
+            ],
+            if (!permissions.canManage) ...[
+              const SizedBox(height: AppSizes.p12),
+              _RoleNotice(canWork: permissions.canWork),
+            ],
             const SizedBox(height: AppSizes.p16),
             if (task.startDate != null)
               _InfoRow(
@@ -188,16 +217,24 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                   ? 'Chưa đặt giờ nhắc'
                   : 'Nhắc lúc ${dateFormat.format(task.reminderAt!)}',
             ),
-            _AssigneeRow(task: task),
+            _AssigneeRow(task: task, canAssign: permissions.canManage),
             _OptionRow(
               icon: IconsaxPlusLinear.folder,
               emptyLabel: 'Chưa thuộc dự án',
               dialogTitle: 'Chọn dự án',
               options: ref.watch(projectOptionsProvider),
               selectedId: task.projectId,
-              onSelected: (id) => ref
-                  .read(taskCrudProvider)
-                  .updateTask(task.copyWith(projectId: id)),
+              onSelected: permissions.canManage
+                  ? (id) => ref
+                        .read(taskCrudProvider)
+                        .updateTask(task.copyWith(projectId: id))
+                  : null,
+              itemName: 'dự án',
+              onCreate: permissions.canManage
+                  ? (name) => ref
+                        .read(taskCrudProvider)
+                        .createProjectFor(task.id, name)
+                  : null,
             ),
             _OptionRow(
               icon: IconsaxPlusLinear.category,
@@ -205,18 +242,28 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               dialogTitle: 'Chọn danh mục',
               options: ref.watch(categoryOptionsProvider),
               selectedId: task.categoryId,
-              onSelected: (id) => ref
-                  .read(taskCrudProvider)
-                  .updateTask(task.copyWith(categoryId: id)),
+              onSelected: permissions.canManage
+                  ? (id) => ref
+                        .read(taskCrudProvider)
+                        .updateTask(task.copyWith(categoryId: id))
+                  : null,
+              itemName: 'danh mục',
+              onCreate: permissions.canManage
+                  ? (name) => ref
+                        .read(taskCrudProvider)
+                        .createCategoryFor(task.id, name)
+                  : null,
             ),
             const SizedBox(height: AppSizes.p16),
-            _DescriptionSection(task: task),
+            _DescriptionSection(task: task, canEdit: permissions.canManage),
             const SizedBox(height: AppSizes.p24),
-            _TagsSection(task: task),
+            _TagsSection(task: task, canEdit: permissions.canManage),
             const SizedBox(height: AppSizes.p24),
             ChecklistSectionWidget(
               subtasks: task.subtasks,
               progress: task.checklistProgress,
+              canManage: permissions.canManage,
+              canToggle: permissions.canWork,
               onAdd: (title) => _notifyIfNotSynced(
                 ref.read(taskCrudProvider).addSubtask(task.id, title),
               ),
@@ -241,12 +288,14 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
             const SizedBox(height: AppSizes.p8),
             CommentTimelineWidget(
               comments: task.comments,
-              currentUserId: commentAuthorId,
+              currentUserId: backendAuthorId ?? commentAuthor?.id,
+              otherOwnIds: {if (commentAuthor != null) commentAuthor.id},
               onSend: (content) => _notifyIfNotSynced(
-                ref.read(taskCrudProvider).addComment(
+                ref
+                    .read(taskCrudProvider)
+                    .addComment(
                       task.id,
-                      authorId: commentAuthorId!,
-                      authorName: currentUser?.name ?? 'Mình',
+                      author: commentAuthor!,
                       content: content,
                     ),
               ),
@@ -275,7 +324,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
     if (!isSynced && mounted) {
       messenger.showSnackBar(
         const SnackBar(
-          content: Text('Chưa đồng bộ được với máy chủ. Thay đổi chỉ lưu trên máy này.'),
+          content: Text(
+            'Chưa đồng bộ được với máy chủ. Thay đổi chỉ lưu trên máy này.',
+          ),
         ),
       );
     }
@@ -346,36 +397,225 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _AssigneeRow extends ConsumerWidget {
-  final TaskItem task;
+/// Chỉ có ở bản debug: đổi người đang xem để thử quyền của từng thành viên.
+class _ViewAsButton extends ConsumerWidget {
+  const _ViewAsButton();
 
-  const _AssigneeRow({required this.task});
+  Future<void> _pick(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(debugViewAsProvider);
+    final options = <({UserModel? user, String label})>[
+      (user: null, label: 'Tài khoản đang đăng nhập'),
+      for (final member in TeamRoster.members)
+        (user: member.toUser(), label: member.name),
+    ];
+
+    final picked = await showDialog<({UserModel? user})>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Xem với vai trò'),
+        children: [
+          for (final option in options)
+            SimpleDialogOption(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop((user: option.user)),
+              child: Row(
+                children: [
+                  Expanded(child: Text(option.label)),
+                  if (option.user?.id == current?.id)
+                    const Icon(Icons.check, size: AppSizes.iconNormal),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+    if (picked == null) return;
+    ref.read(debugViewAsProvider.notifier).viewAs(picked.user);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(currentUserProvider);
-    final isMine = currentUser != null && task.assigneeId == currentUser.id;
+    return IconButton(
+      tooltip: 'Xem với vai trò',
+      icon: const Icon(IconsaxPlusLinear.profile_2user),
+      onPressed: () => _pick(context, ref),
+    );
+  }
+}
+
+class _ViewAsBanner extends ConsumerWidget {
+  final UserModel user;
+
+  const _ViewAsBanner({required this.user});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.p12,
+        AppSizes.p4,
+        AppSizes.p4,
+        AppSizes.p4,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.priorityHigh.withAlpha(25),
+        borderRadius: const BorderRadius.all(AppSizes.radius12),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            IconsaxPlusLinear.eye,
+            size: AppSizes.iconNormal,
+            color: AppColors.priorityHigh,
+          ),
+          const SizedBox(width: AppSizes.p8),
+          Expanded(
+            child: Text(
+              'Đang xem với vai trò ${user.name} (chỉ bản debug)',
+              style: GoogleFonts.plusJakartaSans(fontSize: 13),
+            ),
+          ),
+          TextButton(
+            onPressed: () =>
+                ref.read(debugViewAsProvider.notifier).viewAs(null),
+            child: const Text('Thoát'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoleNotice extends StatelessWidget {
+  final bool canWork;
+
+  const _RoleNotice({required this.canWork});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.p12),
+      decoration: BoxDecoration(
+        color: AppColors.statusTodo.withAlpha(20),
+        borderRadius: const BorderRadius.all(AppSizes.radius12),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            IconsaxPlusLinear.lock,
+            size: AppSizes.iconNormal,
+            color: AppColors.statusTodo,
+          ),
+          const SizedBox(width: AppSizes.p8),
+          Expanded(
+            child: Text(
+              canWork
+                  ? 'Leader giao việc này cho bạn. Bạn được cập nhật checklist, trạng thái và bình luận.'
+                  : 'Chỉ leader và người được giao mới thay đổi được công việc này.',
+              style: GoogleFonts.plusJakartaSans(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AssigneeRow extends ConsumerWidget {
+  final TaskItem task;
+
+  /// Chỉ leader được giao việc.
+  final bool canAssign;
+
+  const _AssigneeRow({required this.task, required this.canAssign});
+
+  Future<void> _pick(BuildContext context, WidgetRef ref) async {
+    final me = ref.read(commentAuthorProvider);
+    final backendIds = ref.read(commentAuthorIdsProvider);
+    final options = <({UserModel user, String label})>[
+      if (me != null) (user: me, label: '${me.name} (tôi)'),
+      for (final member in TeamRoster.members)
+        if (member.id != me?.id) (user: member.toUser(), label: member.name),
+    ];
+    if (options.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Chưa có thành viên nào trong danh sách nhóm.'),
+        ),
+      );
+      return;
+    }
+
+    bool isAssigned(UserModel user) =>
+        task.assigneeId != null &&
+        (task.assigneeId == user.id || task.assigneeId == backendIds[user.id]);
+
+    final picked = await showDialog<UserModel>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Giao việc cho'),
+        children: [
+          for (final option in options)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(option.user),
+              child: Row(
+                children: [
+                  Expanded(child: Text(option.label)),
+                  if (isAssigned(option.user))
+                    const Icon(Icons.check, size: AppSizes.iconNormal),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+    if (picked == null || isAssigned(picked) || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final isSynced = await ref
+        .read(taskCrudProvider)
+        .assignTask(task.id, picked);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          isSynced
+              ? 'Đã giao việc cho ${picked.name}.'
+              : 'Đã giao cho ${picked.name} trên máy, chưa lưu lên server.',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final myIds = ref.watch(currentUserIdsProvider);
+    final assigneeId = task.assigneeId;
 
     final String label;
-    if (task.assigneeId == null) {
+    if (assigneeId == null) {
       label = 'Chưa giao cho ai';
-    } else if (isMine) {
+    } else if (myIds.contains(assigneeId)) {
       label = 'Đã giao cho bạn';
     } else {
-      label = 'Đã giao cho thành viên khác';
+      final member = TeamRoster.findMember(
+        assigneeId,
+        backendIds: ref.watch(commentAuthorIdsProvider),
+      );
+      label = member == null
+          ? 'Đã giao cho thành viên khác'
+          : 'Đã giao cho ${member.name}';
     }
 
     return _InfoRow(
       icon: IconsaxPlusLinear.user,
       label: label,
-      trailing: currentUser == null || isMine
-          ? null
-          : TextButton(
-              onPressed: () => ref
-                  .read(taskCrudProvider)
-                  .updateTask(task.copyWith(assigneeId: currentUser.id)),
-              child: const Text('Giao cho tôi'),
-            ),
+      onTap: canAssign ? () => _pick(context, ref) : null,
+      trailing: canAssign
+          ? TextButton(
+              onPressed: () => _pick(context, ref),
+              child: const Text('Giao việc'),
+            )
+          : null,
     );
   }
 }
@@ -386,7 +626,15 @@ class _OptionRow extends StatelessWidget {
   final String dialogTitle;
   final AsyncValue<List<NamedOption>> options;
   final String? selectedId;
-  final ValueChanged<String> onSelected;
+
+  /// `null` khi không có quyền đổi.
+  final ValueChanged<String>? onSelected;
+
+  /// Tên mục mới, ví dụ "dự án"; dùng cho nút tạo và ô nhập tên.
+  final String itemName;
+
+  /// Tạo mục mới rồi gán cho task; trả về `false` khi server không phản hồi.
+  final Future<bool> Function(String name)? onCreate;
 
   const _OptionRow({
     required this.icon,
@@ -395,7 +643,11 @@ class _OptionRow extends StatelessWidget {
     required this.options,
     required this.selectedId,
     required this.onSelected,
+    required this.itemName,
+    this.onCreate,
   });
+
+  static const _createValue = '\u0000create';
 
   Future<void> _pick(BuildContext context, List<NamedOption> items) async {
     final picked = await showDialog<String>(
@@ -403,15 +655,66 @@ class _OptionRow extends StatelessWidget {
       builder: (dialogContext) => SimpleDialog(
         title: Text(dialogTitle),
         children: [
+          if (items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.p24,
+                vertical: AppSizes.p8,
+              ),
+              child: Text(
+                'Chưa có $itemName nào.',
+                style: const TextStyle(color: AppColors.statusCancelled),
+              ),
+            ),
           for (final item in items)
             SimpleDialogOption(
               onPressed: () => Navigator.of(dialogContext).pop(item.id),
-              child: Text(item.name),
+              child: Row(
+                children: [
+                  Expanded(child: Text(item.name)),
+                  if (item.id == selectedId)
+                    const Icon(Icons.check, size: AppSizes.iconNormal),
+                ],
+              ),
+            ),
+          if (onCreate != null)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(_createValue),
+              child: Row(
+                children: [
+                  const Icon(IconsaxPlusLinear.add, size: AppSizes.iconNormal),
+                  const SizedBox(width: AppSizes.p8),
+                  Text('Tạo $itemName mới'),
+                ],
+              ),
             ),
         ],
       ),
     );
-    if (picked != null) onSelected(picked);
+    if (picked == null || !context.mounted) return;
+    if (picked == _createValue) return _create(context);
+    if (picked != selectedId) onSelected?.call(picked);
+  }
+
+  Future<void> _create(BuildContext context) async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => _TextInputDialog(title: 'Tên $itemName mới'),
+    );
+    final trimmed = name?.trim() ?? '';
+    if (trimmed.isEmpty || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final isCreated = await onCreate!(trimmed);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          isCreated
+              ? 'Đã tạo $itemName "$trimmed".'
+              : 'Không tạo được $itemName: server chưa phản hồi.',
+        ),
+      ),
+    );
   }
 
   @override
@@ -428,19 +731,22 @@ class _OptionRow extends StatelessWidget {
       label = emptyLabel;
     }
 
+    final canPick =
+        onSelected != null && (items.isNotEmpty || onCreate != null);
     return _InfoRow(
       icon: icon,
       label: label,
-      onTap: items.isEmpty ? null : () => _pick(context, items),
-      trailing: items.isEmpty ? null : const Icon(Icons.chevron_right),
+      onTap: canPick ? () => _pick(context, items) : null,
+      trailing: canPick ? const Icon(Icons.chevron_right) : null,
     );
   }
 }
 
 class _DescriptionSection extends ConsumerWidget {
   final TaskItem task;
+  final bool canEdit;
 
-  const _DescriptionSection({required this.task});
+  const _DescriptionSection({required this.task, required this.canEdit});
 
   Future<void> _edit(BuildContext context, WidgetRef ref) async {
     final description = await showDialog<String>(
@@ -473,11 +779,12 @@ class _DescriptionSection extends ConsumerWidget {
                 ),
               ),
             ),
-            IconButton(
-              tooltip: 'Sửa mô tả',
-              icon: const Icon(IconsaxPlusLinear.edit_2, size: 18),
-              onPressed: () => _edit(context, ref),
-            ),
+            if (canEdit)
+              IconButton(
+                tooltip: 'Sửa mô tả',
+                icon: const Icon(IconsaxPlusLinear.edit_2, size: 18),
+                onPressed: () => _edit(context, ref),
+              ),
           ],
         ),
         Text(
@@ -494,8 +801,9 @@ class _DescriptionSection extends ConsumerWidget {
 
 class _TagsSection extends ConsumerWidget {
   final TaskItem task;
+  final bool canEdit;
 
-  const _TagsSection({required this.task});
+  const _TagsSection({required this.task, required this.canEdit});
 
   Future<void> _add(BuildContext context, WidgetRef ref) async {
     final tag = await showDialog<String>(
@@ -529,17 +837,26 @@ class _TagsSection extends ConsumerWidget {
             for (final tag in task.tags)
               InputChip(
                 label: Text(tag),
-                onDeleted: () => ref.read(taskCrudProvider).updateTask(
-                      task.copyWith(
-                        tags: task.tags.where((t) => t != tag).toList(),
-                      ),
-                    ),
+                onDeleted: canEdit
+                    ? () => ref
+                          .read(taskCrudProvider)
+                          .updateTask(
+                            task.copyWith(
+                              tags: task.tags.where((t) => t != tag).toList(),
+                            ),
+                          )
+                    : null,
               ),
-            ActionChip(
-              avatar: const Icon(IconsaxPlusLinear.add, size: AppSizes.iconSmall),
-              label: const Text('Thêm nhãn'),
-              onPressed: () => _add(context, ref),
-            ),
+            if (canEdit)
+              ActionChip(
+                avatar: const Icon(
+                  IconsaxPlusLinear.add,
+                  size: AppSizes.iconSmall,
+                ),
+                label: const Text('Thêm nhãn'),
+                onPressed: () => _add(context, ref),
+              ),
+            if (!canEdit && task.tags.isEmpty) const Text('Chưa có nhãn.'),
           ],
         ),
       ],

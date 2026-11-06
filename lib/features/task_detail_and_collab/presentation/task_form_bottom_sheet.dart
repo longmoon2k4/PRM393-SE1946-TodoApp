@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_sizes.dart';
 import '../providers/reminder_notification_service.dart';
 import '../providers/task_crud_provider.dart';
+import '../providers/task_permission_provider.dart';
 
 /// Trả về nội dung lỗi, hoặc `null` nếu các mốc thời gian hợp lệ.
 /// Giá trị không đổi so với [original] không bị bắt lỗi quá khứ, để Task đã
@@ -45,7 +46,21 @@ class TaskFormBottomSheet extends ConsumerStatefulWidget {
 
   const TaskFormBottomSheet({super.key, this.task});
 
-  static Future<void> show(BuildContext context, {TaskItem? task}) {
+  /// Chỉ leader được tạo hoặc sửa; thành viên khác nhận thông báo thay vì form.
+  static Future<void> show(BuildContext context, {TaskItem? task}) async {
+    final isLeader = ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(isLeaderProvider);
+    if (!isLeader) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(
+          content: Text('Chỉ leader mới được tạo hoặc sửa công việc.'),
+        ),
+      );
+      return;
+    }
+
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

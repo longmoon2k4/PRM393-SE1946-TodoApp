@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+
 import '../../../core/models/subtask_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_sizes.dart';
@@ -14,6 +15,12 @@ class ChecklistSectionWidget extends StatefulWidget {
   final ValueChanged<String> onDelete;
   final ValueChanged<List<SubTask>> onReorder;
 
+  /// Thêm, xóa và kéo đổi thứ tự mục con.
+  final bool canManage;
+
+  /// Tick hoặc bỏ tick mục con.
+  final bool canToggle;
+
   const ChecklistSectionWidget({
     super.key,
     required this.subtasks,
@@ -22,6 +29,8 @@ class ChecklistSectionWidget extends StatefulWidget {
     required this.onToggle,
     required this.onDelete,
     required this.onReorder,
+    this.canManage = true,
+    this.canToggle = true,
   });
 
   @override
@@ -111,26 +120,34 @@ class _ChecklistSectionWidgetState extends State<ChecklistSectionWidget> {
               key: ValueKey(subtask.id),
               index: index,
               subtask: subtask,
-              onToggle: () => widget.onToggle(subtask.id),
-              onDelete: () => widget.onDelete(subtask.id),
+              onToggle: widget.canToggle
+                  ? () => widget.onToggle(subtask.id)
+                  : null,
+              onDelete: widget.canManage
+                  ? () => widget.onDelete(subtask.id)
+                  : null,
             );
           },
         ),
-        TextField(
-          controller: _addController,
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _submit(),
-          decoration: InputDecoration(
-            hintText: 'Thêm mục con...',
-            isDense: true,
-            prefixIcon: const Icon(IconsaxPlusLinear.add, size: AppSizes.iconNormal),
-            suffixIcon: IconButton(
-              tooltip: 'Thêm mục con',
-              icon: Icon(IconsaxPlusLinear.tick_circle, color: primary),
-              onPressed: _submit,
+        if (widget.canManage)
+          TextField(
+            controller: _addController,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(),
+            decoration: InputDecoration(
+              hintText: 'Thêm mục con...',
+              isDense: true,
+              prefixIcon: const Icon(
+                IconsaxPlusLinear.add,
+                size: AppSizes.iconNormal,
+              ),
+              suffixIcon: IconButton(
+                tooltip: 'Thêm mục con',
+                icon: Icon(IconsaxPlusLinear.tick_circle, color: primary),
+                onPressed: _submit,
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -139,8 +156,12 @@ class _ChecklistSectionWidgetState extends State<ChecklistSectionWidget> {
 class _ChecklistRow extends StatelessWidget {
   final int index;
   final SubTask subtask;
-  final VoidCallback onToggle;
-  final VoidCallback onDelete;
+
+  /// `null` khi không có quyền; mục con chỉ hiển thị.
+  final VoidCallback? onToggle;
+
+  /// `null` khi không có quyền quản lý; ẩn cả nút xóa và tay kéo.
+  final VoidCallback? onDelete;
 
   const _ChecklistRow({
     super.key,
@@ -154,20 +175,21 @@ class _ChecklistRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        ReorderableDragStartListener(
-          index: index,
-          child: const Padding(
-            padding: EdgeInsets.all(AppSizes.p8),
-            child: Icon(
-              Icons.drag_indicator,
-              size: AppSizes.iconNormal,
-              color: AppColors.statusCancelled,
+        if (onDelete != null)
+          ReorderableDragStartListener(
+            index: index,
+            child: const Padding(
+              padding: EdgeInsets.all(AppSizes.p8),
+              child: Icon(
+                Icons.drag_indicator,
+                size: AppSizes.iconNormal,
+                color: AppColors.statusCancelled,
+              ),
             ),
           ),
-        ),
         Checkbox(
           value: subtask.isCompleted,
-          onChanged: (_) => onToggle(),
+          onChanged: onToggle == null ? null : (_) => onToggle!(),
         ),
         Expanded(
           child: GestureDetector(
@@ -180,22 +202,24 @@ class _ChecklistRow extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   color: subtask.isCompleted ? AppColors.statusCancelled : null,
-                  decoration:
-                      subtask.isCompleted ? TextDecoration.lineThrough : null,
+                  decoration: subtask.isCompleted
+                      ? TextDecoration.lineThrough
+                      : null,
                 ),
               ),
             ),
           ),
         ),
-        IconButton(
-          tooltip: 'Xóa mục con',
-          icon: const Icon(
-            IconsaxPlusLinear.trash,
-            size: 18,
-            color: AppColors.statusCancelled,
+        if (onDelete != null)
+          IconButton(
+            tooltip: 'Xóa mục con',
+            icon: const Icon(
+              IconsaxPlusLinear.trash,
+              size: 18,
+              color: AppColors.statusCancelled,
+            ),
+            onPressed: onDelete,
           ),
-          onPressed: onDelete,
-        ),
       ],
     );
   }
