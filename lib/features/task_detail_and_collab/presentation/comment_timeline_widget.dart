@@ -22,6 +22,9 @@ class CommentTimelineWidget extends StatefulWidget {
 
   /// `null` khi chưa đăng nhập: chỉ xem, không gửi được bình luận.
   final String? currentUserId;
+
+  /// Id khác của chính người dùng, ví dụ id trên máy khi backend dùng id khác.
+  final Set<String> otherOwnIds;
   final ValueChanged<String> onSend;
 
   const CommentTimelineWidget({
@@ -29,6 +32,7 @@ class CommentTimelineWidget extends StatefulWidget {
     required this.comments,
     required this.currentUserId,
     required this.onSend,
+    this.otherOwnIds = const {},
   });
 
   @override
@@ -76,7 +80,9 @@ class _CommentTimelineWidgetState extends State<CommentTimelineWidget> {
           _CommentBubble(
             key: ValueKey(comment.id),
             comment: comment,
-            isMine: comment.authorId == widget.currentUserId,
+            isMine:
+                comment.authorId == widget.currentUserId ||
+                widget.otherOwnIds.contains(comment.authorId),
           ),
         const SizedBox(height: AppSizes.p8),
         TextField(
